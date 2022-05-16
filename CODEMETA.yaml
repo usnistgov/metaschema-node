@@ -146,7 +146,7 @@ themes:
   #         - Human language technology
   #         - Information retrieval
   #         - Natural language processing
-  #     - Data entry
+  - Data entry
   #     - Federal information standards (FIPS)
   #     - Health IT
   #     - Identity and access management
@@ -175,7 +175,7 @@ themes:
   #
   # - Infrastructure
   #
-  # - Manufacturing
+  - Manufacturing
   #     - Additive manufacturing
   #     - Biomanufacturing
   #     - Factory communications
@@ -198,9 +198,9 @@ themes:
   #         - Sensing and perception
   #     - Supply chain
   #     - Sustainable manufacturing
-  #     - Systems engineering
-  #     - Systems integration
-  #     - Technology commercialization
+  - Systems engineering
+  - Systems integration
+  - Technology commercialization
   #
   # - Materials
   #     - Ceramics
@@ -216,11 +216,11 @@ themes:
   #     - Polymers
   #     - Superconductors
   #
-  # - Mathematics and Statistics
+  - Mathematics and Statistics
   #     - Experiment design
   #     - Image and signal processing
   #     - Mathematical knowledge management
-  #     - Modeling and simulation research
+  - Modeling and simulation research
   #     - Numerical methods and software
   #     - Statistical analysis
   #     - Uncertainty quantification

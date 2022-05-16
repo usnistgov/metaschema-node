@@ -1,0 +1,14 @@
+{
+    "name": "@oscal/metaschema-model-common",
+    "version": "0.0.0",
+    "description": "",
+    "author": {
+        "name": "Nikita Wootten",
+        "email": "nikita.wootten@nist.gov"
+    },
+    "license": "NIST-PD-fallback",
+    "devDependencies": {
+        "@types/node": "^17.0.32",
+        "typescript": "^4.6.4"
+    }
+}
