@@ -4,7 +4,7 @@
     "plugins": [
         "@typescript-eslint",
         "prettier",
-        "license-header"
+        "header"
     ],
     "extends": [
         "eslint:recommended",
@@ -20,7 +20,7 @@
                 "argsIgnorePattern": "^_"
             }
         ],
-        "license-header/header": [
+        "header/header": [
             "error",
             "./docs/license_header.txt"
         ]
