@@ -16,9 +16,5 @@ jobs:
           cache: npm
       - name: Download dependencies
         run: npm install
-      - name: Build
-        run: npm build
       - name: Lint
         run: npm run lint
-      - name: Test
-        run: npm test
