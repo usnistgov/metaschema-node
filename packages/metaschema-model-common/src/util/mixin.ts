@@ -1,0 +1,1 @@
+export type AbstractConstructor<TBase> = abstract new (...args: any[]) => TBase;
