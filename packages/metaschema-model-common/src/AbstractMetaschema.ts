@@ -1,5 +1,5 @@
-import MarkupLine from "./datatype/markup/markupLine";
-import MarkupMultiLine from "./datatype/markup/markupMultiLine";
+import MarkupLine from './datatype/markup/markupLine';
+import MarkupMultiLine from './datatype/markup/markupMultiLine';
 
 export default abstract class AbstractMetaschema {
     abstract getLocation(): string | undefined;

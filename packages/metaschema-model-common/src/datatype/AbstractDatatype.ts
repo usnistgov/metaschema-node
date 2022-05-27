@@ -1,4 +1,4 @@
-import IDatatype from "./IDatatype";
+import IDatatype from './IDatatype';
 
 export default abstract class AbstractDatatype<T extends IDatatype<T>, V> implements IDatatype<T> {
     abstract copy(): T;

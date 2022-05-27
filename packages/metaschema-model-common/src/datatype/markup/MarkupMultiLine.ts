@@ -1,4 +1,2 @@
 // TODO: implement
-export default class MarkupMultiLine {
-
-}
+export default class MarkupMultiLine {}

@@ -1,6 +1,8 @@
-import AbstractDatatype from "./AbstractDatatype";
+import AbstractDatatype from './AbstractDatatype';
 
-export default abstract class AbstractAmbiguousDateTime<T extends AbstractAmbiguousDateTime<T>> extends AbstractDatatype<T, Date> {
+export default abstract class AbstractAmbiguousDateTime<
+    T extends AbstractAmbiguousDateTime<T>,
+> extends AbstractDatatype<T, Date> {
     public readonly hasTimeZone: boolean;
 
     public constructor(value: Date, hasTimeZone: boolean) {

@@ -1,3 +1,1 @@
-export default abstract class AbstractConstraint {
-
-}
+export default abstract class AbstractConstraint {}

@@ -1,7 +1,7 @@
-import AbstractConstraint from "../constraint/AbstractConstraint";
-import { AbstractModelElement, AbstractNamedModelElement } from "../element";
-import { AbstractConstructor } from "../util/mixin";
-import { ModuleScope } from "../util/types";
+import AbstractConstraint from '../constraint/AbstractConstraint';
+import { AbstractModelElement, AbstractNamedModelElement } from '../element';
+import { AbstractConstructor } from '../util/mixin';
+import { ModuleScope } from '../util/types';
 
 export default interface IDefinition extends AbstractModelElement {
     /**
@@ -12,7 +12,7 @@ export default interface IDefinition extends AbstractModelElement {
     getConstraints(): AbstractConstraint[];
     /**
      * Retrieve the definition's scope within the context of its defining module.
-     * 
+     *
      * @returns the module scope
      */
     getModuleScope(): ModuleScope;

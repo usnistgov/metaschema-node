@@ -1,5 +1,3 @@
-import AbstractMetaschema from "./AbstractMetaschema";
+import AbstractMetaschema from './AbstractMetaschema';
 
-export {
-    AbstractMetaschema
-}
+export { AbstractMetaschema };

@@ -1,10 +1,10 @@
-import AbstractMetaschema from "../AbstractMetaschema";
-import AbstractAssemblyDefinition from "../definition/AbstractAssemblyDefinition";
-import AbstractRootAssemblyDefinition from "../definition/AbstractRootAssemblyDefinition";
-import MarkupMultiLine from "../datatype/markup/markupMultiLine";
-import QName from "../util/QName";
-import { JsonGroupAsBehavior, XmlGroupAsBehavior } from "../util/types";
-import AbstractAssemblyInstance from "./AbstractAssemblyInstance";
+import AbstractMetaschema from '../AbstractMetaschema';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
+import AbstractRootAssemblyDefinition from '../definition/AbstractRootAssemblyDefinition';
+import MarkupMultiLine from '../datatype/markup/markupMultiLine';
+import QName from '../util/QName';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types';
+import AbstractAssemblyInstance from './AbstractAssemblyInstance';
 
 export default class RootAssemblyDefinitionInstance extends AbstractAssemblyInstance {
     private readonly rootAssemblyDefinition: AbstractRootAssemblyDefinition;
@@ -16,7 +16,7 @@ export default class RootAssemblyDefinitionInstance extends AbstractAssemblyInst
 
     /**
      * Get the underlying definition used for this root-level instance.
-     * 
+     *
      * @returns the proxied definition
      */
     protected getProxy(): AbstractRootAssemblyDefinition {

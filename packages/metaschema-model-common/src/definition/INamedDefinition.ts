@@ -1,7 +1,7 @@
-import { AbstractNamedModelElement } from "../element";
-import INamedInstance from "../instance/INamedInstance";
-import { AbstractConstructor } from "../util/mixin";
-import IDefinition, { defineable } from "./IDefinition";
+import { AbstractNamedModelElement } from '../element';
+import INamedInstance from '../instance/INamedInstance';
+import { AbstractConstructor } from '../util/mixin';
+import IDefinition, { defineable } from './IDefinition';
 
 /**
  * This marker interface is used for some collections that contain various named definitions.
@@ -10,7 +10,7 @@ export default interface INamedDefinition extends IDefinition {
     /**
      * Determine if the definition is defined inline, meaning the definition is declared where it is
      * used.
-     * 
+     *
      * @returns `true` if the definition is declared inline or `false` if the definition is able to be globally referenced
      */
     isInline(): boolean;

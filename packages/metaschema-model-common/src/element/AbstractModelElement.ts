@@ -1,6 +1,6 @@
-import MarkupMultiLine from "../datatype/markup/MarkupMultiLine";
-import AbstractMetaschema from "../AbstractMetaschema";
-import { ModelType } from "../util/types";
+import MarkupMultiLine from '../datatype/markup/MarkupMultiLine';
+import AbstractMetaschema from '../AbstractMetaschema';
+import { ModelType } from '../util/types';
 
 /**
  * A marker interface for Metaschema constructs that can be members of a Metaschema definition's
@@ -14,7 +14,7 @@ export default abstract class AbstractModelElement {
 
     /**
      * Retrieve the remarks associated with this information element, if any.
-     * 
+     *
      * @returnsthe remarks or `undefined` if no remarks are defined
      */
     abstract getRemarks(): MarkupMultiLine | undefined;

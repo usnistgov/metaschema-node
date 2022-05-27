@@ -1,4 +1,2 @@
 // TODO
-export default class MarkupLine {
-
-}
+export default class MarkupLine {}
