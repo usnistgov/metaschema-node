@@ -28,6 +28,25 @@ import AbstractAssembly from '../element/AbstractAssembly';
 import { namedModelInstanceable } from './INamedModelInstance';
 
 export default abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractAssembly) {
+    private readonly parent;
+
+    constructor(parent: AbstractAssemblyDefinition) {
+        super();
+        this.parent = parent;
+    }
+
+    getContainingDefinition() {
+        return this.parent;
+    }
+
+    getXmlNamespace(): string | undefined {
+        return this.getContainingMetaschema().getXmlNamespace();
+    }
+
+    getGroupAsXmlNamespace(): string | undefined {
+        return this.getContainingMetaschema().getXmlNamespace();
+    }
+
     getJsonName(): string {
         if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
             return this.getGroupAsName() ?? 'null group-as name';

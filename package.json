@@ -14,6 +14,7 @@
     "typescript": "^4.7.2"
   },
   "scripts": {
-    "lint": "eslint ./packages"
+    "lint": "eslint ./packages",
+    "test": "echo \"TODO\" && exit 0"
   }
 }

@@ -1,14 +1,14 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ""
+title: ''
 labels: enhancement
-assignees: ""
+assignees: ''
 ---
 
 # User Story:
 
-As an NMetaschema {stakeholder}, I {provide a clear and concise description of what the problem is. Ex. I need to be able to do}
+As a `metaschema-node` {stakeholder}, I {provide a clear and concise description of what the problem is. Ex. I need to be able to do}
 
 ## Goals:
 
@@ -20,7 +20,7 @@ As an NMetaschema {stakeholder}, I {provide a clear and concise description of w
 
 ## Acceptance Criteria
 
-- [ ] A Pull Request (PR) is submitted that fully addresses the goals of this User Story. This issue is referenced in the PR.
-- [ ] The CI-CD build process runs without any reported errors on the PR. This can be confirmed by reviewing that all checks have passed in the PR.
+-   [ ] A Pull Request (PR) is submitted that fully addresses the goals of this User Story. This issue is referenced in the PR.
+-   [ ] The CI-CD build process runs without any reported errors on the PR. This can be confirmed by reviewing that all checks have passed in the PR.
 
 {The items above are general acceptance criteria for all User Stories. Please describe anything else that must be completed for this issue to be considered resolved.}

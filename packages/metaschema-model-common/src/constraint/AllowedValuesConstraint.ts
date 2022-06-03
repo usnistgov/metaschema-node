@@ -23,50 +23,52 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { INamedModelDefinition } from '../definition';
-import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
-import { AbstractFlag } from '../element';
-import { equals } from '../util/equality';
-import { namedInstanceable } from './INamedInstance';
+import MarkupLine from '../datatype/markup/markupLine';
+import MarkupMultiLine from '../datatype/markup/markupMultiLine';
+import MetapathExpression from '../metapath/MetapathExpression';
+import AbstractConstraint, { Level } from './AbstractConstraint';
 
-export default abstract class AbstractFlagInstance extends namedInstanceable(AbstractFlag) {
-    private readonly parent;
+export interface IAllowedValue {
+    /**
+     * Retrieves the enumerated value associated with this allowed value constraint entry.
+     */
+    value: string;
 
-    constructor(parent: INamedModelDefinition) {
-        super();
-        this.parent = parent;
-    }
+    /**
+     * Retrieves the enumerated value's description associated with this allowed value constraint entry.
+     */
+    description: MarkupLine;
+}
 
-    getContainingDefinition(): INamedModelDefinition {
-        return this.parent;
+export default class AllowedValuesConstraint extends AbstractConstraint {
+    private _allowedValues;
+
+    /**
+     * Determines if this allowed value constraint is open-ended (`true`) or closed. If
+     * "open-ended", the constraint allows the target's value to by any additional unspecified value. If
+     * "closed", the constraint requries the target's value to be one of the specified values.
+     */
+    readonly isAllowedOther;
+
+    constructor(
+        id: string | undefined,
+        level: Level,
+        remarks: MarkupMultiLine | undefined,
+        target: MetapathExpression,
+        allowedValues: Map<string, IAllowedValue>,
+        isAllowedOther: boolean,
+    ) {
+        super(id, level, remarks, target);
+        this._allowedValues = allowedValues;
+        this.isAllowedOther = isAllowedOther;
     }
 
     /**
-     * Determines if a flag value is required to be provided.
+     * Get the collection allowed values associated with this constraint.
      *
-     * @returns `true` if a value is required, or `false` otherwise
+     * @returns a mapping of value to the associated {@link IAllowedValue} item
      */
-    abstract isRequired(): boolean;
-
-    /**
-     * Determines if this flag's value is used as the property name for the JSON object that holds the
-     * remaining data based on this flag's containing definition.
-     *
-     * TODO investigate ways to avoid this problem entirely
-     *
-     * @returns `true` if this flag is used as a JSON key, or `false` otherwise
-     */
-    isJsonKey(): boolean {
-        return equals(this, this.getContainingDefinition().getJsonKeyFlagInstance());
-    }
-
-    /**
-     * Determines if this flag is used as a JSON "value key". A "value key" is a flag who's value is
-     * used as the property name for the containing objects value.
-     *
-     * @returns `true` if the flag is used as a JSON "value key", or `false` otherwise
-     */
-    isJsonValueKey(): boolean {
-        return this.getContainingDefinition() instanceof AbstractFieldDefinition && this.isJsonKey();
+    get allowedValues() {
+        return new Map(this._allowedValues);
     }
 }

@@ -23,4 +23,66 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-export default abstract class AbstractConstraint {}
+
+import MarkupMultiLine from '../datatype/markup/markupMultiLine';
+import MetapathExpression from '../metapath/MetapathExpression';
+
+/**
+ * The degree to which a constraint violation is significant.
+ *
+ * These values are ordered from least significant to most significant.
+ */
+export enum Level {
+    /**
+     * A violation of the constraint represents a point of interest.
+     */
+    INFORMATIONAL,
+    /**
+     * A violation of the constraint represents a potential issue with the content.
+     */
+    WARNING,
+    /**
+     * A violation of the constraint represents a fault in the content. This may include issues around
+     * compatibility, integrity, consistency, etc.
+     */
+    ERROR,
+    /**
+     * A violation of the constraint represents a serious fault in the content that will prevent typical
+     * use of the content.
+     */
+    CRITICAL,
+}
+
+export default abstract class AbstractConstraint {
+    /**
+     * The unique identifier for this constraint.
+     */
+    readonly id;
+
+    /**
+     * The significance of a violation of this constraint.
+     */
+    readonly level;
+
+    /**
+     * The remarks associated with this constraint
+     */
+    readonly remarks;
+
+    /**
+     * The Metapath expression to use to query the targets of the constraint
+     */
+    readonly target;
+
+    constructor(
+        id: string | undefined,
+        level: Level,
+        remarks: MarkupMultiLine | undefined,
+        target: MetapathExpression,
+    ) {
+        this.id = id;
+        this.level = level;
+        this.remarks = remarks;
+        this.target = target;
+    }
+}

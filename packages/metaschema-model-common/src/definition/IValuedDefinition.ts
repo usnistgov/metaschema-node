@@ -23,6 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint';
+import ExpectConstraint from '../constraint/ExpectConstraint';
+import IndexHasConstraint from '../constraint/IndexHasConstraint';
+import MatchesConstraint from '../constraint/MatchesConstraint';
+import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter';
 import { AbstractNamedModelElement } from '../element';
 import { AbstractConstructor } from '../util/mixin';
 import IDefinition, { defineable } from './IDefinition';
@@ -31,10 +36,45 @@ import IDefinition, { defineable } from './IDefinition';
  * This marker interface identifies Metaschema definition types that have associated values (i.e.,
  * field, flag).
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export default interface IValuedDefinition extends IDefinition {}
+export default interface IValuedDefinition extends IDefinition {
+    getDatatypeAdapter(): IDatatypeAdapter<never>;
+
+    /**
+     * Retrieve the list of allowed value constraints that apply to this definition's value.
+     *
+     * @returns the list of allowed value constraints
+     */
+    getAllowedValuesContraints(): AllowedValuesConstraint;
+
+    /**
+     * Retrieve the list of matches constraints that apply to this definition's value.
+     *
+     * @returns the list of matches constraints
+     */
+    getMatchesConstraints(): MatchesConstraint[];
+
+    /**
+     * Retrieve the list of key reference constraints that apply to this definition's value.
+     *
+     * @returns the list of key reference constraints
+     */
+    getIndexHasKeyConstraints(): IndexHasConstraint[];
+
+    /**
+     * Retrieve the list of expect constraints that apply to this definition's value.
+     *
+     * @returns the list of expect constraints
+     */
+    getExpectConstraints(): ExpectConstraint[];
+}
 
 export function valuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {}
+    abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {
+        abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getMatchesConstraints(): MatchesConstraint[];
+        abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
+        abstract getExpectConstraints(): ExpectConstraint[];
+    }
     return ValuedDefinition;
 }
