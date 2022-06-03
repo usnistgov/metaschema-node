@@ -23,50 +23,46 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { INamedModelDefinition } from '../definition';
-import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
-import { AbstractFlag } from '../element';
-import { equals } from '../util/equality';
-import { namedInstanceable } from './INamedInstance';
 
-export default abstract class AbstractFlagInstance extends namedInstanceable(AbstractFlag) {
-    private readonly parent;
+import MarkupMultiLine from '../datatype/markup/markupMultiLine';
+import MetapathExpression from '../metapath/MetapathExpression';
+import AbstractConstraint, { Level } from './AbstractConstraint';
 
-    constructor(parent: INamedModelDefinition) {
-        super();
-        this.parent = parent;
-    }
-
-    getContainingDefinition(): INamedModelDefinition {
-        return this.parent;
-    }
+export interface IKeyField {
+    // getTarget(): MetapathExpression
 
     /**
-     * Determines if a flag value is required to be provided.
-     *
-     * @returns `true` if a value is required, or `false` otherwise
+     * A pattern to use to retrieve the value. If defined, the first capturing group is used to
+     * retrieve the value.
      */
-    abstract isRequired(): boolean;
+    pattern: RegExp | undefined;
 
     /**
-     * Determines if this flag's value is used as the property name for the JSON object that holds the
-     * remaining data based on this flag's containing definition.
-     *
-     * TODO investigate ways to avoid this problem entirely
-     *
-     * @returns `true` if this flag is used as a JSON key, or `false` otherwise
+     * Any remarks about the key field as markup text.
      */
-    isJsonKey(): boolean {
-        return equals(this, this.getContainingDefinition().getJsonKeyFlagInstance());
+    remarks: MarkupMultiLine | undefined;
+}
+
+export default abstract class AbstractKeyConstraint extends AbstractConstraint {
+    private readonly _keyFields;
+
+    constructor(
+        id: string | undefined,
+        level: Level,
+        remarks: MarkupMultiLine | undefined,
+        target: MetapathExpression,
+        keyFields: IKeyField[],
+    ) {
+        super(id, level, remarks, target);
+        this._keyFields = keyFields;
     }
 
     /**
-     * Determines if this flag is used as a JSON "value key". A "value key" is a flag who's value is
-     * used as the property name for the containing objects value.
+     * Retrieve the list of keys to use in creating and looking up an entry in a given index.
      *
-     * @returns `true` if the flag is used as a JSON "value key", or `false` otherwise
+     * @returns one or more keys
      */
-    isJsonValueKey(): boolean {
-        return this.getContainingDefinition() instanceof AbstractFieldDefinition && this.isJsonKey();
+    get keyFields() {
+        return Array.from(this._keyFields);
     }
 }

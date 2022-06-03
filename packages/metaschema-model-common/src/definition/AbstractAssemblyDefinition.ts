@@ -23,10 +23,34 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import CardinalityConstraint from '../constraint/CardinalityConstraint';
+import IndexConstraint from '../constraint/IndexConstraint';
+import UniqueConstraint from '../constraint/UniqueConstraint';
 import { AbstractAssembly } from '../element';
 import { modelContainable } from './IModelContainer';
 import { namedModelDefineable } from './INamedModelDefinition';
 
 export default abstract class AbstractAssemblyDefinition extends modelContainable(
     namedModelDefineable(AbstractAssembly),
-) {}
+) {
+    /**
+     * Get any index constraints associated with this assembly definition.
+     *
+     * @returns the collection of index constraints, which may be empty
+     */
+    abstract getIndexConstraints(): IndexConstraint[];
+
+    /**
+     * Get any unique constraints associated with this assembly definition.
+     *
+     * @returns the collection of unique constraints, which may be empty
+     */
+    abstract getUniqueConstraints(): UniqueConstraint[];
+
+    /**
+     * Get any cardinality constraints associated with this assembly definition.
+     *
+     * @returns the collection of cardinality constraints, which may be empty
+     */
+    abstract getCardinalityConstraints(): CardinalityConstraint[];
+}

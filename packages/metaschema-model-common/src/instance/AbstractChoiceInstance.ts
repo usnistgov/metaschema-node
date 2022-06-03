@@ -23,11 +23,48 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import { AbstractAssemblyDefinition } from '../definition';
 import { modelContainable } from '../definition/IModelContainer';
 import { AbstractChoice } from '../element';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types';
 import { modelInstanceable } from './IModelInstance';
 
 /**
  * This marker interface represents a choice of allowed instances in a Metaschema.
  */
-export default abstract class AbstractChoiceInstance extends modelContainable(modelInstanceable(AbstractChoice)) {}
+export default abstract class AbstractChoiceInstance extends modelContainable(modelInstanceable(AbstractChoice)) {
+    private readonly parent;
+
+    constructor(parent: AbstractAssemblyDefinition) {
+        super();
+        this.parent = parent;
+    }
+
+    getContainingDefinition() {
+        return this.parent;
+    }
+
+    getMinOccurs(): number {
+        return 1;
+    }
+
+    getMaxOccurs(): number {
+        return 1;
+    }
+
+    getGroupAsName(): string | undefined {
+        return undefined;
+    }
+
+    getGroupAsXmlNamespace(): string | undefined {
+        return undefined;
+    }
+
+    getJsonGroupAsBehavior(): JsonGroupAsBehavior {
+        return JsonGroupAsBehavior.NONE;
+    }
+
+    getXmlGroupAsBehavior(): XmlGroupAsBehavior {
+        return XmlGroupAsBehavior.UNGROUPED;
+    }
+}

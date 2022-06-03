@@ -23,12 +23,24 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import { AbstractAssemblyDefinition } from '../definition';
 import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
 import AbstractField from '../element/AbstractField';
 import QName from '../util/QName';
 import { namedModelInstanceable } from './INamedModelInstance';
 
 export default abstract class AbstractFieldInstance extends namedModelInstanceable(AbstractField) {
+    private readonly parent;
+
+    constructor(parent: AbstractAssemblyDefinition) {
+        super();
+        this.parent = parent;
+    }
+
+    getContainingDefinition() {
+        return this.parent;
+    }
+
     getXmlNamespace(): string | undefined {
         return this.isInXmlWrapped() ? super.getXmlNamespace() : undefined;
     }

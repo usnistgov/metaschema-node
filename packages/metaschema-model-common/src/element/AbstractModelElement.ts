@@ -40,7 +40,7 @@ export default abstract class AbstractModelElement {
     /**
      * Retrieve the remarks associated with this information element, if any.
      *
-     * @returnsthe remarks or `undefined` if no remarks are defined
+     * @returns the remarks or `undefined` if no remarks are defined
      */
     abstract getRemarks(): MarkupMultiLine | undefined;
 
