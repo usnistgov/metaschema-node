@@ -23,26 +23,35 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import { AbstractMetaschema } from '@oscal/metaschema-model-common';
+import { MarkupLine, MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
 
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
-import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
-
-export default class MatchesConstraint extends AbstractConstraint {
-    readonly pattern;
-    readonly adapter;
-
-    constructor(
-        id: string | undefined,
-        level: Level,
-        remarks: MarkupMultiLine | undefined,
-        target: MetapathExpression,
-        pattern: RegExp,
-        adapter: IDatatypeAdapter<never>,
-    ) {
-        super(id, level, remarks, target);
-        this.pattern = pattern;
-        this.adapter = adapter;
+export default class XmlMetaschema extends AbstractMetaschema {
+    getLocation(): string | undefined {
+        throw new Error('Method not implemented.');
+    }
+    getName(): MarkupLine {
+        throw new Error('Method not implemented.');
+    }
+    getVersion(): string {
+        throw new Error('Method not implemented.');
+    }
+    getRemarks(): MarkupMultiLine | undefined {
+        throw new Error('Method not implemented.');
+    }
+    getShortName(): string {
+        throw new Error('Method not implemented.');
+    }
+    getXmlNamespace(): string {
+        throw new Error('Method not implemented.');
+    }
+    getJsonBaseUri(): string {
+        throw new Error('Method not implemented.');
+    }
+    getImportedMetaschemas(): AbstractMetaschema[] {
+        throw new Error('Method not implemented.');
+    }
+    getImportedMetaschemasByShortName(_: string): AbstractMetaschema | undefined {
+        throw new Error('Method not implemented.');
     }
 }

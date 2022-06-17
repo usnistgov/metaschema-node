@@ -23,10 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractConstraint from '../constraint/AbstractConstraint';
-import { AbstractModelElement, AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import { ModuleScope } from '../util/types';
+import AbstractConstraint from '../constraint/AbstractConstraint.js';
+import AbstractModelElement from '../element/AbstractModelElement.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import { ModuleScope } from '../util/types.js';
 
 export default interface IDefinition extends AbstractModelElement {
     /**

@@ -23,26 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import AbstractAmbiguousDateTime from './AbstractAmbiguousDateTime.js';
+import AbstractDatatype from './AbstractDatatype.js';
+import IDatatype from './IDatatype.js';
 
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
-import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
+export * from './adapter/index.js';
+export * from './markup/index.js';
 
-export default class MatchesConstraint extends AbstractConstraint {
-    readonly pattern;
-    readonly adapter;
-
-    constructor(
-        id: string | undefined,
-        level: Level,
-        remarks: MarkupMultiLine | undefined,
-        target: MetapathExpression,
-        pattern: RegExp,
-        adapter: IDatatypeAdapter<never>,
-    ) {
-        super(id, level, remarks, target);
-        this.pattern = pattern;
-        this.adapter = adapter;
-    }
-}
+export { AbstractAmbiguousDateTime, AbstractDatatype, IDatatype };

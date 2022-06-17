@@ -24,25 +24,6 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
-import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
+import MetapathExpression from './MetapathExpression.js';
 
-export default class MatchesConstraint extends AbstractConstraint {
-    readonly pattern;
-    readonly adapter;
-
-    constructor(
-        id: string | undefined,
-        level: Level,
-        remarks: MarkupMultiLine | undefined,
-        target: MetapathExpression,
-        pattern: RegExp,
-        adapter: IDatatypeAdapter<never>,
-    ) {
-        super(id, level, remarks, target);
-        this.pattern = pattern;
-        this.adapter = adapter;
-    }
-}
+export { MetapathExpression };

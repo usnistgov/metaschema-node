@@ -23,11 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { INamedModelDefinition } from '../definition';
-import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
-import { AbstractFlag } from '../element';
-import { equals } from '../util/equality';
-import { namedInstanceable } from './INamedInstance';
+import AbstractFieldDefinition from '../definition/AbstractFieldDefinition.js';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import AbstractFlag from '../element/AbstractFlag.js';
+import { equals } from '../util/equality.js';
+import { namedInstanceable } from './INamedInstance.js';
 
 export default abstract class AbstractFlagInstance extends namedInstanceable(AbstractFlag) {
     private readonly parent;

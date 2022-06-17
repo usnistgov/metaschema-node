@@ -23,12 +23,12 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyInstance from '../instance/AbstractAssemblyInstance';
-import AbstractChoiceInstance from '../instance/AbstractChoiceInstance';
-import AbstractFieldInstance from '../instance/AbstractFieldInstance';
-import IModelInstance from '../instance/IModelInstance';
-import INamedModelInstance from '../instance/INamedModelInstance';
-import { AbstractConstructor } from '../util/mixin';
+import AbstractAssemblyInstance from '../instance/AbstractAssemblyInstance.js';
+import AbstractChoiceInstance from '../instance/AbstractChoiceInstance.js';
+import AbstractFieldInstance from '../instance/AbstractFieldInstance.js';
+import IModelInstance from '../instance/IModelInstance.js';
+import INamedModelInstance from '../instance/INamedModelInstance.js';
+import { AbstractConstructor } from '../util/mixin.js';
 
 /**
  * Indicates that the Metaschema definition type has a complex model that can contain flags, field,

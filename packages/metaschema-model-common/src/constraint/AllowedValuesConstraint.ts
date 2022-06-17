@@ -23,10 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupLine from '../datatype/markup/markupLine';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine';
-import MetapathExpression from '../metapath/MetapathExpression';
-import AbstractConstraint, { Level } from './AbstractConstraint';
+import MarkupLine from '../datatype/markup/markupLine.js';
+import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
+import MetapathExpression from '../metapath/MetapathExpression.js';
+import AbstractConstraint, { Level } from './AbstractConstraint.js';
 
 export interface IAllowedValue {
     /**

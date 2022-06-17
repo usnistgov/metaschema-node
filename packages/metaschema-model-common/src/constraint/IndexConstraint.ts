@@ -23,10 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupMultiLine from '../datatype/markup/markupMultiLine';
-import MetapathExpression from '../metapath/MetapathExpression';
-import { Level } from './AbstractConstraint';
-import AbstractKeyConstraint, { IKeyField } from './AbstractKeyConstraint';
+import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
+import MetapathExpression from '../metapath/MetapathExpression.js';
+import { Level } from './AbstractConstraint.js';
+import AbstractKeyConstraint, { IKeyField } from './AbstractKeyConstraint.js';
 
 export default class IndexConstraint extends AbstractKeyConstraint {
     readonly name;

@@ -23,11 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
-import AbstractAssembly from '../element/AbstractAssembly';
-import { namedModelInstanceable } from './INamedModelInstance';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import AbstractAssembly from '../element/AbstractAssembly.js';
+import { namedModelInstanceable } from './INamedModelInstance.js';
 
-export default abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractAssembly) {
+abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractAssembly) {
     private readonly parent;
 
     constructor(parent: AbstractAssemblyDefinition) {
@@ -56,3 +56,5 @@ export default abstract class AbstractAssemblyInstance extends namedModelInstanc
 
     abstract getDefinition(): AbstractAssemblyDefinition;
 }
+
+export default AbstractAssemblyInstance;

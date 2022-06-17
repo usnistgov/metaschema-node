@@ -14,7 +14,8 @@
     "typescript": "^4.7.2"
   },
   "scripts": {
-    "lint": "eslint ./packages",
+    "lint": "lerna run lint",
+    "build": "lerna run build",
     "test": "echo \"TODO\" && exit 0"
   }
 }

@@ -23,10 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractMetaschema from '../AbstractMetaschema';
-import INamedModelDefinition from '../definition/INamedModelDefinition';
-import AbstractModelElement from '../element/AbstractModelElement';
-import { AbstractConstructor } from '../util/mixin';
+import AbstractMetaschema from '../AbstractMetaschema.js';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import AbstractModelElement from '../element/AbstractModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
 
 export default interface IInstance extends AbstractModelElement {
     /**

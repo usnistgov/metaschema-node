@@ -23,10 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractField from '../element/AbstractField';
-import AbstractFlagInstance from '../instance/AbstractFlagInstance';
-import { namedModelDefineable } from './INamedModelDefinition';
-import { namedValuedDefineable } from './INamedValuedDefinition';
+import AbstractField from '../element/AbstractField.js';
+import AbstractFlagInstance from '../instance/AbstractFlagInstance.js';
+import { namedModelDefineable } from './INamedModelDefinition.js';
+import { namedValuedDefineable } from './INamedValuedDefinition.js';
 
 export default abstract class AbstractFieldDefinition extends namedValuedDefineable(
     namedModelDefineable(AbstractField),

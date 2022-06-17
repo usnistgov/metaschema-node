@@ -23,6 +23,13 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractMetaschema from './AbstractMetaschema';
+import AbstractMetaschema from './AbstractMetaschema.js';
+
+export * as constraint from './constraint/index.js';
+export * as datatype from './datatype/index.js';
+export * as definition from './definition/index.js';
+export * as instance from './instance/index.js';
+export * as metapath from './metapath/index.js';
+export * as util from './util/index.js';
 
 export { AbstractMetaschema };

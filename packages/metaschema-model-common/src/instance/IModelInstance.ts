@@ -23,12 +23,13 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
-import { AbstractModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import QName from '../util/QName';
-import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types';
-import IInstance from './IInstance';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import AbstractModelElement from '../element/AbstractModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import QName from '../util/QName.js';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types.js';
+import IInstance from './IInstance.js';
 
 /**
  * This marker interface is used to identify a field or assembly instance that is a member of an
@@ -40,7 +41,7 @@ export default interface IModelInstance extends IInstance {
      *
      * @returns the Metaschema assembly definition on which the info element was declared
      */
-    getContainingDefinition(): AbstractAssemblyDefinition;
+    getContainingDefinition(): INamedModelDefinition;
 
     /**
      * Get the name used for the associated element wrapping a collection of elements in XML. This value
@@ -107,7 +108,7 @@ export function modelInstanceable<TBase extends AbstractConstructor<AbstractMode
         abstract getGroupAsXmlNamespace(): string | undefined;
         abstract getJsonGroupAsBehavior(): JsonGroupAsBehavior;
         abstract getXmlGroupAsBehavior(): XmlGroupAsBehavior;
-        abstract getContainingDefinition(): AbstractAssemblyDefinition;
+        abstract getContainingDefinition(): INamedModelDefinition;
         getXmlGroupAsQName(): QName | undefined {
             const groupAsName = this.getGroupAsName();
             return this.getXmlGroupAsBehavior() === XmlGroupAsBehavior.GROUPED && groupAsName

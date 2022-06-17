@@ -23,12 +23,12 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssembly from './AbstractAssembly';
-import AbstractChoice from './AbstractChoice';
-import AbstractField from './AbstractField';
-import AbstractFlag from './AbstractFlag';
-import AbstractModelElement from './AbstractModelElement';
-import AbstractNamedModelElement from './AbstractNamedModelElement';
+import AbstractAssembly from './AbstractAssembly.js';
+import AbstractChoice from './AbstractChoice.js';
+import AbstractField from './AbstractField.js';
+import AbstractFlag from './AbstractFlag.js';
+import AbstractModelElement from './AbstractModelElement.js';
+import AbstractNamedModelElement from './AbstractNamedModelElement.js';
 
 export {
     AbstractAssembly,

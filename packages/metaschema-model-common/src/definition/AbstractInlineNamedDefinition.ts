@@ -23,9 +23,9 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractNamedModelElement } from '../element';
-import INamedInstance from '../instance/INamedInstance';
-import { namedDefineable } from './INamedDefinition';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import INamedInstance from '../instance/INamedInstance.js';
+import { namedDefineable } from './INamedDefinition.js';
 
 /**
  * A trait indicating that the implementation is a localized definition that is declared in-line as

@@ -23,10 +23,17 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractNamedModelElement } from '../element';
-import AbstractFlagInstance from '../instance/AbstractFlagInstance';
-import { AbstractConstructor } from '../util/mixin';
-import INamedDefinition, { namedDefineable } from './INamedDefinition';
+import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint.js';
+import CardinalityConstraint from '../constraint/CardinalityConstraint.js';
+import ExpectConstraint from '../constraint/ExpectConstraint.js';
+import IndexConstraint from '../constraint/IndexConstraint.js';
+import IndexHasConstraint from '../constraint/IndexHasConstraint.js';
+import MatchesConstraint from '../constraint/MatchesConstraint.js';
+import UniqueConstraint from '../constraint/UniqueConstraint.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import AbstractFlagInstance from '../instance/AbstractFlagInstance.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import INamedDefinition, { namedDefineable } from './INamedDefinition.js';
 
 /**
  * This marker interface identifies a definition that is intended to be part of an Assembly's model.
@@ -58,6 +65,55 @@ export default interface INamedModelDefinition extends INamedDefinition {
      */
     hasJsonKey(): boolean;
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
+
+    /**
+     * Retrieve the list of allowed value constraints that apply to this definition's value.
+     *
+     * @returns the list of allowed value constraints
+     */
+    getAllowedValuesContraints(): AllowedValuesConstraint;
+
+    /**
+     * Retrieve the list of matches constraints that apply to this definition's value.
+     *
+     * @returns the list of matches constraints
+     */
+    getMatchesConstraints(): MatchesConstraint[];
+
+    /**
+     * Retrieve the list of key reference constraints that apply to this definition's value.
+     *
+     * @returns the list of key reference constraints
+     */
+    getIndexHasKeyConstraints(): IndexHasConstraint[];
+
+    /**
+     * Retrieve the list of expect constraints that apply to this definition's value.
+     *
+     * @returns the list of expect constraints
+     */
+    getExpectConstraints(): ExpectConstraint[];
+
+    /**
+     * Get any index constraints associated with this assembly definition.
+     *
+     * @returns the collection of index constraints, which may be empty
+     */
+    getIndexConstraints(): IndexConstraint[];
+
+    /**
+     * Get any unique constraints associated with this assembly definition.
+     *
+     * @returns the collection of unique constraints, which may be empty
+     */
+    getUniqueConstraints(): UniqueConstraint[];
+
+    /**
+     * Get any cardinality constraints associated with this assembly definition.
+     *
+     * @returns the collection of cardinality constraints, which may be empty
+     */
+    getCardinalityConstraints(): CardinalityConstraint[];
 }
 
 export function namedModelDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
@@ -70,6 +126,14 @@ export function namedModelDefineable<TBase extends AbstractConstructor<AbstractN
 
         abstract hasJsonKey(): boolean;
         abstract getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
+
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getMatchesConstraints(): MatchesConstraint[];
+        abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
+        abstract getExpectConstraints(): ExpectConstraint[];
+        abstract getIndexConstraints(): IndexConstraint[];
+        abstract getUniqueConstraints(): UniqueConstraint[];
+        abstract getCardinalityConstraints(): CardinalityConstraint[];
     }
     return NamedModelDefinition;
 }

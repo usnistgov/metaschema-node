@@ -23,10 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractNamedModelElement } from '../element';
-import INamedInstance from '../instance/INamedInstance';
-import { AbstractConstructor } from '../util/mixin';
-import IDefinition, { defineable } from './IDefinition';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import INamedInstance from '../instance/INamedInstance.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import IDefinition, { defineable } from './IDefinition.js';
 
 /**
  * This marker interface is used for some collections that contain various named definitions.

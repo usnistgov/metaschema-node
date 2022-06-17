@@ -24,9 +24,9 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import MarkupMultiLine from '../datatype/markup/markupMultiLine';
-import MetapathExpression from '../metapath/MetapathExpression';
-import AbstractConstraint, { Level } from './AbstractConstraint';
+import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
+import MetapathExpression from '../metapath/MetapathExpression.js';
+import AbstractConstraint, { Level } from './AbstractConstraint.js';
 
 export interface IKeyField {
     // getTarget(): MetapathExpression

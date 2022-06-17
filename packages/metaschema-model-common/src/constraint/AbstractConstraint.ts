@@ -24,8 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import MarkupMultiLine from '../datatype/markup/markupMultiLine';
-import MetapathExpression from '../metapath/MetapathExpression';
+import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
+import MetapathExpression from '../metapath/MetapathExpression.js';
 
 /**
  * The degree to which a constraint violation is significant.

@@ -23,14 +23,14 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint';
-import ExpectConstraint from '../constraint/ExpectConstraint';
-import IndexHasConstraint from '../constraint/IndexHasConstraint';
-import MatchesConstraint from '../constraint/MatchesConstraint';
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter';
-import { AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import IDefinition, { defineable } from './IDefinition';
+import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint.js';
+import ExpectConstraint from '../constraint/ExpectConstraint.js';
+import IndexHasConstraint from '../constraint/IndexHasConstraint.js';
+import MatchesConstraint from '../constraint/MatchesConstraint.js';
+import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import IDefinition, { defineable } from './IDefinition.js';
 
 /**
  * This marker interface identifies Metaschema definition types that have associated values (i.e.,

@@ -7,8 +7,25 @@
         "email": "nikita.wootten@nist.gov"
     },
     "scripts": {
-        "build": "tsc -p .",
-        "lint": "eslint"
+        "build": "tsc"
     },
+    "exports": {
+        ".": "./lib/index.js",
+        "./lib": null,
+        "./src": null,
+        "./constraint": "./lib/constraint/index.js",
+        "./datatype": "./lib/datatype/index.js",
+        "./definition": "./lib/definition/index.js",
+        "./element": "./lib/element/index.js",
+        "./instance": "./lib/instance/index.js",
+        "./metapath": "./lib/metapath/index.js",
+        "./util": "./lib/util/index.js"
+    },
+    "main": "./lib/index.js",
+    "types": "./lib/index.d.ts",
+    "files": [
+        "lib"
+    ],
+    "type": "module",
     "license": "NIST-PD-fallback"
 }

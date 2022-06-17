@@ -24,25 +24,24 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
-import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
+import AbstractConstraint from './AbstractConstraint.js';
+import AbstractKeyConstraint from './AbstractKeyConstraint.js';
+import AllowedValuesConstraint from './AllowedValuesConstraint.js';
+import CardinalityConstraint from './CardinalityConstraint.js';
+import ExpectConstraint from './ExpectConstraint.js';
+import IndexConstraint from './IndexConstraint.js';
+import IndexHasConstraint from './IndexHasConstraint.js';
+import MatchesConstraint from './MatchesConstraint.js';
+import UniqueConstraint from './UniqueConstraint.js';
 
-export default class MatchesConstraint extends AbstractConstraint {
-    readonly pattern;
-    readonly adapter;
-
-    constructor(
-        id: string | undefined,
-        level: Level,
-        remarks: MarkupMultiLine | undefined,
-        target: MetapathExpression,
-        pattern: RegExp,
-        adapter: IDatatypeAdapter<never>,
-    ) {
-        super(id, level, remarks, target);
-        this.pattern = pattern;
-        this.adapter = adapter;
-    }
-}
+export {
+    AbstractConstraint,
+    AbstractKeyConstraint,
+    AllowedValuesConstraint,
+    CardinalityConstraint,
+    ExpectConstraint,
+    IndexConstraint,
+    IndexHasConstraint,
+    MatchesConstraint,
+    UniqueConstraint,
+};

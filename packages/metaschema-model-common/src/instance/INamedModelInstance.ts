@@ -23,12 +23,12 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
-import { AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import AbstractFlagInstance from './AbstractFlagInstance';
-import IModelInstance, { modelInstanceable } from './IModelInstance';
-import INamedInstance, { namedInstanceable } from './INamedInstance';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import AbstractFlagInstance from './AbstractFlagInstance.js';
+import IModelInstance, { modelInstanceable } from './IModelInstance.js';
+import INamedInstance, { namedInstanceable } from './INamedInstance.js';
 
 export default interface INamedModelInstance extends INamedInstance, IModelInstance {
     /**
@@ -61,6 +61,8 @@ export function namedModelInstanceable<TBase extends AbstractConstructor<Abstrac
         extends namedInstanceable(modelInstanceable(Base))
         implements INamedModelInstance
     {
+        abstract getContainingDefinition(): AbstractAssemblyDefinition;
+
         hasJsonKey(): boolean {
             return this.getDefinition().hasJsonKey();
         }

@@ -23,12 +23,12 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import CardinalityConstraint from '../constraint/CardinalityConstraint';
-import IndexConstraint from '../constraint/IndexConstraint';
-import UniqueConstraint from '../constraint/UniqueConstraint';
-import { AbstractAssembly } from '../element';
-import { modelContainable } from './IModelContainer';
-import { namedModelDefineable } from './INamedModelDefinition';
+import CardinalityConstraint from '../constraint/CardinalityConstraint.js';
+import IndexConstraint from '../constraint/IndexConstraint.js';
+import UniqueConstraint from '../constraint/UniqueConstraint.js';
+import AbstractAssembly from '../element/AbstractAssembly.js';
+import { modelContainable } from './IModelContainer.js';
+import { namedModelDefineable } from './INamedModelDefinition.js';
 
 export default abstract class AbstractAssemblyDefinition extends modelContainable(
     namedModelDefineable(AbstractAssembly),
