@@ -40,11 +40,11 @@ abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractA
     }
 
     getXmlNamespace(): string | undefined {
-        return this.getContainingMetaschema().getXmlNamespace();
+        return this.getContainingMetaschema().xmlNamespace;
     }
 
     getGroupAsXmlNamespace(): string | undefined {
-        return this.getContainingMetaschema().getXmlNamespace();
+        return this.getContainingMetaschema().xmlNamespace;
     }
 
     getJsonName(): string {

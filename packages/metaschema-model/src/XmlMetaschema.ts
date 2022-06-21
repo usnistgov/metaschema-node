@@ -24,34 +24,65 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { MarkupLine, MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
+import { MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
+import {
+    AbstractAssemblyDefinition,
+    AbstractFieldDefinition,
+    AbstractFlagDefinition,
+} from '@oscal/metaschema-model-common/definition';
+import { JSONObject, parseObjectProp, parseStringProp } from './util.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    getLocation(): string | undefined {
-        throw new Error('Method not implemented.');
+    protected parsedXml: JSONObject;
+    protected parsedXmlMetaschema: JSONObject;
+
+    get name() {
+        return parseStringProp('schema-name', 'METASCHEMA', this.parsedXmlMetaschema);
     }
-    getName(): MarkupLine {
-        throw new Error('Method not implemented.');
+
+    get version() {
+        return parseStringProp('schema-version', 'METASCHEMA', this.parsedXmlMetaschema);
     }
-    getVersion(): string {
-        throw new Error('Method not implemented.');
+
+    get shortName() {
+        return parseStringProp('short-name', 'METASCHEMA', this.parsedXmlMetaschema);
     }
-    getRemarks(): MarkupMultiLine | undefined {
-        throw new Error('Method not implemented.');
+
+    get xmlNamespace() {
+        return parseStringProp('namespace', 'METASCHEMA', this.parsedXmlMetaschema);
     }
-    getShortName(): string {
-        throw new Error('Method not implemented.');
+
+    get jsonBaseUri() {
+        return parseStringProp('json-base-uri', 'METASCHEMA', this.parsedXmlMetaschema);
     }
-    getXmlNamespace(): string {
-        throw new Error('Method not implemented.');
+
+    remarks: MarkupMultiLine | undefined;
+
+    private _flagDefinitions: Map<string, AbstractFlagDefinition>;
+    get flagDefinitions() {
+        return this._flagDefinitions;
     }
-    getJsonBaseUri(): string {
-        throw new Error('Method not implemented.');
+
+    private _fieldDefinitions: Map<string, AbstractFieldDefinition>;
+    get fieldDefinitions() {
+        return this._fieldDefinitions;
     }
-    getImportedMetaschemas(): AbstractMetaschema[] {
-        throw new Error('Method not implemented.');
+
+    private _assemblyDefinitions: Map<string, AbstractAssemblyDefinition>;
+    get assemblyDefinitions() {
+        return this._assemblyDefinitions;
     }
-    getImportedMetaschemasByShortName(_: string): AbstractMetaschema | undefined {
-        throw new Error('Method not implemented.');
+
+    readonly location;
+    constructor(location: string, parsedXml: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
+        super(importedMetaschemas);
+        this.location = location;
+
+        this.parsedXml = parsedXml;
+        this.parsedXmlMetaschema = parseObjectProp('METASCHEMA', '*root*', this.parsedXml);
+
+        this._flagDefinitions = new Map();
+        this._fieldDefinitions = new Map();
+        this._assemblyDefinitions = new Map();
     }
 }

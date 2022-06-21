@@ -62,7 +62,7 @@ export function namedInstanceable<TBase extends AbstractConstructor<AbstractName
             return new QName(this.getEffectiveName(), this.getXmlNamespace());
         }
         getXmlNamespace(): string | undefined {
-            return this.getContainingMetaschema().getXmlNamespace();
+            return this.getContainingMetaschema().xmlNamespace;
         }
         abstract getContainingDefinition(): INamedModelDefinition;
         getFormalName(): string | undefined {

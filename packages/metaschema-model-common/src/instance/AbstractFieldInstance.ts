@@ -57,7 +57,7 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceab
     }
 
     getGroupAsXmlNamespace(): string | undefined {
-        return this.isInXmlWrapped() ? this.getContainingMetaschema().getXmlNamespace() : undefined;
+        return this.isInXmlWrapped() ? this.getContainingMetaschema().xmlNamespace : undefined;
     }
 
     abstract getDefinition(): AbstractFieldDefinition;

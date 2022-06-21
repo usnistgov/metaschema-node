@@ -23,32 +23,21 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import QName from '../util/QName.js';
-import AbstractAssemblyDefinition from './AbstractAssemblyDefinition.js';
 
-export default abstract class AbstractRootAssemblyDefinition extends AbstractAssemblyDefinition {
-    /**
-     * Get the root name.
-     *
-     * @returns the root name
-     */
-    abstract getRootName(): string;
+import XmlMetaschema from './XmlMetaschema.js';
+import { XMLParser } from 'fast-xml-parser';
 
-    /**
-     * Get the XML qualified name to use in XML as the root element.
-     *
-     * @returns the root XML qualified name
-     */
-    getRootXmlQName(): QName {
-        return new QName(this.getRootName(), this.getContainingMetaschema().xmlNamespace);
-    }
-
-    /**
-     * Get the name used for the associated property in JSON/YAML.
-     *
-     * @returns the root JSON property name
-     */
-    getRootJsonName() {
-        return this.getRootName();
+/**
+ * Provides methods to load a Metaschema expressed in XML.
+ *
+ * Loaded Metaschema instances are cached to avoid the need to load them for every use. Any
+ * Metaschema imported is also loaded and cached automatically.
+ */
+export default class MetaschemaLoader {
+    loadXmlMetaschema(location: string, raw: string) {
+        const parser = new XMLParser();
+        const rawMetaschema = parser.parse(raw);
+        console.log(rawMetaschema);
+        return new XmlMetaschema(location, rawMetaschema, []);
     }
 }

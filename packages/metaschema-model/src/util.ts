@@ -23,32 +23,34 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import QName from '../util/QName.js';
-import AbstractAssemblyDefinition from './AbstractAssemblyDefinition.js';
 
-export default abstract class AbstractRootAssemblyDefinition extends AbstractAssemblyDefinition {
-    /**
-     * Get the root name.
-     *
-     * @returns the root name
-     */
-    abstract getRootName(): string;
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-    /**
-     * Get the XML qualified name to use in XML as the root element.
-     *
-     * @returns the root XML qualified name
-     */
-    getRootXmlQName(): QName {
-        return new QName(this.getRootName(), this.getContainingMetaschema().xmlNamespace);
+export function parseStringProp(propName: string, parentName: string, obj: JSONObject): string {
+    if (!(propName in obj)) {
+        throw new Error(`'${propName}' does not exist in parent ${parentName}`);
     }
-
-    /**
-     * Get the name used for the associated property in JSON/YAML.
-     *
-     * @returns the root JSON property name
-     */
-    getRootJsonName() {
-        return this.getRootName();
+    let value = obj[propName];
+    if (Number.isInteger(value)) {
+        value = Number(value) + '.0';
     }
+    if (typeof value !== 'string') {
+        throw new Error(`${propName} in parent ${parentName} is not of string type`);
+    }
+    return value;
+}
+
+export function parseObjectProp(propName: string, parentName: string, obj: JSONObject): JSONObject {
+    if (!(propName in obj)) {
+        throw new Error(`'${propName}' does not exist in parent ${parentName}`);
+    }
+    const value = obj[propName];
+    if (!(value && typeof value === 'object' && !Array.isArray(value))) {
+        throw new Error(`${propName} in parent ${parentName} is not of string type`);
+    }
+    return value;
 }

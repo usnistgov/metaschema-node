@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "test",
+			"path": "packages/metaschema-model",
+			"group": "test",
+			"problemMatcher": [],
+			"label": "npm: test - packages/metaschema-model",
+			"detail": "jest --config ../../jest.config.ts"
+		}
+	]
+}

@@ -7,11 +7,14 @@
         "email": "nikita.wootten@nist.gov"
     },
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "test": "jest --config ../../jest.config.ts"
     },
     "type": "module",
     "license": "NIST-PD-fallback",
     "dependencies": {
-        "@oscal/metaschema-model-common": "^0.0.0"
-    }
+        "@oscal/metaschema-model-common": "^0.0.0",
+        "fast-xml-parser": "^4.0.8"
+    },
+    "devDependencies": {}
 }
