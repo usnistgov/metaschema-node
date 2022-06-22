@@ -29,8 +29,21 @@ import MetapathExpression from '../metapath/MetapathExpression.js';
 import AbstractConstraint, { Level } from './AbstractConstraint.js';
 
 export default class CardinalityConstraint extends AbstractConstraint {
-    private _minOccurs;
-    private _maxOccurs;
+    /**
+     * Retrieve the required minimum occurrence of the target instance. If specified, this value must be
+     * less than or equal to the value of {@link IModelInstance.maxOccurs} and greater than
+     * {@link IModelInstance.minOccurs}.
+     * A non-negative integer or `undefined` if not defined
+     */
+    readonly minOccurs;
+
+    /**
+     * Retrieve the required maximum occurrence of the target instance. If specified, this value must be
+     * less than the value of {@link IModelInstance.maxOccurs} and greater than or equal to
+     * {@link IModelInstance.minOccurs}.
+     * A non-negative integer or `undefined` if not defined
+     */
+    readonly maxOccurs;
 
     constructor(
         id: string | undefined,
@@ -41,29 +54,7 @@ export default class CardinalityConstraint extends AbstractConstraint {
         maxOccurs: number | undefined,
     ) {
         super(id, level, remarks, target);
-        this._minOccurs = minOccurs;
-        this._maxOccurs = maxOccurs;
-    }
-
-    /**
-     * Retrieve the required minimum occurrence of the target instance. If specified, this value must be
-     * less than or equal to the value of {@link IModelInstance.getMaxOccurs} and greater than
-     * {@link IModelInstance.getMinOccurs}.
-     *
-     * @returns a non-negative integer or `undefined` if not defined
-     */
-    get minOccurs() {
-        return this._minOccurs;
-    }
-
-    /**
-     * Retrieve the required maximum occurrence of the target instance. If specified, this value must be
-     * less than the value of {@link IModelInstance.getMaxOccurs} and greater than or equal to
-     * {@link IModelInstance.getMinOccurs}.
-     *
-     * @returns a non-negative integer or `undefined` if not defined
-     */
-    get maxOccurs() {
-        return this._maxOccurs;
+        this.minOccurs = minOccurs;
+        this.maxOccurs = maxOccurs;
     }
 }

@@ -32,10 +32,6 @@ import { ModelType } from '../util/types.js';
 export default abstract class AbstractChoice extends AbstractModelElement {
     /**
      * Provides the Metaschema model type of `CHOICE`.
-     *
-     * @returns the model type
      */
-    getModelType(): ModelType {
-        return ModelType.CHOICE;
-    }
+    readonly modelType = ModelType.CHOICE;
 }

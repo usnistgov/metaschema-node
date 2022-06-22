@@ -23,7 +23,6 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
 import INamedModelDefinition from '../definition/INamedModelDefinition.js';
 import AbstractModelElement from '../element/AbstractModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
@@ -38,81 +37,67 @@ import IInstance from './IInstance.js';
 export default interface IModelInstance extends IInstance {
     /**
      * Retrieve the Metaschema assembly definition on which the info element was declared.
-     *
-     * @returns the Metaschema assembly definition on which the info element was declared
      */
-    getContainingDefinition(): INamedModelDefinition;
+    readonly containingDefinition: INamedModelDefinition;
 
     /**
      * Get the name used for the associated element wrapping a collection of elements in XML. This value
-     * is required when {@link getXmlGroupAsBehavior} = {@link XmlGroupAsBehavior.GROUPED}. This name
-     * will be the element name wrapping a collection of elements.
-     *
-     * @returns the groupAs QName or `undefined` if no name is configured, such as when {@link getMaxOccurs} = `1`.
+     * is required when {@link xmlGroupAsBehavior} = {@link XmlGroupAsBehavior.GROUPED}. This name
+     * will be the element name wrapping a collection of elements. Will be `undefined` if no name is
+     * configured, such as when {@link maxOccurs} = `1`.
      */
-    getXmlGroupAsQName(): QName | undefined;
+    readonly xmlGroupAsQName: QName | undefined;
 
     /**
      * Get the minimum cardinality for this associated instance. This value must be less than or equal
-     * to the maximum cardinality returned by {@link getMaxOccurs}.
-     *
-     * @returns `0` or a positive integer value
+     * to the maximum cardinality returned by {@link maxOccurs}.
      */
-    getMinOccurs(): number;
+    readonly minOccurs: number;
 
     /**
      * Get the maximum cardinality for this associated instance. This value must be greater than or
-     * equal to the minimum cardinality returned by {@link getMinOccurs}, or `-1` if unbounded.
-     *
-     * @returns a positive integer value or `-1` if unbounded
+     * equal to the minimum cardinality returned by {@link minOccurs}, or `-1` if unbounded.
      */
-    getMaxOccurs(): number;
+    readonly maxOccurs: number;
 
     /**
      * Get the name provided for grouping. An instance in Metaschema must have a group name if the
-     * instance has a cardinality greater than `1`.
-     *
-     * @returns the group-as name or `undefined` if no name is configured, such as when {@link getMaxOccurs} = 1
+     * instance has a cardinality greater than `1`. Will be `undefined` if no name is configured,
+     * such as when {@link maxOccurs} = 1.
      */
-    getGroupAsName(): string | undefined;
+    readonly groupAsName: string | undefined;
 
     /**
      * Retrieve the XML namespace for this group.
-     *
-     * @returns the XML namespace or `undefined` if no namespace is used
      */
-    getGroupAsXmlNamespace(): string | undefined;
+    readonly groupAsXmlNamespace: string | undefined;
 
     /**
      * Gets the configured JSON group-as strategy. A JSON group-as strategy is only required when
-     * {@link getMaxOccurs} &gt; 1.
-     *
-     * @returns the JSON group-as strategy, or {@code JsonGroupAsBehavior#NONE} if {@link getMaxOccurs} = 1
+     * {@link maxOccurs} > 1. Will always be {@link JsonGroupAsBehavior.NONE} if {@link maxOccurs} = 1
      */
-    getJsonGroupAsBehavior(): JsonGroupAsBehavior;
+    readonly jsonGroupAsBehavior: JsonGroupAsBehavior;
 
     /**
      * Gets the configured XML group-as strategy. A XML group-as strategy is only required when
-     * {@link getMaxOccurs} &gt; 1.
-     *
-     * @returns the JSON group-as strategy, or {@code XmlGroupAsBehavior#UNGROUPED} if {@link getMaxOccurs} = 1
+     * {@link maxOccurs} > 1. Will always be {@link XmlGroupAsBehavior.UNGROUPED} if {@link maxOccurs} = 1
      */
-    getXmlGroupAsBehavior(): XmlGroupAsBehavior;
+    readonly xmlGroupAsBehavior: XmlGroupAsBehavior;
 }
 
 export function modelInstanceable<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
     abstract class ModelInstance extends Base implements IModelInstance {
-        abstract getMinOccurs(): number;
-        abstract getMaxOccurs(): number;
-        abstract getGroupAsName(): string | undefined;
-        abstract getGroupAsXmlNamespace(): string | undefined;
-        abstract getJsonGroupAsBehavior(): JsonGroupAsBehavior;
-        abstract getXmlGroupAsBehavior(): XmlGroupAsBehavior;
-        abstract getContainingDefinition(): INamedModelDefinition;
-        getXmlGroupAsQName(): QName | undefined {
-            const groupAsName = this.getGroupAsName();
-            return this.getXmlGroupAsBehavior() === XmlGroupAsBehavior.GROUPED && groupAsName
-                ? new QName(groupAsName, this.getGroupAsXmlNamespace())
+        abstract readonly minOccurs: number;
+        abstract readonly maxOccurs: number;
+        abstract readonly groupAsName: string | undefined;
+        abstract readonly groupAsXmlNamespace: string | undefined;
+        abstract readonly jsonGroupAsBehavior: JsonGroupAsBehavior;
+        abstract readonly xmlGroupAsBehavior: XmlGroupAsBehavior;
+        abstract readonly containingDefinition: INamedModelDefinition;
+        get xmlGroupAsQName(): QName | undefined {
+            const groupAsName = this.groupAsName;
+            return this.xmlGroupAsBehavior === XmlGroupAsBehavior.GROUPED && groupAsName
+                ? new QName(groupAsName, this.groupAsXmlNamespace)
                 : undefined;
         }
     }

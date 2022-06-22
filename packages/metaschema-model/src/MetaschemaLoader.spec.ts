@@ -39,8 +39,7 @@ describe('MetaschemaLoader', () => {
 
         const metaschema = loader.loadXmlMetaschema(
             location,
-            `
-            <?xml version="1.0" encoding="UTF-8"?>
+            `<?xml version="1.0" encoding="UTF-8"?>
             <?xml-stylesheet type="text/css" href="../../toolchains/xslt-M4/util/metaschema-author.css"?>
             <?xml-model href="../../toolchains/xslt-M4/validate/metaschema-composition-check.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
             <METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
@@ -51,8 +50,7 @@ describe('MetaschemaLoader', () => {
                 <json-base-uri>${jsonBaseUri}</json-base-uri>
                 <import href="oscal_control-common_metaschema.xml"/>
                 <import href="oscal_metadata_metaschema.xml"/>
-            </METASCHEMA>
-            `,
+            </METASCHEMA>`,
         );
 
         expect(metaschema.location).toBe(location);

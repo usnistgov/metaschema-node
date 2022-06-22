@@ -32,17 +32,15 @@ export default interface IInstance extends AbstractModelElement {
     /**
      * Retrieve the Metaschema definition on which the instance was declared. This value will typically
      * not be `undefined`, except in the case that the instance represents a definition at the root.
-     *
-     * @returns the Metaschema definition on which the instance was declared
      */
-    getContainingDefinition(): INamedModelDefinition;
+    readonly containingDefinition: INamedModelDefinition;
 }
 
 export function instanceable<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
     abstract class Instance extends Base implements IInstance {
-        abstract getContainingDefinition(): INamedModelDefinition;
-        getContainingMetaschema(): AbstractMetaschema {
-            return this.getContainingDefinition().getContainingMetaschema();
+        abstract readonly containingDefinition: INamedModelDefinition;
+        get containingMetaschema(): AbstractMetaschema {
+            return this.containingDefinition.containingMetaschema;
         }
     }
     return Instance;

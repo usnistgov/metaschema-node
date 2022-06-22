@@ -36,16 +36,7 @@ export default abstract class AbstractFieldDefinition extends namedValuedDefinea
      *
      * @returns the configured flag instance, or `undefined` if a flag is not configured as the "value key"
      */
-    abstract getJsonValueKeyFlagInstance(): AbstractFlagInstance | undefined;
-
-    /**
-     * Check if a JSON value key flag is configured.
-     *
-     * @returns `true` if a JSON value key flag is configured, or `false` otherwise
-     */
-    hasJsonValueKeyFlagInstance() {
-        return this.getJsonValueKeyFlagInstance() !== undefined;
-    }
+    abstract readonly jsonValueKeyFlagInstance: AbstractFlagInstance | undefined;
 
     /**
      * Retrieves the configured static label to use as the value key, or the type specific name if a
@@ -53,15 +44,15 @@ export default abstract class AbstractFieldDefinition extends namedValuedDefinea
      *
      * @returns the value key label
      */
-    abstract getJsonValueKeyName(): string;
+    abstract readonly jsonValueKeyName: string;
 
     /**
      * Retrieves the key to use as the field name for this field's value in JSON.
      *
      * @returns a string or a FlagInstance value
      */
-    getJsonValueKey() {
-        return this.getJsonValueKeyFlagInstance() ?? this.getJsonValueKeyName();
+    get jsonValueKey() {
+        return this.jsonValueKeyFlagInstance ?? this.jsonValueKeyName;
     }
 
     /**
@@ -72,5 +63,5 @@ export default abstract class AbstractFieldDefinition extends namedValuedDefinea
      *
      * @returns `true` if the field is eligible for collapsing, or `false` otherwise
      */
-    abstract isCollapsible(): boolean;
+    abstract readonly isCollapsible: boolean;
 }

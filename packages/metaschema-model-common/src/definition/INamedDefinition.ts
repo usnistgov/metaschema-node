@@ -38,19 +38,19 @@ export default interface INamedDefinition extends IDefinition {
      *
      * @returns `true` if the definition is declared inline or `false` if the definition is able to be globally referenced
      */
-    isInline(): boolean;
+    readonly isInline: boolean;
 
     /**
      * If the definition is defined inline, return the instance the definition is inlined for.
      * @returns the instance or `undefined`
      */
-    getInlineInstance(): INamedInstance | undefined;
+    readonly inlineInstance: INamedInstance | undefined;
 }
 
 export function namedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedDefinition extends defineable(Base) implements INamedDefinition {
-        abstract isInline(): boolean;
-        abstract getInlineInstance(): INamedInstance | undefined;
+        abstract readonly isInline: boolean;
+        abstract readonly inlineInstance: INamedInstance | undefined;
     }
     return NamedDefinition;
 }

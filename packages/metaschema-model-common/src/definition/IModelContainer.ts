@@ -36,79 +36,39 @@ import { AbstractConstructor } from '../util/mixin.js';
  */
 export default interface IModelContainer {
     /**
-     * Get the model instance contained within the model with the associated use name
-     * (see {@link AbstractNamedModelInstance.getUseName})
-     *
-     * @param name the use name of the model instance
-     * @returns the matching model instance, or `undefined` if no match was found
+     * Get all named model instances within the container mapped by use name.
      */
-    getModelInstanceByName(name: string): INamedModelInstance | undefined;
+    readonly namedModelInstances: Map<string, INamedModelInstance>;
 
     /**
-     * Get all named model instances within the container.
-     *
-     * @returns an ordered mapping of use name to model instance
+     * Get all field instances within the container mapped by use name.
      */
-    getNamedModelInstances(): Map<string, INamedModelInstance>;
+    readonly fieldInstances: Map<string, AbstractFieldInstance>;
 
     /**
-     * Get the field instance contained within the model with the associated use name.
-     * (see {@link AbstractFieldInstance.getUseName})
-     *
-     * @param name the use name of the field instance
-     * @returns the matching field instance, or `null` if no match was found
+     * Get all assembly instances within the container mapped by use name.
      */
-    getFieldInstanceByName(name: string): AbstractFieldInstance | undefined;
-
-    /**
-     * Get all field instances within the container.
-     *
-     * @returns a mapping of use name to field instance
-     */
-    getFieldInstances(): Map<string, AbstractFieldInstance>;
-
-    /**
-     * Get the assembly instance contained within the model with the associated use name.
-     * (see {@link AbstractAssemblyInstance.getUseName})
-     *
-     * @param name the use name of the assembly instance
-     * @returns the matching assembly instance, or `undefined` if no match was found
-     */
-    getAssemblyInstanceByName(name: string): AbstractAssemblyInstance | undefined;
-
-    /**
-     * Get all assembly instances within the container.
-     *
-     * @returns a mapping of use name to assembly instance
-     */
-    getAssemblyInstances(): Map<string, AbstractAssemblyInstance>;
+    readonly assemblyInstances: Map<string, AbstractAssemblyInstance>;
 
     /**
      * Get all choice instances within the container.
-     *
-     * @returns a list of choice instances
      */
-    getChoiceInstances(): AbstractChoiceInstance;
+    readonly choiceInstances: AbstractChoiceInstance[];
 
     /**
      * Get all model instances within the container.
-     *
-     * @returns an ordered collection of model instances
      */
-    getModelInstances(): IModelInstance;
+    readonly modelInstances: IModelInstance[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function modelContainable<TBase extends AbstractConstructor<any>>(Base: TBase) {
     abstract class ModelContainer extends Base implements IModelContainer {
-        abstract getModelInstanceByName(name: string): INamedModelInstance | undefined;
-        abstract getNamedModelInstances(): Map<string, INamedModelInstance>;
-        abstract getFieldInstanceByName(name: string): AbstractFieldInstance | undefined;
-        abstract getFieldInstances(): Map<string, AbstractFieldInstance>;
-        abstract getAssemblyInstanceByName(name: string): AbstractAssemblyInstance | undefined;
-        abstract getAssemblyInstances(): Map<string, AbstractAssemblyInstance>;
-        abstract getChoiceInstances(): AbstractChoiceInstance;
-        abstract getModelInstances(): IModelInstance;
+        abstract readonly namedModelInstances: Map<string, INamedModelInstance>;
+        abstract readonly fieldInstances: Map<string, AbstractFieldInstance>;
+        abstract readonly assemblyInstances: Map<string, AbstractAssemblyInstance>;
+        abstract readonly choiceInstances: AbstractChoiceInstance[];
+        abstract readonly modelInstances: IModelInstance[];
     }
     return ModelContainer;
 }

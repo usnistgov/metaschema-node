@@ -24,23 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 export default class QName {
-    private readonly _name: string;
-    private readonly _namespace: string | undefined;
-
-    public get name() {
-        return this._name;
-    }
-
-    public get namespace() {
-        return this._namespace;
-    }
+    readonly name: string;
+    readonly namespace: string | undefined;
 
     constructor(name: string, namespace?: string) {
-        this._name = name;
-        this._namespace = namespace;
+        this.name = name;
+        this.namespace = namespace;
     }
 
     toString(): string {
-        return this._namespace ? this._namespace + ':' + this._name : this._name;
+        return this.namespace ? this.namespace + ':' + this.name : this.name;
     }
 }

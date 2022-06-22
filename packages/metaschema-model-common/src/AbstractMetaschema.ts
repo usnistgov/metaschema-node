@@ -206,8 +206,8 @@ export default abstract class AbstractMetaschema {
         if (this.exportsNeedInit) {
             this.importedMetaschemas.map((metaschema) => {
                 this._exportedFlagDefinitions = new Map([
-                    ...this._exportedFieldDefinitions,
-                    ...metaschema.exportedFieldDefinitions,
+                    ...this._exportedFlagDefinitions,
+                    ...metaschema.exportedFlagDefinitions,
                 ]);
 
                 this._exportedFieldDefinitions = new Map([

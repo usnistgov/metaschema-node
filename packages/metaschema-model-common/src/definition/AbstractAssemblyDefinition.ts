@@ -38,19 +38,19 @@ export default abstract class AbstractAssemblyDefinition extends modelContainabl
      *
      * @returns the collection of index constraints, which may be empty
      */
-    abstract getIndexConstraints(): IndexConstraint[];
+    abstract readonly indexConstraints: IndexConstraint[];
 
     /**
      * Get any unique constraints associated with this assembly definition.
      *
      * @returns the collection of unique constraints, which may be empty
      */
-    abstract getUniqueConstraints(): UniqueConstraint[];
+    abstract readonly uniqueConstraints: UniqueConstraint[];
 
     /**
      * Get any cardinality constraints associated with this assembly definition.
      *
      * @returns the collection of cardinality constraints, which may be empty
      */
-    abstract getCardinalityConstraints(): CardinalityConstraint[];
+    abstract readonly cardinalityConstraints: CardinalityConstraint[];
 }

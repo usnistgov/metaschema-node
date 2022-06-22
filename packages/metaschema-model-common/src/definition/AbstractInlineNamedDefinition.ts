@@ -36,9 +36,7 @@ import { namedDefineable } from './INamedDefinition.js';
 export default abstract class AbstractInlineNamedDefinition<Instance extends INamedInstance> extends namedDefineable(
     AbstractNamedModelElement,
 ) {
-    isInline(): boolean {
-        return true;
-    }
+    readonly isInline = true;
 
-    abstract getInlineInstance(): Instance;
+    abstract readonly inlineInstance: Instance;
 }

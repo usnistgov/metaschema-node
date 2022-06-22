@@ -32,10 +32,6 @@ import { ModelType } from '../util/types.js';
 export default abstract class AbstractAssembly extends AbstractNamedModelElement {
     /**
      * Provides the Metaschema model type of `FIELD`.
-     *
-     * @returns the model type
      */
-    getModelType(): ModelType {
-        return ModelType.FIELD;
-    }
+    readonly modelType = ModelType.FIELD;
 }

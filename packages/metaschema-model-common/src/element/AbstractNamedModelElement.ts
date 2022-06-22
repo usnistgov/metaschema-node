@@ -33,35 +33,31 @@ import AbstractModelElement from './AbstractModelElement.js';
 export default abstract class AbstractNamedModelElement extends AbstractModelElement {
     /**
      * Retrieve the name of the model element.
-     *
-     * @returns the name
      */
-    abstract getName(): string;
+    abstract readonly name: string;
 
     /**
      * Retrieve the name to use for the model element, instead of the name.
      *
      * @returns the use name or `undefined` if no use name is defined
      */
-    abstract getUseName(): string | undefined;
+    abstract readonly useName: string | undefined;
 
     /**
      * The formal display name for a definition.
-     *
-     * @returns the formal name
      */
-    abstract getFormalName(): string | undefined;
+    abstract readonly formalName: string | undefined;
 
     /**
      * Get the name to use based on the provided names. This method will return the use name provided by
-     * {@link AbstractNamedModelElement.getUseName} if the call is not `null`, and fall back to the name provided by
-     * {@link AbstractNamedModelElement.getName} otherwise. This is the model name to use for the for an instance where the
+     * {@link AbstractNamedModelElement.useName} if the call is not `null`, and fall back to the name provided by
+     * {@link AbstractNamedModelElement.name} otherwise. This is the model name to use for the for an instance where the
      * instance is referenced.
      *
      * @returns the use name if available, or the name if not
      */
-    getEffectiveName(): string {
-        return this.getUseName() ?? this.getName();
+    get effectiveName(): string {
+        return this.useName ?? this.name;
     }
 
     /**
@@ -69,13 +65,12 @@ export default abstract class AbstractNamedModelElement extends AbstractModelEle
      *
      * @returns the JSON property name
      */
-    getJsonName(): string {
-        return this.getEffectiveName();
+    get jsonName(): string {
+        return this.effectiveName;
     }
 
     /**
      * Get the text that describes the basic use of the definition
-     * @returns a line of markup text
      */
-    abstract getDescription(): MarkupLine | undefined;
+    abstract readonly description: MarkupLine | undefined;
 }
