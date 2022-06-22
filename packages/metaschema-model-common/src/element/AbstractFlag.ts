@@ -32,6 +32,10 @@ import { ModelType } from '../util/types.js';
 export default abstract class AbstractFlag extends AbstractNamedModelElement {
     /**
      * Provides the Metaschema model type of `FLAG`.
+     *
+     * @returns the model type
      */
-    readonly modelType = ModelType.FLAG;
+    getModelType(): ModelType {
+        return ModelType.FLAG;
+    }
 }

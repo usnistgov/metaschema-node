@@ -40,19 +40,31 @@ export default abstract class AbstractChoiceInstance extends modelContainable(mo
         this.parent = parent;
     }
 
-    get containingDefinition() {
+    getContainingDefinition() {
         return this.parent;
     }
 
-    readonly minOccurs = 1;
+    getMinOccurs(): number {
+        return 1;
+    }
 
-    readonly maxOccurs = 1;
+    getMaxOccurs(): number {
+        return 1;
+    }
 
-    readonly groupAsName = undefined;
+    getGroupAsName(): string | undefined {
+        return undefined;
+    }
 
-    readonly groupAsXmlNamespace = undefined;
+    getGroupAsXmlNamespace(): string | undefined {
+        return undefined;
+    }
 
-    readonly jsonGroupAsBehavior = JsonGroupAsBehavior.NONE;
+    getJsonGroupAsBehavior(): JsonGroupAsBehavior {
+        return JsonGroupAsBehavior.NONE;
+    }
 
-    readonly xmlGroupAsBehavior = XmlGroupAsBehavior.UNGROUPED;
+    getXmlGroupAsBehavior(): XmlGroupAsBehavior {
+        return XmlGroupAsBehavior.UNGROUPED;
+    }
 }

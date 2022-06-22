@@ -47,85 +47,93 @@ export default interface INamedModelDefinition extends INamedDefinition {
      *
      * @returns `true` if the field has not flags, or false otherwise
      */
-    readonly isSimple: boolean;
+    isSimple(): boolean;
     /**
      * Retrieves the flag instances for all flags defined on the containing definition.
      *
      * @return the flags
      */
-    readonly flagInstances: Map<string, AbstractFlagInstance>;
+    getFlagInstances(): Map<string, AbstractFlagInstance>;
     /**
      * Indicates if a flag's value can be used as a property name in the containing object in JSON who's
      * value will be the object containing the flag. In such cases, the flag will not appear in the
      * object. This is only allowed if the flag is required, as determined by a `true` result from
      * {@link AbstractFlagInstance.isRequired}. The {@link AbstractFlagInstance} can be retrieved using
-     * {@link jsonKeyFlagInstance}.
+     * {@link getJsonKeyFlagInstance}.
      *
      * @return `true` if the flag's value can be used as a property name, or `false` otherwise
      */
     hasJsonKey(): boolean;
-    readonly jsonKeyFlagInstance: AbstractFlagInstance | undefined;
+    getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
     /**
      * Retrieve the list of allowed value constraints that apply to this definition's value.
+     *
+     * @returns the list of allowed value constraints
      */
-    readonly allowedValuesContraints: AllowedValuesConstraint;
+    getAllowedValuesContraints(): AllowedValuesConstraint;
 
     /**
      * Retrieve the list of matches constraints that apply to this definition's value.
+     *
+     * @returns the list of matches constraints
      */
-    readonly matchesConstraints: MatchesConstraint[];
+    getMatchesConstraints(): MatchesConstraint[];
 
     /**
      * Retrieve the list of key reference constraints that apply to this definition's value.
+     *
+     * @returns the list of key reference constraints
      */
-    readonly indexHasKeyConstraints: IndexHasConstraint[];
+    getIndexHasKeyConstraints(): IndexHasConstraint[];
 
     /**
      * Retrieve the list of expect constraints that apply to this definition's value.
+     *
+     * @returns the list of expect constraints
      */
-    readonly expectConstraints: ExpectConstraint[];
+    getExpectConstraints(): ExpectConstraint[];
 
     /**
      * Get any index constraints associated with this assembly definition.
      *
      * @returns the collection of index constraints, which may be empty
      */
-    readonly indexConstraints: IndexConstraint[];
+    getIndexConstraints(): IndexConstraint[];
 
     /**
      * Get any unique constraints associated with this assembly definition.
      *
      * @returns the collection of unique constraints, which may be empty
      */
-    readonly uniqueConstraints: UniqueConstraint[];
+    getUniqueConstraints(): UniqueConstraint[];
 
     /**
      * Get any cardinality constraints associated with this assembly definition.
      *
      * @returns the collection of cardinality constraints, which may be empty
      */
-    readonly cardinalityConstraints: CardinalityConstraint[];
+    getCardinalityConstraints(): CardinalityConstraint[];
 }
 
 export function namedModelDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedModelDefinition extends namedDefineable(Base) implements INamedModelDefinition {
-        abstract readonly flagInstances: Map<string, AbstractFlagInstance>;
+        abstract getFlagInstances(): Map<string, AbstractFlagInstance>;
 
-        get isSimple(): boolean {
-            return this.flagInstances.size === 0;
+        isSimple(): boolean {
+            return this.getFlagInstances().size === 0;
         }
 
         abstract hasJsonKey(): boolean;
-        abstract readonly jsonKeyFlagInstance: AbstractFlagInstance | undefined;
+        abstract getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
-        abstract readonly allowedValuesContraints: AllowedValuesConstraint;
-        abstract readonly matchesConstraints: MatchesConstraint[];
-        abstract readonly indexHasKeyConstraints: IndexHasConstraint[];
-        abstract readonly expectConstraints: ExpectConstraint[];
-        abstract readonly indexConstraints: IndexConstraint[];
-        abstract readonly uniqueConstraints: UniqueConstraint[];
-        abstract readonly cardinalityConstraints: CardinalityConstraint[];
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getMatchesConstraints(): MatchesConstraint[];
+        abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
+        abstract getExpectConstraints(): ExpectConstraint[];
+        abstract getIndexConstraints(): IndexConstraint[];
+        abstract getUniqueConstraints(): UniqueConstraint[];
+        abstract getCardinalityConstraints(): CardinalityConstraint[];
     }
     return NamedModelDefinition;
 }

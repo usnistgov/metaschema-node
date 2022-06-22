@@ -32,6 +32,10 @@ import AbstractNamedModelElement from './AbstractNamedModelElement.js';
 export default abstract class AbstractAssembly extends AbstractNamedModelElement {
     /**
      * Provides the Metaschema model type of `ASSEMBLY`.
+     *
+     * @returns the model type
      */
-    readonly modelType = ModelType.ASSEMBLY;
+    getModelType(): ModelType {
+        return ModelType.ASSEMBLY;
+    }
 }

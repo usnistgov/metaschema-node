@@ -37,37 +37,37 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceab
         this.parent = parent;
     }
 
-    get containingDefinition() {
+    getContainingDefinition() {
         return this.parent;
     }
 
-    get xmlNamespace(): string | undefined {
-        return this.isInXmlWrapped ? super.xmlNamespace : undefined;
+    getXmlNamespace(): string | undefined {
+        return this.isInXmlWrapped() ? super.getXmlNamespace() : undefined;
     }
 
-    get xmlQName(): QName | undefined {
-        return this.isInXmlWrapped ? super.xmlQName : undefined;
+    getXmlQName(): QName | undefined {
+        return this.isInXmlWrapped() ? super.getXmlQName() : undefined;
     }
 
-    get jsonName(): string {
-        if (this.maxOccurs == -1 || this.maxOccurs > 1) {
-            return this.groupAsName ?? 'null group-as name.js';
+    getJsonName(): string {
+        if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
+            return this.getGroupAsName() ?? 'null group-as name.js';
         }
-        return this.effectiveName;
+        return this.getEffectiveName();
     }
 
-    get groupAsXmlNamespace(): string | undefined {
-        return this.isInXmlWrapped ? this.containingMetaschema.xmlNamespace : undefined;
+    getGroupAsXmlNamespace(): string | undefined {
+        return this.isInXmlWrapped() ? this.getContainingMetaschema().xmlNamespace : undefined;
     }
 
-    abstract readonly definition: AbstractFieldDefinition;
+    abstract getDefinition(): AbstractFieldDefinition;
 
     /**
      * Determines if the field is configured to have a wrapper in XML.
      *
      * @return `true` if an XML wrapper is required, or `false` otherwise
      */
-    abstract readonly isInXmlWrapped: boolean;
+    abstract isInXmlWrapped(): boolean;
 
     /**
      * Determines if the instance is a simple field value without flags, or if it has a complex
@@ -75,7 +75,7 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceab
      *
      * @return `true` if the instance contains only a value, or `false` otherwise
      */
-    get isSimple(): boolean {
-        return this.definition.isSimple;
+    isSimple(): boolean {
+        return this.getDefinition().isSimple();
     }
 }

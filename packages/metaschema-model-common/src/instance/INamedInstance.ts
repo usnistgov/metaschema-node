@@ -24,6 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import MarkupLine from '../datatype/markup/MarkupLine.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import QName from '../util/QName.js';
 import IInstance, { instanceable } from './IInstance.js';
@@ -39,33 +40,36 @@ export default interface INamedInstance extends IInstance, AbstractNamedModelEle
      *
      * @returns the corresponding definition
      */
-    readonly definition: INamedModelDefinition;
+    getDefinition(): INamedModelDefinition;
     /**
      * Get the XML qualified name to use in XML.
      *
      * @returns the XML qualified name, or `undefined` if there isn't one
      */
-    readonly xmlQName: QName | undefined;
+    getXmlQName(): QName | undefined; //stub
     /**
      * Retrieve the XML namespace for this instance.
      *
      * @returns the XML namespace or `undefined` if no namespace is defined
      */
-    readonly xmlNamespace: string | undefined;
+    getXmlNamespace(): string | undefined;
 }
 
 export function namedInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedInstance extends instanceable(Base) implements INamedInstance {
-        abstract readonly definition: INamedModelDefinition;
-        get xmlQName(): QName | undefined {
-            return new QName(this.effectiveName, this.xmlNamespace);
+        abstract getDefinition(): INamedModelDefinition;
+        getXmlQName(): QName | undefined {
+            return new QName(this.getEffectiveName(), this.getXmlNamespace());
         }
-        get xmlNamespace(): string | undefined {
-            return this.containingMetaschema.xmlNamespace;
+        getXmlNamespace(): string | undefined {
+            return this.getContainingMetaschema().xmlNamespace;
         }
-        abstract readonly containingDefinition: INamedModelDefinition;
-        readonly formalName = undefined;
-        readonly description = undefined;
+        getFormalName(): string | undefined {
+            return undefined;
+        }
+        getDescription(): MarkupLine | undefined {
+            return undefined;
+        }
     }
     return NamedInstance;
 }

@@ -32,15 +32,15 @@ export default abstract class AbstractRootAssemblyDefinition extends AbstractAss
      *
      * @returns the root name
      */
-    abstract readonly rootName: string;
+    abstract getRootName(): string;
 
     /**
      * Get the XML qualified name to use in XML as the root element.
      *
      * @returns the root XML qualified name
      */
-    get rootXmlQName(): QName {
-        return new QName(this.rootName, this.containingMetaschema.xmlNamespace);
+    getRootXmlQName(): QName {
+        return new QName(this.getRootName(), this.getContainingMetaschema().xmlNamespace);
     }
 
     /**
@@ -48,7 +48,7 @@ export default abstract class AbstractRootAssemblyDefinition extends AbstractAss
      *
      * @returns the root JSON property name
      */
-    get rootJsonName() {
-        return this.rootName;
+    getRootJsonName() {
+        return this.getRootName();
     }
 }

@@ -35,26 +35,26 @@ abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractA
         this.parent = parent;
     }
 
-    get containingDefinition() {
+    getContainingDefinition() {
         return this.parent;
     }
 
-    get xmlNamespace(): string | undefined {
-        return this.containingMetaschema.xmlNamespace;
+    getXmlNamespace(): string | undefined {
+        return this.getContainingMetaschema().xmlNamespace;
     }
 
-    get groupAsXmlNamespace(): string | undefined {
-        return this.containingMetaschema.xmlNamespace;
+    getGroupAsXmlNamespace(): string | undefined {
+        return this.getContainingMetaschema().xmlNamespace;
     }
 
-    get jsonName(): string {
-        if (this.maxOccurs == -1 || this.maxOccurs > 1) {
-            return this.groupAsName ?? 'null group-as name';
+    getJsonName(): string {
+        if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
+            return this.getGroupAsName() ?? 'null group-as name';
         }
-        return this.effectiveName;
+        return this.getEffectiveName();
     }
 
-    abstract readonly definition: AbstractAssemblyDefinition;
+    abstract getDefinition(): AbstractAssemblyDefinition;
 }
 
 export default AbstractAssemblyInstance;

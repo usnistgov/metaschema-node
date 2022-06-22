@@ -34,14 +34,14 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
     /**
      * Propagate override from {@link IModelInstance}
      */
-    readonly containingDefinition: AbstractAssemblyDefinition;
+    getContainingDefinition(): AbstractAssemblyDefinition;
 
     /**
      * Indicates if a flag's value can be used as a property name in the containing object in JSON who's
      * value will be the object containing the flag. In such cases, the flag will not appear in the
      * object. This is only allowed if the flag is required, as determined by a `true` result from
      * {@link AbstractFlagInstance.isRequired}. The {@link AbstractFlagInstance} can be retrieved using
-     * {@link jsonKeyFlagInstance}.
+     * {@link getJsonKeyFlagInstance}.
      *
      * @returns {@code true} if the flag's value can be used as a property name, or `false` otherwise
      */
@@ -53,7 +53,7 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
      *
      * @returns the flag instance if a JSON key is configured, or `undefined` otherwise
      */
-    readonly jsonKeyFlagInstance: AbstractFlagInstance | undefined;
+    getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 }
 
 export function namedModelInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
@@ -61,13 +61,13 @@ export function namedModelInstanceable<TBase extends AbstractConstructor<Abstrac
         extends namedInstanceable(modelInstanceable(Base))
         implements INamedModelInstance
     {
-        abstract readonly containingDefinition: AbstractAssemblyDefinition;
+        abstract getContainingDefinition(): AbstractAssemblyDefinition;
 
         hasJsonKey(): boolean {
-            return this.definition.hasJsonKey();
+            return this.getDefinition().hasJsonKey();
         }
-        get jsonKeyFlagInstance(): AbstractFlagInstance | undefined {
-            return this.definition.jsonKeyFlagInstance;
+        getJsonKeyFlagInstance(): AbstractFlagInstance | undefined {
+            return this.getDefinition().getJsonKeyFlagInstance();
         }
     }
     return NamedModelInstance;

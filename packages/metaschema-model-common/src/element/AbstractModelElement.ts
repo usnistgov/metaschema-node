@@ -35,15 +35,17 @@ export default abstract class AbstractModelElement {
     /**
      * Get the Metaschema model type of the information element.
      */
-    abstract readonly modelType: ModelType;
+    abstract getModelType(): ModelType;
 
     /**
      * Retrieve the remarks associated with this information element, if any.
+     *
+     * @returns the remarks or `undefined` if no remarks are defined
      */
-    abstract readonly remarks: MarkupMultiLine | undefined;
+    abstract getRemarks(): MarkupMultiLine | undefined;
 
     /**
      * Retrieves the Metaschema instance that contains for the information element's declaration.
      */
-    abstract readonly containingMetaschema: AbstractMetaschema;
+    abstract getContainingMetaschema(): AbstractMetaschema;
 }

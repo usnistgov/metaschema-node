@@ -37,7 +37,7 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
         this.parent = parent;
     }
 
-    get containingDefinition(): INamedModelDefinition {
+    getContainingDefinition(): INamedModelDefinition {
         return this.parent;
     }
 
@@ -46,7 +46,7 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
      *
      * @returns `true` if a value is required, or `false` otherwise
      */
-    abstract readonly isRequired: boolean;
+    abstract isRequired(): boolean;
 
     /**
      * Determines if this flag's value is used as the property name for the JSON object that holds the
@@ -57,7 +57,7 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
      * @returns `true` if this flag is used as a JSON key, or `false` otherwise
      */
     isJsonKey(): boolean {
-        return equals(this, this.containingDefinition.jsonKeyFlagInstance);
+        return equals(this, this.getContainingDefinition().getJsonKeyFlagInstance());
     }
 
     /**
@@ -67,6 +67,6 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
      * @returns `true` if the flag is used as a JSON "value key", or `false` otherwise
      */
     isJsonValueKey(): boolean {
-        return this.containingDefinition instanceof AbstractFieldDefinition && this.isJsonKey();
+        return this.getContainingDefinition() instanceof AbstractFieldDefinition && this.isJsonKey();
     }
 }

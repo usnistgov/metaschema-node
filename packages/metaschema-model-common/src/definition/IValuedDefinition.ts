@@ -37,36 +37,44 @@ import IDefinition, { defineable } from './IDefinition.js';
  * field, flag).
  */
 export default interface IValuedDefinition extends IDefinition {
-    readonly datatypeAdapter: IDatatypeAdapter<never>;
+    getDatatypeAdapter(): IDatatypeAdapter<never>;
 
     /**
      * Retrieve the list of allowed value constraints that apply to this definition's value.
+     *
+     * @returns the list of allowed value constraints
      */
-    readonly allowedValuesContraints: AllowedValuesConstraint;
+    getAllowedValuesContraints(): AllowedValuesConstraint;
 
     /**
      * Retrieve the list of matches constraints that apply to this definition's value.
+     *
+     * @returns the list of matches constraints
      */
-    readonly matchesConstraints: MatchesConstraint[];
+    getMatchesConstraints(): MatchesConstraint[];
 
     /**
      * Retrieve the list of key reference constraints that apply to this definition's value.
+     *
+     * @returns the list of key reference constraints
      */
-    readonly indexHasKeyConstraints: IndexHasConstraint[];
+    getIndexHasKeyConstraints(): IndexHasConstraint[];
 
     /**
      * Retrieve the list of expect constraints that apply to this definition's value.
+     *
+     * @returns the list of expect constraints
      */
-    readonly expectConstraints: ExpectConstraint[];
+    getExpectConstraints(): ExpectConstraint[];
 }
 
 export function valuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {
-        abstract readonly datatypeAdapter: IDatatypeAdapter<never>;
-        abstract readonly allowedValuesContraints: AllowedValuesConstraint;
-        abstract readonly matchesConstraints: MatchesConstraint[];
-        abstract readonly indexHasKeyConstraints: IndexHasConstraint[];
-        abstract readonly expectConstraints: ExpectConstraint[];
+        abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getMatchesConstraints(): MatchesConstraint[];
+        abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
+        abstract getExpectConstraints(): ExpectConstraint[];
     }
     return ValuedDefinition;
 }
