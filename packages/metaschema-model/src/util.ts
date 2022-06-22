@@ -24,19 +24,26 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+// lifted from OSCAL-deep-diff, may need to be narrowed or expanded if fast-xml-parser does something interesting
 export type JSONPrimitive = string | number | boolean | null;
 export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
 export type JSONObject = { [member: string]: JSONValue };
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface JSONArray extends Array<JSONValue> {}
 
-export function parseStringProp(propName: string, parentName: string, obj: JSONObject): string {
+function tryGetProp(propName: string, parentName: string, obj: JSONObject): JSONValue {
     if (!(propName in obj)) {
         throw new Error(`'${propName}' does not exist in parent ${parentName}`);
     }
-    let value = obj[propName];
+    return obj[propName];
+}
+
+export function parseStringProp(propName: string, parentName: string, obj: JSONObject): string {
+    let value = tryGetProp(propName, parentName, obj);
     if (Number.isInteger(value)) {
-        value = Number(value) + '.0';
+        // issue specific to version numbers
+        // TODO: figure out a more elegant solution here
+        value = value + '.0';
     }
     if (typeof value !== 'string') {
         throw new Error(`${propName} in parent ${parentName} is not of string type`);
@@ -45,12 +52,30 @@ export function parseStringProp(propName: string, parentName: string, obj: JSONO
 }
 
 export function parseObjectProp(propName: string, parentName: string, obj: JSONObject): JSONObject {
-    if (!(propName in obj)) {
-        throw new Error(`'${propName}' does not exist in parent ${parentName}`);
-    }
-    const value = obj[propName];
+    const value = tryGetProp(propName, parentName, obj);
     if (!(value && typeof value === 'object' && !Array.isArray(value))) {
-        throw new Error(`${propName} in parent ${parentName} is not of string type`);
+        throw new Error(`${propName} in parent ${parentName} is not of object type`);
     }
+    return value;
+}
+
+export function parseArrayProp(propName: string, parentName: string, obj: JSONObject): JSONArray {
+    const value = tryGetProp(propName, parentName, obj);
+    if (!Array.isArray(value)) {
+        throw new Error(`${propName} in parent ${parentName} is not of array type`);
+    }
+    return value;
+}
+
+export function parseArrayOrObjectProp(propName: string, parentName: string, obj: JSONObject): JSONArray {
+    let value = tryGetProp(propName, parentName, obj);
+    if (!(value && typeof value === 'object')) {
+        throw new Error(`${propName} in parent ${parentName} is not of array or object type`);
+    }
+
+    if (!Array.isArray(value)) {
+        value = [value];
+    }
+
     return value;
 }

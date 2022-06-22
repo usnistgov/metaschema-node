@@ -30,10 +30,11 @@ import {
     AbstractFieldDefinition,
     AbstractFlagDefinition,
 } from '@oscal/metaschema-model-common/definition';
-import { JSONObject, parseObjectProp, parseStringProp } from './util.js';
+import { XMLParser } from 'fast-xml-parser';
+import { ResourceResolver } from './resolver.js';
+import { JSONObject, parseArrayOrObjectProp, parseObjectProp, parseStringProp } from './util.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    protected parsedXml: JSONObject;
     protected parsedXmlMetaschema: JSONObject;
 
     get name() {
@@ -74,15 +75,98 @@ export default class XmlMetaschema extends AbstractMetaschema {
     }
 
     readonly location;
-    constructor(location: string, parsedXml: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
+
+    constructor(location: string, parsedXmlMetaschema: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
         super(importedMetaschemas);
         this.location = location;
 
-        this.parsedXml = parsedXml;
-        this.parsedXmlMetaschema = parseObjectProp('METASCHEMA', '*root*', this.parsedXml);
+        this.parsedXmlMetaschema = parsedXmlMetaschema;
 
         this._flagDefinitions = new Map();
         this._fieldDefinitions = new Map();
         this._assemblyDefinitions = new Map();
+    }
+
+    /**
+     * Load a Metaschema from a file location
+     * @param location The location to load the metaschema from
+     * @param resolver A function that returns the raw XML string from a specified location
+     * @param loaded The map of previously loaded metaschemas (do not use externally)
+     * @param seen The set of previously seen metaschemas (do not use externally)
+     * @returns The loaded metaschema with all imports
+     */
+    static async load(
+        location: string,
+        resolver: ResourceResolver,
+        loaded?: Record<string, XmlMetaschema>,
+        seen?: Set<string>,
+    ): Promise<XmlMetaschema> {
+        // initialize loaded and seen if base case
+        if (loaded === undefined) {
+            loaded = {};
+        }
+        if (seen === undefined) {
+            seen = new Set();
+        }
+
+        // attempt to return early if this metaschema has already been loaded
+        const shortCircuitAttempt = loaded[location];
+        if (shortCircuitAttempt) {
+            return shortCircuitAttempt;
+        }
+
+        // check for infinite loops
+        if (seen.has(location)) {
+            const seenStr = [...seen.values()].join(', ');
+            const loadedStr = Object.keys(loaded).join(', ');
+            throw new Error(`import loop detected importing ${location} (seen: ${seenStr}; loaded: ${loadedStr})`);
+        }
+
+        // add current location to seen set to prevent infinite loops
+        seen.add(location);
+
+        const raw = await resolver(location);
+        const parsedXml = this.parse(raw);
+        const parsedXmlMetaschema = parseObjectProp('METASCHEMA', '*root*', parsedXml);
+        // get all imports, and recursively import metaschemas for those imports
+        const importLocs = this.parseImports(parsedXmlMetaschema);
+        const imports = [];
+        for (const importLoc of importLocs) {
+            const imported = await this.load(importLoc, resolver, loaded, seen);
+            // allow future metaschemas to short-circuit imports
+            loaded[importLoc] = imported;
+            imports.push(imported);
+        }
+
+        return new this(location, parsedXmlMetaschema, imports);
+    }
+
+    /**
+     * Parse a raw XML string into a JS object consumable by `XmlMetaschema`
+     * @param raw Raw XML to parse into JS objects
+     */
+    private static parse(raw: string | Buffer) {
+        const parser = new XMLParser({ ignoreAttributes: false });
+        return parser.parse(raw);
+    }
+
+    /**
+     * Given a parsed METASCHEMA XML tag, get all required imports.
+     * @param parsedXmlMetaschema The parsed METASHEMA XML tag parsed into JSON
+     * @returns A list of relative or absolute import URIs that must be provided to a given metaschema
+     */
+    private static parseImports(parsedXmlMetaschema: JSONObject): string[] {
+        if (!('import' in parsedXmlMetaschema)) {
+            // no import objects
+            return [];
+        }
+
+        // fastXML returns an object if only one import is returned
+        return parseArrayOrObjectProp('import', 'METASCHEMA', parsedXmlMetaschema).map((parsedXmlImport) => {
+            if (!(parsedXmlImport && typeof parsedXmlImport === 'object' && !Array.isArray(parsedXmlImport))) {
+                throw new Error('import array item is not of object type');
+            }
+            return parseStringProp('@_href', 'import', parsedXmlImport);
+        });
     }
 }

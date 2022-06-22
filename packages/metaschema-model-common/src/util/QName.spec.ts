@@ -24,20 +24,19 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import XmlMetaschema from './XmlMetaschema.js';
-import { XMLParser } from 'fast-xml-parser';
+import QName from './QName';
 
-/**
- * Provides methods to load a Metaschema expressed in XML.
- *
- * Loaded Metaschema instances are cached to avoid the need to load them for every use. Any
- * Metaschema imported is also loaded and cached automatically.
- */
-export default class MetaschemaLoader {
-    loadXmlMetaschema(location: string, raw: string) {
-        const parser = new XMLParser();
-        const rawMetaschema = parser.parse(raw);
-        console.log(rawMetaschema);
-        return new XmlMetaschema(location, rawMetaschema, []);
-    }
-}
+describe('QName', () => {
+    [
+        {
+            name: 'should handle QName with a namespace',
+            instance: new QName('name', 'namespace'),
+            expected: 'namespace:name',
+        },
+        {
+            name: 'should handle QName with no namespace',
+            instance: new QName('name'),
+            expected: 'name',
+        },
+    ].map(({ name, instance, expected }) => it(name, () => expect(instance.toString()).toBe(expected)));
+});
