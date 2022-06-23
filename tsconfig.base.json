@@ -10,7 +10,4 @@
         "allowJs": false,
         "strict": true,
     },
-    "exclude": [
-        "**/*.spec.*"
-    ]
 }

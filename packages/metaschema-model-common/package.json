@@ -7,7 +7,7 @@
         "email": "nikita.wootten@nist.gov"
     },
     "scripts": {
-        "build": "tsc"
+        "build": "tsc -p tsconfig.build.json"
     },
     "exports": {
         "./lib": null,
@@ -22,27 +22,27 @@
         },
         "./datatype": {
             "types": "./src/datatype/index.ts",
-            "default": "./src/datatype/index.js"
+            "default": "./lib/datatype/index.js"
         },
         "./definition": {
             "types": "./src/definition/index.ts",
-            "default": "./src/definition/index.js"
+            "default": "./lib/definition/index.js"
         },
         "./element": {
             "types": "./src/element/index.ts",
-            "default": "./src/element/index.js"
+            "default": "./lib/element/index.js"
         },
         "./instance": {
             "types": "./src/instance/index.ts",
-            "default": "./src/instance/index.js"
+            "default": "./lib/instance/index.js"
         },
         "./metapath": {
             "types": "./src/metapath/index.ts",
-            "default": "./src/metapath/index.js"
+            "default": "./lib/metapath/index.js"
         },
         "./util": {
             "types": "./src/util/index.ts",
-            "default": "./src/util/index.js"
+            "default": "./lib/util/index.js"
         }
     },
     "main": "./lib/index.js",
