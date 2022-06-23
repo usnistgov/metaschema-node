@@ -34,6 +34,9 @@ import IndexHasConstraint from './IndexHasConstraint.js';
 import MatchesConstraint from './MatchesConstraint.js';
 import UniqueConstraint from './UniqueConstraint.js';
 
+export * from './AbstractConstraint.js';
+export * from './AbstractKeyConstraint.js';
+
 export {
     AbstractConstraint,
     AbstractKeyConstraint,

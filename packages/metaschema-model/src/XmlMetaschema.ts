@@ -24,22 +24,28 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
 import {
     AbstractAssemblyDefinition,
     AbstractFieldDefinition,
     AbstractFlagDefinition,
 } from '@oscal/metaschema-model-common/definition';
-import { XMLParser } from 'fast-xml-parser';
 import { ResourceResolver } from './resolver.js';
-import { JSONObject, parseArrayOrObjectProp, parseObjectPropRequired, parseStringPropRequired } from './util.js';
+import {
+    JSONObject,
+    parseArrayOrObjectProp,
+    parseMarkupLineRequired,
+    parseMarkupMultiLine,
+    parseObjectPropRequired,
+    parseStringPropRequired,
+    parseXml,
+} from './parseUtil.js';
 import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
     protected parsedMetaschema: JSONObject;
 
     get name() {
-        return parseStringPropRequired('schema-name', 'METASCHEMA', this.parsedMetaschema);
+        return parseMarkupLineRequired('schema-name', 'METASCHEMA', this.parsedMetaschema);
     }
 
     get version() {
@@ -58,7 +64,9 @@ export default class XmlMetaschema extends AbstractMetaschema {
         return parseStringPropRequired('json-base-uri', 'METASCHEMA', this.parsedMetaschema);
     }
 
-    remarks: MarkupMultiLine | undefined;
+    get remarks() {
+        return parseMarkupMultiLine('remarks', 'METASCHEMA', this.parsedMetaschema);
+    }
 
     private _flagDefinitions: Map<string, AbstractFlagDefinition>;
     get flagDefinitions() {
@@ -135,7 +143,7 @@ export default class XmlMetaschema extends AbstractMetaschema {
         seen.add(location);
 
         const raw = await resolver(location);
-        const parsedXml = this.parse(raw);
+        const parsedXml = parseXml(raw);
         const parsedXmlMetaschema = parseObjectPropRequired('METASCHEMA', '*root*', parsedXml);
         // get all imports, and recursively import metaschemas for those imports
         const importLocs = this.parseImports(parsedXmlMetaschema);
@@ -148,15 +156,6 @@ export default class XmlMetaschema extends AbstractMetaschema {
         }
 
         return new this(location, parsedXmlMetaschema, imports);
-    }
-
-    /**
-     * Parse a raw XML string into a JS object consumable by `XmlMetaschema`
-     * @param raw Raw XML to parse into JS objects
-     */
-    private static parse(raw: string | Buffer) {
-        const parser = new XMLParser({ ignoreAttributes: false });
-        return parser.parse(raw);
     }
 
     /**

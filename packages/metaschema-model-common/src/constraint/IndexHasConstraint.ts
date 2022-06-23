@@ -26,7 +26,7 @@
 
 import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
-import { Level } from './AbstractConstraint.js';
+import { Level } from '../util/types.js';
 import AbstractKeyConstraint, { IKeyField } from './AbstractKeyConstraint.js';
 
 export default class IndexHasConstraint extends AbstractKeyConstraint {

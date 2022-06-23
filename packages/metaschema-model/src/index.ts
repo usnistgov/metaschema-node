@@ -26,5 +26,8 @@
 
 import XmlMetaschema from './XmlMetaschema.js';
 import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
+import XmlGlobalFieldDefinition from './XmlGlobalFieldDefinition.js';
 
-export { XmlMetaschema, XmlGlobalFlagDefinition };
+export * from './resolver.js';
+
+export { XmlMetaschema, XmlGlobalFlagDefinition, XmlGlobalFieldDefinition };

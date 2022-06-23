@@ -26,7 +26,8 @@
 
 import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
+import { Level } from '../util/types.js';
+import AbstractConstraint from './AbstractConstraint.js';
 
 export default class ExpectConstraint extends AbstractConstraint {
     readonly message;

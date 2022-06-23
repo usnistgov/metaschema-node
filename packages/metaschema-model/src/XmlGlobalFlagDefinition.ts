@@ -31,34 +31,39 @@ import {
     IndexHasConstraint,
     MatchesConstraint,
 } from '@oscal/metaschema-model-common/constraint';
-import { MarkupLine, MarkupMultiLine, IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 import { AbstractFlagDefinition } from '@oscal/metaschema-model-common/definition';
-import { INamedInstance } from '@oscal/metaschema-model-common/instance';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import { JSONObject, parseStringProp, parseStringPropRequired } from './util.js';
+import {
+    JSONObject,
+    parseMarkupLine,
+    parseMarkupMultiLine,
+    parseStringProp,
+    parseStringPropRequired,
+} from './parseUtil.js';
 
 export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
     private readonly metaschema;
     private readonly parsedFlag;
 
-    getName(): string {
+    getName() {
         return parseStringPropRequired('@_name', 'define-flag', this.parsedFlag);
     }
 
-    getUseName(): string | undefined {
-        return parseStringProp('use-name', 'define-flag', this.parsedFlag);
+    getUseName() {
+        return parseStringProp('use-name', 'define-flag', this.parsedFlag) ?? this.getName();
     }
 
-    getFormalName(): string | undefined {
+    getFormalName() {
         return parseStringProp('formal-name', 'define-flag', this.parsedFlag);
     }
 
-    getDescription(): MarkupLine | undefined {
-        throw new Error('Method not implemented.');
+    getDescription() {
+        return parseMarkupLine('description', 'define-flag', this.parsedFlag);
     }
 
-    getRemarks(): MarkupMultiLine | undefined {
-        throw new Error('Method not implemented.');
+    getRemarks() {
+        return parseMarkupMultiLine('remarks', 'define-flag', this.parsedFlag);
     }
 
     getDatatypeAdapter(): IDatatypeAdapter<never> {
@@ -81,7 +86,7 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         throw new Error('Method not implemented.');
     }
 
-    getModuleScope(): ModuleScope {
+    getModuleScope() {
         const scope = parseStringProp('@_scope', 'define-flag', this.parsedFlag);
         if (scope === 'local') {
             return ModuleScope.LOCAL;
@@ -91,15 +96,15 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         throw new Error(`Unknown module scope ${scope}`);
     }
 
-    getContainingMetaschema(): AbstractMetaschema {
+    getContainingMetaschema() {
         return this.metaschema;
     }
 
-    getInlineInstance(): INamedInstance | undefined {
+    getInlineInstance() {
         return undefined;
     }
 
-    isInline(): boolean {
+    isInline() {
         return false;
     }
 

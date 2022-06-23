@@ -26,32 +26,7 @@
 
 import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
-
-/**
- * The degree to which a constraint violation is significant.
- *
- * These values are ordered from least significant to most significant.
- */
-export enum Level {
-    /**
-     * A violation of the constraint represents a point of interest.
-     */
-    INFORMATIONAL,
-    /**
-     * A violation of the constraint represents a potential issue with the content.
-     */
-    WARNING,
-    /**
-     * A violation of the constraint represents a fault in the content. This may include issues around
-     * compatibility, integrity, consistency, etc.
-     */
-    ERROR,
-    /**
-     * A violation of the constraint represents a serious fault in the content that will prevent typical
-     * use of the content.
-     */
-    CRITICAL,
-}
+import { Level } from '../util/types.js';
 
 export default abstract class AbstractConstraint {
     /**

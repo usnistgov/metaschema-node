@@ -25,7 +25,7 @@
  */
 
 import { ResourceResolver } from './resolver.js';
-import { parseObjectProp } from './util.js';
+import { parseObjectPropRequired, parseXml } from './parseUtil.js';
 import XmlMetaschema from './XmlMetaschema.js';
 
 function mockResolverBuilder(locations: Record<string, string>): ResourceResolver {
@@ -57,7 +57,7 @@ describe('XmlMetaschema.load()', () => {
         );
 
         expect(metaschema.location).toBe(location);
-        expect(metaschema.name).toBe(schemaName);
+        expect(metaschema.name.toString()).toBe(schemaName);
         expect(metaschema.version).toBe(schemaVersion);
         expect(metaschema.shortName).toBe(shortName);
         expect(metaschema.xmlNamespace).toBe(namespace);
@@ -89,7 +89,7 @@ describe('XmlMetaschema.load()', () => {
 
         const metaschema = await XmlMetaschema.load('some.example/base.xml', resolver);
         expect(metaschema.importedMetaschemas).toHaveLength(1);
-        expect(metaschema.importedMetaschemas[0].name).toBe('Test2');
+        expect(metaschema.importedMetaschemas[0].name.toString()).toBe('Test2');
     });
 
     /**
@@ -194,8 +194,8 @@ describe('XmlMetaschema.parseImports()', () => {
         },
     ].map(({ name, raw, expects }) =>
         it(name, () => {
-            const parsedXml = XmlMetaschema['parse'](raw);
-            const parsedXmlMetaschema = parseObjectProp('METASCHEMA', '*root*', parsedXml);
+            const parsedXml = parseXml(raw);
+            const parsedXmlMetaschema = parseObjectPropRequired('METASCHEMA', '*root*', parsedXml);
             const imports = XmlMetaschema['parseImports'](parsedXmlMetaschema);
             expect(imports).toStrictEqual(expects);
         }),

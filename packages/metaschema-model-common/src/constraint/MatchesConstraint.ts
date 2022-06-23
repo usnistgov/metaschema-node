@@ -27,7 +27,8 @@
 import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
 import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
-import AbstractConstraint, { Level } from './AbstractConstraint.js';
+import { Level } from '../util/types.js';
+import AbstractConstraint from './AbstractConstraint.js';
 
 export default class MatchesConstraint extends AbstractConstraint {
     readonly pattern;

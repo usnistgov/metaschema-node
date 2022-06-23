@@ -60,56 +60,44 @@ export default abstract class AbstractMetaschema {
      * TODO: use an equivalent URI class
      * @returns the location, or `undefined` if this information is not available
      */
-    abstract readonly location: string | undefined;
+    abstract get location(): string | undefined;
 
     /**
      * Get the long name for the Metaschema.
-     *
-     * @returns the name
      */
-    abstract readonly name: MarkupLine;
+    abstract get name(): MarkupLine;
 
     /**
      * Get the revision of the Metaschema.
-     *
-     * @returns the revision
      */
-    abstract readonly version: string;
+    abstract get version(): string;
 
     /**
      * Retrieve the remarks associated with this Metaschema, if any.
      *
      * @returns the remarks or `undefined` if no remarks are defined
      */
-    abstract readonly remarks: MarkupMultiLine | undefined;
+    abstract get remarks(): MarkupMultiLine | undefined;
 
     /**
      * Retrieves the unique short name for the Metaschema, which provides a textual identifier for the
      * Metaschema instance.
-     *
-     * @returns the short name
      */
-    abstract readonly shortName: string;
+    abstract get shortName(): string;
 
     /**
      * Retrieves the XML namespace associated with the Metaschema.
-     *
-     * @returns a namespace
      */
-    abstract readonly xmlNamespace: string;
+    abstract get xmlNamespace(): string;
 
     /**
      * Retrieve the JSON schema base URI associated with the Metaschema.
-     *
-     * @returns the base URI
      */
-    abstract readonly jsonBaseUri: string;
+    abstract get jsonBaseUri(): string;
 
     private readonly _importedMetaschemas;
     /**
      * Retrieves all Metaschema imported by this Metaschema.
-     *
-     * @returns a list of imported Metaschema
      */
     get importedMetaschemas() {
         return this._importedMetaschemas;
