@@ -24,19 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import QName from './QName.js';
+import XmlMetaschema from './XmlMetaschema.js';
+import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 
-describe('QName', () => {
-    [
-        {
-            name: 'should handle QName with a namespace',
-            instance: new QName('name', 'namespace'),
-            expected: 'namespace:name',
-        },
-        {
-            name: 'should handle QName with no namespace',
-            instance: new QName('name'),
-            expected: 'name',
-        },
-    ].map(({ name, instance, expected }) => it(name, () => expect(instance.toString()).toBe(expected)));
-});
+export { XmlMetaschema, XmlGlobalFlagDefinition };

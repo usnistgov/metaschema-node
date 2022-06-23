@@ -25,6 +25,7 @@
  */
 import AbstractMetaschema from './AbstractMetaschema.js';
 
+// backup method if using old style module resolution
 export * as constraint from './constraint/index.js';
 export * as datatype from './datatype/index.js';
 export * as definition from './definition/index.js';

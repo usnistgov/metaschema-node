@@ -32,29 +32,30 @@ import {
 } from '@oscal/metaschema-model-common/definition';
 import { XMLParser } from 'fast-xml-parser';
 import { ResourceResolver } from './resolver.js';
-import { JSONObject, parseArrayOrObjectProp, parseObjectProp, parseStringProp } from './util.js';
+import { JSONObject, parseArrayOrObjectProp, parseObjectPropRequired, parseStringPropRequired } from './util.js';
+import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    protected parsedXmlMetaschema: JSONObject;
+    protected parsedMetaschema: JSONObject;
 
     get name() {
-        return parseStringProp('schema-name', 'METASCHEMA', this.parsedXmlMetaschema);
+        return parseStringPropRequired('schema-name', 'METASCHEMA', this.parsedMetaschema);
     }
 
     get version() {
-        return parseStringProp('schema-version', 'METASCHEMA', this.parsedXmlMetaschema);
+        return parseStringPropRequired('schema-version', 'METASCHEMA', this.parsedMetaschema);
     }
 
     get shortName() {
-        return parseStringProp('short-name', 'METASCHEMA', this.parsedXmlMetaschema);
+        return parseStringPropRequired('short-name', 'METASCHEMA', this.parsedMetaschema);
     }
 
     get xmlNamespace() {
-        return parseStringProp('namespace', 'METASCHEMA', this.parsedXmlMetaschema);
+        return parseStringPropRequired('namespace', 'METASCHEMA', this.parsedMetaschema);
     }
 
     get jsonBaseUri() {
-        return parseStringProp('json-base-uri', 'METASCHEMA', this.parsedXmlMetaschema);
+        return parseStringPropRequired('json-base-uri', 'METASCHEMA', this.parsedMetaschema);
     }
 
     remarks: MarkupMultiLine | undefined;
@@ -76,13 +77,21 @@ export default class XmlMetaschema extends AbstractMetaschema {
 
     readonly location;
 
-    constructor(location: string, parsedXmlMetaschema: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
+    constructor(location: string, parsedMetaschema: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
         super(importedMetaschemas);
         this.location = location;
 
-        this.parsedXmlMetaschema = parsedXmlMetaschema;
+        this.parsedMetaschema = parsedMetaschema;
 
         this._flagDefinitions = new Map();
+        (parseArrayOrObjectProp('define-flag', 'METASCHEMA', this.parsedMetaschema) ?? []).forEach((parsedFlag) => {
+            if (!(parsedFlag && typeof parsedFlag === 'object' && !Array.isArray(parsedFlag))) {
+                throw new Error('define-flag array item is not of object type');
+            }
+            const flag = new XmlGlobalFlagDefinition(parsedFlag, this);
+            this._flagDefinitions.set(flag.getName(), flag);
+        });
+
         this._fieldDefinitions = new Map();
         this._assemblyDefinitions = new Map();
     }
@@ -127,7 +136,7 @@ export default class XmlMetaschema extends AbstractMetaschema {
 
         const raw = await resolver(location);
         const parsedXml = this.parse(raw);
-        const parsedXmlMetaschema = parseObjectProp('METASCHEMA', '*root*', parsedXml);
+        const parsedXmlMetaschema = parseObjectPropRequired('METASCHEMA', '*root*', parsedXml);
         // get all imports, and recursively import metaschemas for those imports
         const importLocs = this.parseImports(parsedXmlMetaschema);
         const imports = [];
@@ -162,11 +171,8 @@ export default class XmlMetaschema extends AbstractMetaschema {
         }
 
         // fastXML returns an object if only one import is returned
-        return parseArrayOrObjectProp('import', 'METASCHEMA', parsedXmlMetaschema).map((parsedXmlImport) => {
-            if (!(parsedXmlImport && typeof parsedXmlImport === 'object' && !Array.isArray(parsedXmlImport))) {
-                throw new Error('import array item is not of object type');
-            }
-            return parseStringProp('@_href', 'import', parsedXmlImport);
-        });
+        return (parseArrayOrObjectProp('import', 'METASCHEMA', parsedXmlMetaschema) ?? []).map((parsedXmlImport) =>
+            parseStringPropRequired('@_href', 'import', parsedXmlImport),
+        );
     }
 }

@@ -10,6 +10,16 @@
         "build": "tsc",
         "test": "jest --config ../../jest.config.ts"
     },
+    "exports": {
+        "./lib": null,
+        "./src": null,
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./lib/index.js"
+        }
+    },
+    "main": "./lib/index.js",
+    "types": "./src/index.ts",
     "type": "module",
     "license": "NIST-PD-fallback",
     "dependencies": {
