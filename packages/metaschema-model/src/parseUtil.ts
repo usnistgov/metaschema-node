@@ -64,6 +64,26 @@ export function tryConvertToObject(name: string, parent: JSONValue): JSONObject 
     return parent;
 }
 
+export function parseBooleanProp(propName: string, parentName: string, parent: JSONValue): boolean | undefined {
+    parent = tryConvertToObject(parentName, parent);
+    if (!(propName in parent)) {
+        return undefined;
+    }
+    const value = parent[propName];
+    if (typeof value !== 'boolean') {
+        throw XMLParsingError.wrongType(propName, parentName, 'boolean');
+    }
+    return value;
+}
+
+export function parseBooleanPropRequired(propName: string, parentName: string, parent: JSONValue): boolean {
+    const value = parseBooleanProp(propName, parentName, parent);
+    if (value === undefined) {
+        throw XMLParsingError.undefined(propName, parentName);
+    }
+    return value;
+}
+
 export function parseNumberProp(propName: string, parentName: string, parent: JSONValue): number | undefined {
     parent = tryConvertToObject(parentName, parent);
     if (!(propName in parent)) {
@@ -122,6 +142,10 @@ export function parseObjectProp(propName: string, parentName: string, parent: JS
     }
     const value = parent[propName];
     if (!(value && typeof value === 'object' && !Array.isArray(value))) {
+        if (typeof value === 'string' && value === '') {
+            // parser interprets empty pair of tags as an empty string
+            return {};
+        }
         throw XMLParsingError.wrongType(propName, parentName, 'object');
     }
     return value;

@@ -26,7 +26,6 @@
 
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import {
-    AbstractConstraint,
     AllowedValuesConstraint,
     MatchesConstraint,
     IndexHasConstraint,
@@ -38,8 +37,15 @@ import {
 import { MarkupLine, IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
 import { AbstractFlagInstance, INamedInstance } from '@oscal/metaschema-model-common/instance';
-import { ModuleScope, ModelType } from '@oscal/metaschema-model-common/util';
-import { JSONObject, parseMarkupLine, parseMarkupMultiLine, parseStringPropRequired } from './parseUtil.js';
+import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import parseDatatypeAdapter from './datatype.js';
+import {
+    JSONObject,
+    parseMarkupLine,
+    parseMarkupMultiLine,
+    parseStringProp,
+    parseStringPropRequired,
+} from './parseUtil.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     private readonly metaschema;
@@ -49,12 +55,12 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         return parseStringPropRequired('@_name', 'define-field', this.parsedField);
     }
 
-    getUseName(): string | undefined {
-        throw new Error('Method not implemented.');
+    getUseName(): string {
+        return parseStringProp('use-name', 'define-field', this.parsedField) ?? this.getName();
     }
 
     getFormalName(): string | undefined {
-        throw new Error('Method not implemented.');
+        return parseStringProp('formal-name', 'define-field', this.parsedField);
     }
 
     getDescription(): MarkupLine | undefined {
@@ -89,23 +95,20 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         throw new Error('Method not implemented.');
     }
 
-    getModelType(): ModelType {
-        throw new Error('Method not implemented.');
-    }
-
     getContainingMetaschema(): AbstractMetaschema {
         return this.metaschema;
     }
 
     getDatatypeAdapter(): IDatatypeAdapter<never> {
+        // TODO provide default if not exist
+        return parseDatatypeAdapter('@_as-type', 'define-field', this.parsedField);
+    }
+
+    getFlagInstances(): Map<string, AbstractFlagInstance> {
         throw new Error('Method not implemented.');
     }
 
-    getConstraints(): AbstractConstraint[] {
-        throw new Error('Method not implemented.');
-    }
-
-    getAllowedValuesContraints(): AllowedValuesConstraint {
+    getAllowedValuesContraints(): AllowedValuesConstraint[] {
         throw new Error('Method not implemented.');
     }
 
@@ -118,10 +121,6 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     }
 
     getExpectConstraints(): ExpectConstraint[] {
-        throw new Error('Method not implemented.');
-    }
-
-    getFlagInstances(): Map<string, AbstractFlagInstance> {
         throw new Error('Method not implemented.');
     }
 

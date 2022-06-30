@@ -44,7 +44,7 @@ export default interface IValuedDefinition extends IDefinition {
      *
      * @returns the list of allowed value constraints
      */
-    getAllowedValuesContraints(): AllowedValuesConstraint;
+    getAllowedValuesContraints(): AllowedValuesConstraint[];
 
     /**
      * Retrieve the list of matches constraints that apply to this definition's value.
@@ -71,7 +71,7 @@ export default interface IValuedDefinition extends IDefinition {
 export function valuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {
         abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
-        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];
         abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
         abstract getExpectConstraints(): ExpectConstraint[];

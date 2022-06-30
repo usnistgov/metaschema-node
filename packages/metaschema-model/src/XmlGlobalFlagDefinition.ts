@@ -34,7 +34,9 @@ import {
 import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 import { AbstractFlagDefinition } from '@oscal/metaschema-model-common/definition';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import {
+import { parseConstraints } from './constraints.js';
+import parseDatatypeAdapter from './datatype.js';
+import XMLParsingError, {
     JSONObject,
     parseMarkupLine,
     parseMarkupMultiLine,
@@ -45,6 +47,11 @@ import {
 export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
     private readonly metaschema;
     private readonly parsedFlag;
+
+    private readonly allowedValuesConstraints: AllowedValuesConstraint[];
+    private readonly matchesConstraints: MatchesConstraint[];
+    private readonly indexHasKeyConstraints: IndexHasConstraint[];
+    private readonly expectConstraints: ExpectConstraint[];
 
     getName() {
         return parseStringPropRequired('@_name', 'define-flag', this.parsedFlag);
@@ -67,23 +74,24 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
     }
 
     getDatatypeAdapter(): IDatatypeAdapter<never> {
-        throw new Error('Method not implemented.');
+        // TODO provide default if not exist
+        return parseDatatypeAdapter('@_as-type', 'define-flag', this.parsedFlag);
     }
 
-    getAllowedValuesContraints(): AllowedValuesConstraint {
-        throw new Error('Method not implemented.');
+    getAllowedValuesContraints(): AllowedValuesConstraint[] {
+        return this.allowedValuesConstraints;
     }
 
     getMatchesConstraints(): MatchesConstraint[] {
-        throw new Error('Method not implemented.');
+        return this.matchesConstraints;
     }
 
     getIndexHasKeyConstraints(): IndexHasConstraint[] {
-        throw new Error('Method not implemented.');
+        return this.indexHasKeyConstraints;
     }
 
     getExpectConstraints(): ExpectConstraint[] {
-        throw new Error('Method not implemented.');
+        return this.expectConstraints;
     }
 
     getModuleScope() {
@@ -112,5 +120,22 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         super();
         this.metaschema = metaschema;
         this.parsedFlag = parsedXmlFlagDefinition;
+
+        const {
+            indexHasKeyConstraints,
+            expectConstraints,
+            matchesConstrants,
+            allowedValuesConstraints,
+            ...extraneousConstraints
+        } = parseConstraints('constraint', 'define-flag', this.parsedFlag);
+        this.indexHasKeyConstraints = indexHasKeyConstraints;
+        this.expectConstraints = expectConstraints;
+        this.matchesConstraints = matchesConstrants;
+        this.allowedValuesConstraints = allowedValuesConstraints;
+        Object.values(extraneousConstraints).map((c) => {
+            if (c.length > 0) {
+                throw new XMLParsingError(`define-flag has extraneous constraint ${c}`);
+            }
+        });
     }
 }

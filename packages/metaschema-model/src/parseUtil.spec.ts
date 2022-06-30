@@ -105,7 +105,7 @@ describe('parseObjectProp()', () => {
     });
     it('should throw error on non-object type', () => {
         expect(() => parseObjectProp('obj', '*root*', { obj: false })).toThrow();
-        expect(() => parseObjectProp('obj', '*root*', { obj: '' })).toThrow();
+        expect(() => parseObjectProp('obj', '*root*', { obj: 'help' })).toThrow();
         expect(() => parseObjectProp('obj', '*root*', { obj: 55 })).toThrow();
         expect(() => parseObjectProp('obj', '*root*', { obj: [] })).toThrow();
     });

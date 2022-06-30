@@ -24,28 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractConstraint from './AbstractConstraint.js';
-import AbstractKeyConstraint from './AbstractKeyConstraint.js';
-import AllowedValuesConstraint from './AllowedValuesConstraint.js';
-import CardinalityConstraint from './CardinalityConstraint.js';
-import ExpectConstraint from './ExpectConstraint.js';
-import IndexConstraint from './IndexConstraint.js';
-import IndexHasConstraint from './IndexHasConstraint.js';
-import MatchesConstraint from './MatchesConstraint.js';
-import UniqueConstraint from './UniqueConstraint.js';
+import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+import { JSONValue, parseStringPropRequired } from './parseUtil.js';
 
-export * from './AllowedValuesConstraint.js';
-export * from './AbstractConstraint.js';
-export * from './AbstractKeyConstraint.js';
-
-export {
-    AbstractConstraint,
-    AbstractKeyConstraint,
-    AllowedValuesConstraint,
-    CardinalityConstraint,
-    ExpectConstraint,
-    IndexConstraint,
-    IndexHasConstraint,
-    MatchesConstraint,
-    UniqueConstraint,
-};
+export default function parseDatatypeAdapter(
+    propName: string,
+    parentName: string,
+    parent: JSONValue,
+): IDatatypeAdapter<unknown> {
+    const datatype = parseStringPropRequired(propName, parentName, parent);
+    return { name: datatype }; // TODO implement?
+}

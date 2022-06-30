@@ -31,17 +31,25 @@ import {
     IKeyField,
     IndexConstraint,
     UniqueConstraint,
+    MatchesConstraint,
+    AllowedValuesConstraint,
+    IAllowedValue,
 } from '@oscal/metaschema-model-common/constraint';
 import { MetapathExpression } from '@oscal/metaschema-model-common/metapath';
 import { Level } from '@oscal/metaschema-model-common/util';
+import parseDatatypeAdapter from './datatype.js';
 import XMLParsingError, {
     JSONObject,
     JSONValue,
+    parseArrayOrObjectProp,
     parseArrayOrObjectPropRequired,
+    parseBooleanPropRequired,
     parseMarkupMultiLine,
     parseNumberProp,
+    parseObjectProp,
     parseStringProp,
     parseStringPropRequired,
+    tryConvertToObject,
 } from './parseUtil.js';
 
 function parseLevel(propName: string, parentName: string, parent: JSONValue): Level {
@@ -99,7 +107,34 @@ function parseKeyFields(propName: string, parentName: string, parent: JSONValue)
     });
 }
 
-export function loadCardinalityConstraint(parsedXml: JSONObject): CardinalityConstraint {
+export function parseConstraints(propName: string, parentName: string, parent: JSONValue) {
+    const constraintsXml = parseObjectProp(propName, parentName, parent) ?? {};
+    return {
+        cardinalityConstraints: (parseArrayOrObjectProp('has-cardinality', propName, constraintsXml) ?? []).map((c) =>
+            loadCardinalityConstraint(tryConvertToObject('has-cardinality', c)),
+        ),
+        expectConstraints: (parseArrayOrObjectProp('expect', propName, constraintsXml) ?? []).map((c) =>
+            loadExpectConstraint(tryConvertToObject('expect', c)),
+        ),
+        indexHasKeyConstraints: (parseArrayOrObjectProp('index-has-key', propName, constraintsXml) ?? []).map((c) =>
+            loadIndexHasKeyConstraint(tryConvertToObject('index-has-key', c)),
+        ),
+        indexConstraints: (parseArrayOrObjectProp('index', propName, constraintsXml) ?? []).map((c) =>
+            loadIndexConstraint(tryConvertToObject('index', c)),
+        ),
+        uniqueConstraints: (parseArrayOrObjectProp('is-unique', propName, constraintsXml) ?? []).map((c) =>
+            loadUniqueConstraint(tryConvertToObject('is-unique', c)),
+        ),
+        matchesConstrants: (parseArrayOrObjectProp('matches', propName, constraintsXml) ?? []).map((c) =>
+            loadMatchesConstraint(tryConvertToObject('matches', c)),
+        ),
+        allowedValuesConstraints: (parseArrayOrObjectProp('allowed-values', propName, constraintsXml) ?? []).map((c) =>
+            loadAllowedValuesConstrant(tryConvertToObject('allowed-values', c)),
+        ),
+    };
+}
+
+function loadCardinalityConstraint(parsedXml: JSONObject): CardinalityConstraint {
     return new CardinalityConstraint(
         parseStringProp('@_id', 'has-cardinality', parsedXml),
         parseLevel('@_level', 'has-cardinality', parsedXml),
@@ -110,7 +145,7 @@ export function loadCardinalityConstraint(parsedXml: JSONObject): CardinalityCon
     );
 }
 
-export function loadExpectsConstraint(parsedXml: JSONObject) {
+function loadExpectConstraint(parsedXml: JSONObject) {
     return new ExpectConstraint(
         parseStringProp('@_id', 'expect', parsedXml),
         parseLevel('@_level', 'expect', parsedXml),
@@ -121,7 +156,7 @@ export function loadExpectsConstraint(parsedXml: JSONObject) {
     );
 }
 
-export function loadIndexHasConstraint(parsedXml: JSONObject) {
+function loadIndexHasKeyConstraint(parsedXml: JSONObject) {
     return new IndexHasConstraint(
         parseStringProp('@_id', 'index-has', parsedXml),
         parseLevel('@_level', 'index-has', parsedXml),
@@ -132,7 +167,7 @@ export function loadIndexHasConstraint(parsedXml: JSONObject) {
     );
 }
 
-export function loadIndexConstraint(parsedXml: JSONObject) {
+function loadIndexConstraint(parsedXml: JSONObject) {
     return new IndexConstraint(
         parseStringProp('@_id', 'index', parsedXml),
         parseLevel('@_level', 'index', parsedXml),
@@ -143,7 +178,7 @@ export function loadIndexConstraint(parsedXml: JSONObject) {
     );
 }
 
-export function loadUniqueConstraint(parsedXml: JSONObject) {
+function loadUniqueConstraint(parsedXml: JSONObject) {
     return new UniqueConstraint(
         parseStringProp('@_id', 'is-unique', parsedXml),
         parseLevel('@_level', 'is-unique', parsedXml),
@@ -153,24 +188,30 @@ export function loadUniqueConstraint(parsedXml: JSONObject) {
     );
 }
 
-// export function loadMatchesConstraint(parsedXml: JSONObject) {
-//     const id = parseStringProp('@_id', 'matches', parsedXml);
-//     const rawLevel = parseStringProp('@_level', 'matches', parsedXml);
-//     const target = parseStringPropRequired('@_target', 'matches', parsedXml);
-//     const rawPattern = parseStringPropRequired('@_pattern', 'matches', parsedXml);
-//     const datatype = parseStringPropRequired('@_datatype', 'matches', parsedXml);
+function loadMatchesConstraint(parsedXml: JSONObject) {
+    return new MatchesConstraint(
+        parseStringProp('@_id', 'matches', parsedXml),
+        parseLevel('@_level', 'matches', parsedXml),
+        parseMarkupMultiLine('remarks', 'matches', parsedXml),
+        parseMetapathRequired('@_target', 'matches', parsedXml),
+        new RegExp(parseStringPropRequired('@_pattern', 'matches', parsedXml)),
+        parseDatatypeAdapter('@_datatype', 'matches', parsedXml),
+    );
+}
 
-//     return new MatchesConstraint(
-//         id,
-//         parseLevel(rawLevel),
-//         undefined,
-//         parseTarget(target),
-//         new RegExp(rawPattern),
-//         undefined,
-//     );
-// }
+function parseAllowedValues(propName: string, parentName: string, parent: JSONValue): Map<string, IAllowedValue> {
+    const allowedValuesMap = new Map();
+    parseArrayOrObjectPropRequired(propName, parentName, parent);
+    return allowedValuesMap;
+}
 
-// export function loadAllowedValues(parsedXml: JSONObject) {
-
-//     return new AllowedValuesConstraint()
-// }
+function loadAllowedValuesConstrant(parsedXml: JSONObject) {
+    return new AllowedValuesConstraint(
+        parseStringProp('@_id', 'allowed-values', parsedXml),
+        parseLevel('@_level', 'allowed-values', parsedXml),
+        parseMarkupMultiLine('remarks', 'allowed-values', parsedXml),
+        parseMetapathRequired('@_target', 'allowed-values', parsedXml),
+        parseAllowedValues('enum', 'allowed-values', parsedXml),
+        parseBooleanPropRequired('@_allow-other', 'allowed-values', parsedXml),
+    );
+}

@@ -71,7 +71,7 @@ export default interface INamedModelDefinition extends INamedDefinition {
      *
      * @returns the list of allowed value constraints
      */
-    getAllowedValuesContraints(): AllowedValuesConstraint;
+    getAllowedValuesContraints(): AllowedValuesConstraint[];
 
     /**
      * Retrieve the list of matches constraints that apply to this definition's value.
@@ -127,7 +127,7 @@ export function namedModelDefineable<TBase extends AbstractConstructor<AbstractN
         abstract hasJsonKey(): boolean;
         abstract getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
-        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getAllowedValuesContraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];
         abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
         abstract getExpectConstraints(): ExpectConstraint[];
