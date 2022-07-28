@@ -24,14 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { parseXml } from './parseUtil.js';
 // import { loadCardinalityConstraint } from './constraints.js';
-import { parseConstraints } from './constraints.js';
+import { parseXml } from '@oscal/data-utils';
+import { processConstraints } from './constraints.js';
 
 describe('parseConstraints()', () => {
     it('should parse empty set of constraints', () => {
-        const xml = parseXml(`<constraint></constraint>`);
-        const constraints = parseConstraints('constraint', '*root*', xml);
+        const constraintXml = parseXml(`<constraint></constraint>`).documentElement;
+        const constraints = processConstraints(constraintXml, { parent: constraintXml });
         Object.values(constraints).forEach((c) => {
             expect(c.length).toBe(0);
         });

@@ -20,6 +20,6 @@
   "scripts": {
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "test": "echo \"TODO\" && exit 0"
+    "test": "jest"
   }
 }

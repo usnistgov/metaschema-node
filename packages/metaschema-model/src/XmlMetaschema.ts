@@ -23,49 +23,55 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import {
     AbstractAssemblyDefinition,
     AbstractFieldDefinition,
     AbstractFlagDefinition,
 } from '@oscal/metaschema-model-common/definition';
-import { ResourceResolver } from './resolver.js';
-import {
-    JSONObject,
-    parseArrayOrObjectProp,
-    parseMarkupLineRequired,
-    parseMarkupMultiLine,
-    parseObjectPropRequired,
-    parseStringPropRequired,
-    parseXml,
-} from './parseUtil.js';
 import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
+import { ResourceResolver } from './resolver.js';
+import { AbstractMetaschema } from '@oscal/metaschema-model-common';
+import {
+    forEachChild,
+    optionalOneChild,
+    parseXml,
+    processNode,
+    requireAttribute,
+    requireOneChild,
+} from '@oscal/data-utils';
+import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    protected parsedMetaschema: JSONObject;
+    protected metaschemaXml: HTMLElement;
+
+    private readonly _name;
 
     get name() {
-        return parseMarkupLineRequired('schema-name', 'METASCHEMA', this.parsedMetaschema);
+        return this._name;
     }
 
+    private readonly _version;
     get version() {
-        return parseStringPropRequired('schema-version', 'METASCHEMA', this.parsedMetaschema);
+        return this._version;
     }
 
+    private readonly _shortName;
     get shortName() {
-        return parseStringPropRequired('short-name', 'METASCHEMA', this.parsedMetaschema);
+        return this._shortName;
     }
 
+    private readonly _xmlNamespace;
     get xmlNamespace() {
-        return parseStringPropRequired('namespace', 'METASCHEMA', this.parsedMetaschema);
+        return this._xmlNamespace;
     }
-
+    private readonly _jsonBaseUri;
     get jsonBaseUri() {
-        return parseStringPropRequired('json-base-uri', 'METASCHEMA', this.parsedMetaschema);
+        return this._jsonBaseUri;
     }
 
+    private readonly _remarks;
     get remarks() {
-        return parseMarkupMultiLine('remarks', 'METASCHEMA', this.parsedMetaschema);
+        return this._remarks;
     }
 
     private _flagDefinitions: Map<string, AbstractFlagDefinition>;
@@ -85,21 +91,41 @@ export default class XmlMetaschema extends AbstractMetaschema {
 
     readonly location;
 
-    constructor(location: string, parsedMetaschema: JSONObject, importedMetaschemas: AbstractMetaschema[]) {
+    constructor(location: string, metaschemaXml: HTMLElement, importedMetaschemas: AbstractMetaschema[]) {
         super(importedMetaschemas);
         this.location = location;
 
-        this.parsedMetaschema = parsedMetaschema;
+        this.metaschemaXml = metaschemaXml;
 
-        this._flagDefinitions = new Map();
-        (parseArrayOrObjectProp('define-flag', 'METASCHEMA', this.parsedMetaschema) ?? []).forEach((parsedFlag) => {
-            if (!(parsedFlag && typeof parsedFlag === 'object' && !Array.isArray(parsedFlag))) {
-                throw new Error('define-flag array item is not of object type');
-            }
-            const flag = new XmlGlobalFlagDefinition(parsedFlag, this);
-            this._flagDefinitions.set(flag.getName(), flag);
-        });
+        const parsed = processNode(
+            metaschemaXml,
+            {},
+            {
+                'schema-name': requireOneChild(processMarkupLine),
+                'schema-version': requireOneChild((child) => processNode(child, {}, {}).body),
+                'short-name': requireOneChild((child) => processNode(child, {}, {}).body),
+                namespace: requireOneChild((child) => processNode(child, {}, {}).body),
+                'json-base-uri': requireOneChild((child) => processNode(child, {}, {}).body),
+                remarks: optionalOneChild(processMarkupMultiLine),
+                'define-flag': (children, _) => {
+                    const definitions = new Map();
+                    children.forEach((child) => {
+                        const definition: XmlGlobalFlagDefinition = new XmlGlobalFlagDefinition(child, this);
+                        definitions.set(definition.getName(), definition);
+                    });
+                    return definitions;
+                },
+            },
+        );
 
+        this._name = parsed.children['schema-name'];
+        this._version = parsed.children['schema-version'];
+        this._shortName = parsed.children['short-name'];
+        this._xmlNamespace = parsed.children.namespace;
+        this._jsonBaseUri = parsed.children['json-base-uri'];
+        this._remarks = parsed.children.remarks;
+
+        this._flagDefinitions = parsed.children['define-flag'];
         this._fieldDefinitions = new Map();
         this._assemblyDefinitions = new Map();
     }
@@ -143,10 +169,11 @@ export default class XmlMetaschema extends AbstractMetaschema {
         seen.add(location);
 
         const raw = await resolver(location);
-        const parsedXml = parseXml(raw);
-        const parsedXmlMetaschema = parseObjectPropRequired('METASCHEMA', '*root*', parsedXml);
+        const rootXml = parseXml(raw);
+        const metaschemaXml = rootXml.documentElement;
+
         // get all imports, and recursively import metaschemas for those imports
-        const importLocs = this.parseImports(parsedXmlMetaschema);
+        const importLocs = this.parseImports(metaschemaXml);
         const imports = [];
         for (const importLoc of importLocs) {
             const imported = await this.load(importLoc, resolver, loaded, seen);
@@ -155,23 +182,21 @@ export default class XmlMetaschema extends AbstractMetaschema {
             imports.push(imported);
         }
 
-        return new this(location, parsedXmlMetaschema, imports);
+        return new this(location, metaschemaXml, imports);
     }
 
     /**
      * Given a parsed METASCHEMA XML tag, get all required imports.
-     * @param parsedXmlMetaschema The parsed METASHEMA XML tag parsed into JSON
+     * @param metaschemaXml The parsed METASCHEMA XML tag parsed into JSON
      * @returns A list of relative or absolute import URIs that must be provided to a given metaschema
      */
-    private static parseImports(parsedXmlMetaschema: JSONObject): string[] {
-        if (!('import' in parsedXmlMetaschema)) {
-            // no import objects
-            return [];
-        }
-
-        // fastXML returns an object if only one import is returned
-        return (parseArrayOrObjectProp('import', 'METASCHEMA', parsedXmlMetaschema) ?? []).map((parsedXmlImport) =>
-            parseStringPropRequired('@_href', 'import', parsedXmlImport),
-        );
+    private static parseImports(metaschemaXml: HTMLElement): string[] {
+        return processNode(
+            metaschemaXml,
+            {},
+            {
+                import: forEachChild((child) => processNode(child, { href: requireAttribute((attr) => attr) }, {})),
+            },
+        ).children.import.map((importElem) => importElem.attributes.href);
     }
 }

@@ -37,29 +37,28 @@ import {
 } from '@oscal/metaschema-model-common/constraint';
 import { MetapathExpression } from '@oscal/metaschema-model-common/metapath';
 import { Level } from '@oscal/metaschema-model-common/util';
-import parseDatatypeAdapter from './datatype.js';
-import XMLParsingError, {
-    JSONObject,
-    JSONValue,
-    parseArrayOrObjectProp,
-    parseArrayOrObjectPropRequired,
-    parseBooleanPropRequired,
-    parseMarkupMultiLine,
-    parseNumberProp,
-    parseObjectProp,
-    parseStringProp,
-    parseStringPropRequired,
-    tryConvertToObject,
-} from './parseUtil.js';
+import {
+    AttributeProcessor,
+    ChildProcessor,
+    DefiniteAttributeProcessor,
+    forEachChild,
+    optionalOneChild,
+    processNode,
+    requireAttribute,
+    requireOneChild,
+    undefineableAttribute,
+    XmlProcessingError,
+} from '@oscal/data-utils';
+import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
+import { processDatatypeAdapter } from './datatype.js';
 
-function parseLevel(propName: string, parentName: string, parent: JSONValue): Level {
-    const raw = parseStringProp(propName, parentName, parent);
-    if (raw === undefined) {
+const processLevel: AttributeProcessor<Level> = (attribute, context) => {
+    if (attribute === null) {
         return Level.ERROR;
     }
 
     let level: Level;
-    switch (raw) {
+    switch (attribute) {
         case 'INFORMATIONAL':
             level = Level.INFORMATIONAL;
             break;
@@ -73,145 +72,233 @@ function parseLevel(propName: string, parentName: string, parent: JSONValue): Le
             level = Level.CRITICAL;
             break;
         default:
-            throw new XMLParsingError(`Unknown level ${raw} in parent ${parentName}`);
+            throw XmlProcessingError.withContext(context, `Invalid level "${attribute}"`);
     }
 
     return level;
-}
+};
 
-function parseMetapath(propName: string, parentName: string, parent: JSONValue): MetapathExpression | undefined {
-    const raw = parseStringProp(propName, parentName, parent);
-    if (raw === undefined) {
-        return undefined;
-    }
-    return new MetapathExpression(raw);
-}
+const processMetapath: DefiniteAttributeProcessor<MetapathExpression> = (attribute, _context) => {
+    return new MetapathExpression(attribute);
+};
 
-function parseMetapathRequired(propName: string, parentName: string, parent: JSONValue): MetapathExpression {
-    const value = parseMetapath(propName, parentName, parent);
-    if (value === undefined) {
-        throw XMLParsingError.undefined(propName, parentName);
-    }
-    return value;
-}
+type ConstraintsOutput = {
+    cardinalityConstraints: CardinalityConstraint[];
+    expectConstraints: ExpectConstraint[];
+    indexConstraints: IndexConstraint[];
+    indexHasConstraints: IndexHasConstraint[];
+    uniqueConstraints: UniqueConstraint[];
+    matchesConstraints: MatchesConstraint[];
+    allowedValuesConstraints: AllowedValuesConstraint[];
+};
 
-function parseKeyFields(propName: string, parentName: string, parent: JSONValue): IKeyField[] {
-    const raw = parseArrayOrObjectPropRequired(propName, parentName, parent);
-    return raw.map((parsedKeyField) => {
-        const rawPattern = parseStringProp('@_pattern', 'key-field', parsedKeyField);
-        return {
-            pattern: rawPattern ? new RegExp(rawPattern) : undefined,
-            remarks: parseMarkupMultiLine('remarks', 'expect', parsedKeyField),
-            target: parseStringPropRequired('@_target', 'expect', parsedKeyField),
-        };
-    });
-}
-
-export function parseConstraints(propName: string, parentName: string, parent: JSONValue) {
-    const constraintsXml = parseObjectProp(propName, parentName, parent) ?? {};
+export const processConstraints: ChildProcessor<ConstraintsOutput> = (child, _context) => {
+    const processed = processNode(
+        child,
+        {},
+        {
+            'has-cardinality': forEachChild(processCardinalityConstraint),
+            expect: forEachChild(processExpectConstraint),
+            'index-has-key': forEachChild(processIndexHasConstraint),
+            index: forEachChild(processIndexConstraint),
+            'is-unique': forEachChild(processUniqueConstraint),
+            matches: forEachChild(processMatchesConstraint),
+            'allowed-values': forEachChild(processAllowedValuesConstraint),
+        },
+    );
     return {
-        cardinalityConstraints: (parseArrayOrObjectProp('has-cardinality', propName, constraintsXml) ?? []).map((c) =>
-            loadCardinalityConstraint(tryConvertToObject('has-cardinality', c)),
-        ),
-        expectConstraints: (parseArrayOrObjectProp('expect', propName, constraintsXml) ?? []).map((c) =>
-            loadExpectConstraint(tryConvertToObject('expect', c)),
-        ),
-        indexHasKeyConstraints: (parseArrayOrObjectProp('index-has-key', propName, constraintsXml) ?? []).map((c) =>
-            loadIndexHasKeyConstraint(tryConvertToObject('index-has-key', c)),
-        ),
-        indexConstraints: (parseArrayOrObjectProp('index', propName, constraintsXml) ?? []).map((c) =>
-            loadIndexConstraint(tryConvertToObject('index', c)),
-        ),
-        uniqueConstraints: (parseArrayOrObjectProp('is-unique', propName, constraintsXml) ?? []).map((c) =>
-            loadUniqueConstraint(tryConvertToObject('is-unique', c)),
-        ),
-        matchesConstrants: (parseArrayOrObjectProp('matches', propName, constraintsXml) ?? []).map((c) =>
-            loadMatchesConstraint(tryConvertToObject('matches', c)),
-        ),
-        allowedValuesConstraints: (parseArrayOrObjectProp('allowed-values', propName, constraintsXml) ?? []).map((c) =>
-            loadAllowedValuesConstrant(tryConvertToObject('allowed-values', c)),
-        ),
+        cardinalityConstraints: processed.children['has-cardinality'],
+        expectConstraints: processed.children.expect,
+        indexHasConstraints: processed.children['index-has-key'],
+        indexConstraints: processed.children.index,
+        uniqueConstraints: processed.children['is-unique'],
+        matchesConstraints: processed.children.matches,
+        allowedValuesConstraints: processed.children['allowed-values'],
     };
-}
+};
 
-function loadCardinalityConstraint(parsedXml: JSONObject): CardinalityConstraint {
+const processNumberAttribute: DefiniteAttributeProcessor<number> = (attribute, context) => {
+    const number = +attribute;
+    if (Number.isNaN(number)) {
+        throw XmlProcessingError.withContext(context, `Could not convert "${attribute}" to a numeric value`);
+    }
+    return number;
+};
+
+const CONSTRAINT_COMMON_ATTRS = {
+    id: undefineableAttribute((attr) => attr),
+    level: processLevel,
+    target: requireAttribute(processMetapath),
+};
+
+const CONSTRAINT_COMMON_CHILDREN = {
+    remarks: optionalOneChild(processMarkupMultiLine),
+};
+
+const processCardinalityConstraint: ChildProcessor<CardinalityConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        {
+            ...CONSTRAINT_COMMON_ATTRS,
+            'min-occurs': undefineableAttribute(processNumberAttribute),
+            'max-occurs': undefineableAttribute(processNumberAttribute),
+        },
+        CONSTRAINT_COMMON_CHILDREN,
+    );
     return new CardinalityConstraint(
-        parseStringProp('@_id', 'has-cardinality', parsedXml),
-        parseLevel('@_level', 'has-cardinality', parsedXml),
-        parseMarkupMultiLine('remarks', 'has-cardinality', parsedXml),
-        parseMetapathRequired('@_target', 'has-cardinality', parsedXml),
-        parseNumberProp('@_min-occurs', 'has-cardinality', parsedXml),
-        parseNumberProp('@_max-occurs', 'has-cardinality', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.attributes['min-occurs'],
+        processed.attributes['max-occurs'],
     );
-}
+};
 
-function loadExpectConstraint(parsedXml: JSONObject) {
+const processExpectConstraint: ChildProcessor<ExpectConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        { ...CONSTRAINT_COMMON_ATTRS, test: requireAttribute(processMetapath) },
+        { ...CONSTRAINT_COMMON_CHILDREN, message: requireOneChild((child) => processNode(child, {}, {}).body) },
+    );
     return new ExpectConstraint(
-        parseStringProp('@_id', 'expect', parsedXml),
-        parseLevel('@_level', 'expect', parsedXml),
-        parseMarkupMultiLine('remarks', 'expect', parsedXml),
-        parseMetapathRequired('@_target', 'expect', parsedXml),
-        parseMetapathRequired('@_test', 'expect', parsedXml),
-        parseStringPropRequired('message', 'expect', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.attributes.test,
+        processed.children.message,
     );
-}
+};
 
-function loadIndexHasKeyConstraint(parsedXml: JSONObject) {
+const processKeyFields: ChildProcessor<IKeyField> = (child, _context) => {
+    const processed = processNode(
+        child,
+        {
+            pattern: undefineableAttribute((attribute) => new RegExp(attribute)),
+            target: requireAttribute(processMetapath),
+        },
+        CONSTRAINT_COMMON_CHILDREN,
+    );
+    return {
+        pattern: processed.attributes.pattern,
+        remarks: processed.children.remarks,
+        target: processed.attributes.target,
+    };
+};
+
+const processIndexHasConstraint: ChildProcessor<IndexHasConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
+        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+    );
     return new IndexHasConstraint(
-        parseStringProp('@_id', 'index-has', parsedXml),
-        parseLevel('@_level', 'index-has', parsedXml),
-        parseMarkupMultiLine('remarks', 'index-has', parsedXml),
-        parseMetapathRequired('@_target', 'index-has', parsedXml),
-        parseKeyFields('key-fields', 'index-has', parsedXml),
-        parseStringPropRequired('@_name', 'index-has', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.children['key-fields'],
+        processed.attributes.name,
     );
-}
+};
 
-function loadIndexConstraint(parsedXml: JSONObject) {
+const processIndexConstraint: ChildProcessor<IndexConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
+        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+    );
     return new IndexConstraint(
-        parseStringProp('@_id', 'index', parsedXml),
-        parseLevel('@_level', 'index', parsedXml),
-        parseMarkupMultiLine('remarks', 'index', parsedXml),
-        parseMetapathRequired('@_target', 'index', parsedXml),
-        parseKeyFields('key-fields', 'index', parsedXml),
-        parseStringPropRequired('@_name', 'index', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.children['key-fields'],
+        processed.attributes.name,
     );
-}
+};
 
-function loadUniqueConstraint(parsedXml: JSONObject) {
+const processUniqueConstraint: ChildProcessor<UniqueConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        { ...CONSTRAINT_COMMON_ATTRS },
+        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+    );
     return new UniqueConstraint(
-        parseStringProp('@_id', 'is-unique', parsedXml),
-        parseLevel('@_level', 'is-unique', parsedXml),
-        parseMarkupMultiLine('remarks', 'is-unique', parsedXml),
-        parseMetapathRequired('@_target', 'is-unique', parsedXml),
-        parseKeyFields('key-fields', 'is-unique', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.children['key-fields'],
     );
-}
+};
 
-function loadMatchesConstraint(parsedXml: JSONObject) {
+const processMatchesConstraint: ChildProcessor<MatchesConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        {
+            ...CONSTRAINT_COMMON_ATTRS,
+            pattern: requireAttribute((attribute) => new RegExp(attribute)),
+            datatype: requireAttribute(processDatatypeAdapter),
+        },
+        { ...CONSTRAINT_COMMON_CHILDREN },
+    );
     return new MatchesConstraint(
-        parseStringProp('@_id', 'matches', parsedXml),
-        parseLevel('@_level', 'matches', parsedXml),
-        parseMarkupMultiLine('remarks', 'matches', parsedXml),
-        parseMetapathRequired('@_target', 'matches', parsedXml),
-        new RegExp(parseStringPropRequired('@_pattern', 'matches', parsedXml)),
-        parseDatatypeAdapter('@_datatype', 'matches', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.attributes.pattern,
+        processed.attributes.datatype,
     );
-}
+};
 
-function parseAllowedValues(propName: string, parentName: string, parent: JSONValue): Map<string, IAllowedValue> {
-    const allowedValuesMap = new Map();
-    parseArrayOrObjectPropRequired(propName, parentName, parent);
-    return allowedValuesMap;
-}
+const processBoolean: DefiniteAttributeProcessor<boolean> = (attribute, context) => {
+    if (attribute === 'true') {
+        return true;
+    } else if (attribute === 'false') {
+        return false;
+    } else {
+        throw XmlProcessingError.withContext(context, `Expected boolean, got ${attribute}`);
+    }
+};
 
-function loadAllowedValuesConstrant(parsedXml: JSONObject) {
+const processAllowedValuesConstraint: ChildProcessor<AllowedValuesConstraint> = (child, _context) => {
+    const processed = processNode(
+        child,
+        {
+            ...CONSTRAINT_COMMON_ATTRS,
+            'allow-other': requireAttribute(processBoolean),
+        },
+        {
+            ...CONSTRAINT_COMMON_CHILDREN,
+            enum: (children, context) => {
+                const allowedValuesMap = new Map<string, IAllowedValue>();
+                children.forEach((child) => {
+                    const processed = processNode(
+                        child,
+                        {
+                            value: requireAttribute((attr) => attr),
+                        },
+                        {},
+                    );
+                    const description = processMarkupLine(child, context);
+                    allowedValuesMap.set(processed.attributes.value, {
+                        value: processed.attributes.value,
+                        description: description,
+                    });
+                });
+                return allowedValuesMap;
+            },
+        },
+    );
     return new AllowedValuesConstraint(
-        parseStringProp('@_id', 'allowed-values', parsedXml),
-        parseLevel('@_level', 'allowed-values', parsedXml),
-        parseMarkupMultiLine('remarks', 'allowed-values', parsedXml),
-        parseMetapathRequired('@_target', 'allowed-values', parsedXml),
-        parseAllowedValues('enum', 'allowed-values', parsedXml),
-        parseBooleanPropRequired('@_allow-other', 'allowed-values', parsedXml),
+        processed.attributes.id,
+        processed.attributes.level,
+        processed.children.remarks,
+        processed.attributes.target,
+        processed.children.enum,
+        processed.attributes['allow-other'],
     );
-}
+};

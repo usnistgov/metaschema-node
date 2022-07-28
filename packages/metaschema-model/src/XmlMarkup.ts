@@ -24,10 +24,17 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+import { MarkupLine, MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
+import { Context, processNode } from '@oscal/data-utils';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
-    // TODO: implement
-    return { name: child };
-};
+// This is a PLACEHOLDER for any real functionality
+
+export function processMarkupLine(child: HTMLElement, _context: Context) {
+    // TODO this is very wrong
+    return new MarkupLine(processNode(child, {}, {}).body);
+}
+
+export function processMarkupMultiLine() {
+    // TODO this is even more wrong
+    return new MarkupMultiLine();
+}

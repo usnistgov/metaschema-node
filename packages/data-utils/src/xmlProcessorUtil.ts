@@ -34,9 +34,19 @@ export class XmlProcessingError extends Error {
         super(msg);
         Object.setPrototypeOf(this, XmlProcessingError.prototype);
     }
+
+    /**
+     * Attach the XML processing context to the error message
+     * @param context The context to add to the error
+     * @param msg The error message
+     */
+    static withContext(context: Context, msg: string) {
+        // TODO: add context string to error message
+        return new XmlProcessingError(msg);
+    }
 }
 
-type Context = {
+export type Context = {
     parent: HTMLElement;
 };
 
@@ -44,11 +54,43 @@ type AttributeValue = ReturnType<HTMLElement['getAttributeNS']>;
 
 type Processor<InputT, ReturnT> = (input: InputT, context: Context) => ReturnT;
 export type AttributeProcessor<T> = Processor<AttributeValue, T>;
+export type DefiniteAttributeProcessor<T> = Processor<NonNullable<AttributeValue>, T>;
 export type ChildListProcessor<T> = Processor<HTMLElement[], T>;
+export type ChildProcessor<T> = Processor<HTMLElement, T>;
 
 /**
  * Canned utility XML processors
  */
+
+/**
+ * Throw an error if the attribute does not exist
+ * @param definiteAttributeProcessor The processor to wrap
+ * @returns The wrapped attribute processor
+ */
+export function requireAttribute<T>(definiteAttributeProcessor: DefiniteAttributeProcessor<T>): AttributeProcessor<T> {
+    return (attribute, context) => {
+        if (attribute === null) {
+            throw XmlProcessingError.withContext(context, 'A required attribute was not provided');
+        }
+        return definiteAttributeProcessor(attribute, context);
+    };
+}
+
+/**
+ * Return undefined if the attribute does not exist
+ * @param definiteAttributeProcessor The processor to wrap
+ * @returns The wrapped attribute processor
+ */
+export function undefineableAttribute<T>(
+    definiteAttributeProcessor: DefiniteAttributeProcessor<T>,
+): AttributeProcessor<T | undefined> {
+    return (attribute, context) => {
+        if (attribute === null) {
+            return undefined;
+        }
+        return definiteAttributeProcessor(attribute, context);
+    };
+}
 
 /**
  * Apply a transformation to each child and return a list
@@ -59,17 +101,25 @@ export function forEachChild<T>(childProcessor: Processor<HTMLElement, T>): Chil
     return (children, context) => children.map((child) => childProcessor(child, context));
 }
 
-// /**
-//  * An identity function; returns the input value, can be applied to a Child, Child list, or Attribute
-//  */
-// export const identity = <T>(input: T): T => input;
-
-export function requireAttribute<T>(f: Processor<NonNullable<AttributeValue>, T>): AttributeProcessor<T> {
-    return (attribute, context) => {
-        if (attribute === null) {
-            // TODO: better error message
-            throw new XmlProcessingError('Attribute not available');
+export function optionalOneChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T | undefined> {
+    return (children, context) => {
+        if (children.length === 0) {
+            return undefined;
         }
-        return f(attribute, context);
+
+        if (children.length > 1) {
+            throw XmlProcessingError.withContext(context, `Expected 1 or no children but received ${children.length}`);
+        }
+
+        return childProcessor(children[0], context);
+    };
+}
+
+export function requireOneChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T> {
+    return (children, context) => {
+        if (children.length != 1) {
+            throw XmlProcessingError.withContext(context, `Expected exactly 1 child but received ${children.length}`);
+        }
+        return childProcessor(children[0], context);
     };
 }

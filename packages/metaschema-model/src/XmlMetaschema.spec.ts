@@ -24,8 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import { parseXml } from '@oscal/data-utils';
 import { ResourceResolver } from './resolver.js';
-import { parseObjectPropRequired, parseXml } from './parseUtil.js';
 import XmlMetaschema from './XmlMetaschema.js';
 
 function mockResolverBuilder(locations: Record<string, string>): ResourceResolver {
@@ -36,7 +36,7 @@ function mockResolverBuilder(locations: Record<string, string>): ResourceResolve
 
 describe('XmlMetaschema.load()', () => {
     it('should load the most basic Metaschema', async () => {
-        const location = 'file://notreal.xml';
+        const location = 'file://not-real.xml';
         const schemaName = 'Test Metaschema';
         const schemaVersion = '1.0';
         const shortName = 'test-model';
@@ -194,9 +194,8 @@ describe('XmlMetaschema.parseImports()', () => {
         },
     ].map(({ name, raw, expects }) =>
         it(name, () => {
-            const parsedXml = parseXml(raw);
-            const parsedXmlMetaschema = parseObjectPropRequired('METASCHEMA', '*root*', parsedXml);
-            const imports = XmlMetaschema['parseImports'](parsedXmlMetaschema);
+            const document = parseXml(raw);
+            const imports = XmlMetaschema['parseImports'](document.documentElement);
             expect(imports).toStrictEqual(expects);
         }),
     );

@@ -24,6 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import { optionalOneChild, processNode, requireAttribute, XmlProcessingError } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import {
     AllowedValuesConstraint,
@@ -34,51 +35,48 @@ import {
 import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 import { AbstractFlagDefinition } from '@oscal/metaschema-model-common/definition';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import { parseConstraints } from './constraints.js';
-import parseDatatypeAdapter from './datatype.js';
-import XMLParsingError, {
-    JSONObject,
-    parseMarkupLine,
-    parseMarkupMultiLine,
-    parseStringProp,
-    parseStringPropRequired,
-} from './parseUtil.js';
+import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
 
 export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
     private readonly metaschema;
-    private readonly parsedFlag;
+    private readonly flagDefinitionXml;
 
     private readonly allowedValuesConstraints: AllowedValuesConstraint[];
     private readonly matchesConstraints: MatchesConstraint[];
     private readonly indexHasKeyConstraints: IndexHasConstraint[];
     private readonly expectConstraints: ExpectConstraint[];
 
+    private readonly name;
     getName() {
-        return parseStringPropRequired('@_name', 'define-flag', this.parsedFlag);
+        return this.name;
     }
 
+    private readonly useName;
     getUseName() {
-        return parseStringProp('use-name', 'define-flag', this.parsedFlag) ?? this.getName();
+        return this.useName ?? this.getName();
     }
 
+    private readonly formalName;
     getFormalName() {
-        return parseStringProp('formal-name', 'define-flag', this.parsedFlag);
+        return this.formalName;
     }
 
+    private readonly description;
     getDescription() {
-        return parseMarkupLine('description', 'define-flag', this.parsedFlag);
+        return this.description;
     }
 
+    private readonly remarks;
     getRemarks() {
-        return parseMarkupMultiLine('remarks', 'define-flag', this.parsedFlag);
+        return this.remarks;
     }
 
     getDatatypeAdapter(): IDatatypeAdapter<never> {
         // TODO provide default if not exist
-        return parseDatatypeAdapter('@_as-type', 'define-flag', this.parsedFlag);
+        throw new Error('Method not implemented');
     }
 
-    getAllowedValuesContraints(): AllowedValuesConstraint[] {
+    getAllowedValuesConstraints(): AllowedValuesConstraint[] {
         return this.allowedValuesConstraints;
     }
 
@@ -94,14 +92,9 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return this.expectConstraints;
     }
 
+    private readonly moduleScope;
     getModuleScope() {
-        const scope = parseStringProp('@_scope', 'define-flag', this.parsedFlag);
-        if (scope === 'local') {
-            return ModuleScope.LOCAL;
-        } else if (scope === 'inherited' || scope === undefined) {
-            return ModuleScope.INHERITED;
-        }
-        throw new Error(`Unknown module scope ${scope}`);
+        return this.moduleScope;
     }
 
     getContainingMetaschema() {
@@ -116,26 +109,43 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return false;
     }
 
-    constructor(parsedXmlFlagDefinition: JSONObject, metaschema: AbstractMetaschema) {
+    constructor(flagDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.parsedFlag = parsedXmlFlagDefinition;
+        this.flagDefinitionXml = flagDefinitionXml;
 
-        const {
-            indexHasKeyConstraints,
-            expectConstraints,
-            matchesConstrants,
-            allowedValuesConstraints,
-            ...extraneousConstraints
-        } = parseConstraints('constraint', 'define-flag', this.parsedFlag);
-        this.indexHasKeyConstraints = indexHasKeyConstraints;
-        this.expectConstraints = expectConstraints;
-        this.matchesConstraints = matchesConstrants;
-        this.allowedValuesConstraints = allowedValuesConstraints;
-        Object.values(extraneousConstraints).map((c) => {
-            if (c.length > 0) {
-                throw new XMLParsingError(`define-flag has extraneous constraint ${c}`);
-            }
-        });
+        const parsed = processNode(
+            flagDefinitionXml,
+            {
+                name: requireAttribute((attr) => attr),
+                scope: (scope, context) => {
+                    if (scope === 'local') {
+                        return ModuleScope.LOCAL;
+                    } else if (scope === 'inherited' || scope === undefined) {
+                        return ModuleScope.INHERITED;
+                    }
+                    throw XmlProcessingError.withContext(context, `Unknown module scope ${scope}`);
+                },
+            },
+            {
+                'use-name': optionalOneChild((child) => processNode(child, {}, {}).body),
+                'formal-name': optionalOneChild((child) => processNode(child, {}, {}).body),
+                description: optionalOneChild(processMarkupLine),
+                remarks: optionalOneChild(processMarkupMultiLine),
+            },
+        );
+
+        this.name = parsed.attributes.name;
+        this.moduleScope = parsed.attributes.scope;
+
+        this.useName = parsed.children['use-name'];
+        this.formalName = parsed.children['formal-name'];
+        this.description = parsed.children.description;
+        this.remarks = parsed.children.remarks;
+
+        this.allowedValuesConstraints = [];
+        this.matchesConstraints = [];
+        this.indexHasKeyConstraints = [];
+        this.expectConstraints = [];
     }
 }

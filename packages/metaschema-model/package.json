@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
-        "test": "jest --config ../../jest.config.ts"
+        "test": "jest"
     },
     "exports": {
         "./lib": null,
@@ -23,8 +23,7 @@
     "type": "module",
     "license": "NIST-PD-fallback",
     "dependencies": {
-        "@oscal/metaschema-model-common": "^0.0.0",
-        "fast-xml-parser": "^4.0.8"
-    },
-    "devDependencies": {}
+        "@oscal/data-utils": "^0.0.0",
+        "@oscal/metaschema-model-common": "^0.0.0"
+    }
 }

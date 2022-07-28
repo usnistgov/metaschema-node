@@ -24,6 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import { optionalOneChild, processNode, requireAttribute } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import {
     AllowedValuesConstraint,
@@ -38,37 +39,35 @@ import { MarkupLine, IDatatypeAdapter } from '@oscal/metaschema-model-common/dat
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
 import { AbstractFlagInstance, INamedInstance } from '@oscal/metaschema-model-common/instance';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import parseDatatypeAdapter from './datatype.js';
-import {
-    JSONObject,
-    parseMarkupLine,
-    parseMarkupMultiLine,
-    parseStringProp,
-    parseStringPropRequired,
-} from './parseUtil.js';
+import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     private readonly metaschema;
-    private readonly parsedField;
+    private readonly fieldDefinitionXml;
 
+    private readonly name;
     getName() {
-        return parseStringPropRequired('@_name', 'define-field', this.parsedField);
+        return this.name;
     }
 
+    private readonly useName;
     getUseName(): string {
-        return parseStringProp('use-name', 'define-field', this.parsedField) ?? this.getName();
+        return this.useName ?? this.getName();
     }
 
+    private readonly formalName;
     getFormalName(): string | undefined {
-        return parseStringProp('formal-name', 'define-field', this.parsedField);
+        return this.formalName;
     }
 
+    private readonly description;
     getDescription(): MarkupLine | undefined {
-        return parseMarkupLine('description', 'define-field', this.parsedField);
+        return this.description;
     }
 
+    private readonly remarks;
     getRemarks() {
-        return parseMarkupMultiLine('remarks', 'define-field', this.parsedField);
+        return this.remarks;
     }
 
     getJsonValueKeyFlagInstance(): AbstractFlagInstance | undefined {
@@ -101,14 +100,15 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
 
     getDatatypeAdapter(): IDatatypeAdapter<never> {
         // TODO provide default if not exist
-        return parseDatatypeAdapter('@_as-type', 'define-field', this.parsedField);
+        // return parseDatatypeAdapter('@_as-type', 'define-field', this.fieldDefinitionXml);
+        throw new Error('Method not implemented');
     }
 
     getFlagInstances(): Map<string, AbstractFlagInstance> {
         throw new Error('Method not implemented.');
     }
 
-    getAllowedValuesContraints(): AllowedValuesConstraint[] {
+    getAllowedValuesConstraints(): AllowedValuesConstraint[] {
         throw new Error('Method not implemented.');
     }
 
@@ -144,9 +144,30 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         throw new Error('Method not implemented.');
     }
 
-    constructor(parsedXmlFieldDefinition: JSONObject, metaschema: AbstractMetaschema) {
+    constructor(parsedXmlFieldDefinition: HTMLElement, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.parsedField = parsedXmlFieldDefinition;
+        this.fieldDefinitionXml = parsedXmlFieldDefinition;
+
+        const parsed = processNode(
+            this.fieldDefinitionXml,
+            {
+                name: requireAttribute((attr) => attr),
+            },
+            {
+                'use-name': optionalOneChild((child) => processNode(child, {}, {}).body),
+                'formal-name': optionalOneChild((child) => processNode(child, {}, {}).body),
+                description: optionalOneChild(processMarkupLine),
+                remarks: optionalOneChild(processMarkupMultiLine),
+            },
+        );
+
+        this.name = parsed.attributes.name;
+        // this.moduleScope = parsed.attributes.scope;
+
+        this.useName = parsed.children['use-name'];
+        this.formalName = parsed.children['formal-name'];
+        this.description = parsed.children.description;
+        this.remarks = parsed.children.remarks;
     }
 }
