@@ -24,17 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { MarkupLine, MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
-import { Context, processNode } from '@oscal/data-utils';
+import { AttributeProcessor, XmlProcessingError } from '@oscal/data-utils';
+import { ModuleScope } from '@oscal/metaschema-model-common/util';
 
-// This is a PLACEHOLDER for any real functionality
-
-export function processMarkupLine(child: HTMLElement, _context: Context) {
-    // TODO this is very wrong
-    return new MarkupLine(processNode(child, {}, {}).body);
-}
-
-export function processMarkupMultiLine() {
-    // TODO this is even more wrong
-    return new MarkupMultiLine();
-}
+export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute, context) => {
+    if (attribute === 'local') {
+        return ModuleScope.LOCAL;
+    } else if (attribute === 'inherited' || attribute === undefined) {
+        return ModuleScope.INHERITED;
+    }
+    throw XmlProcessingError.withContext(context, `Unknown module scope ${attribute}`);
+};

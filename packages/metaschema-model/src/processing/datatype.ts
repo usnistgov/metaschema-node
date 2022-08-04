@@ -24,10 +24,10 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
+import { AttributeProcessor } from '@oscal/data-utils';
 import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
+export const processDatatypeAdapter: AttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
     // TODO: implement
-    return { name: child };
+    return { name: child ?? '' };
 };

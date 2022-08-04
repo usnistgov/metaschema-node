@@ -26,12 +26,21 @@
 
 import { processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { AbstractFlagDefinition } from '@oscal/metaschema-model-common/definition';
-import { NAMED_VALUED_DEFINITION } from './processing/model.js';
+import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
+import {
+    INamedModelInstance,
+    AbstractFieldInstance,
+    AbstractChoiceInstance,
+    IModelInstance,
+    AbstractFlagInstance,
+    INamedInstance,
+    AbstractAssemblyInstance,
+} from '@oscal/metaschema-model-common/instance';
+import { NAMED_DEFINITION } from './processing/model.js';
 
-export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
+export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinition {
     private readonly metaschema;
-    protected readonly flagDefinitionXml;
+    protected readonly assemblyDefinitionXml;
 
     private readonly name;
     getName() {
@@ -58,11 +67,6 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return this.remarks;
     }
 
-    private readonly datatype;
-    getDatatypeAdapter() {
-        return this.datatype;
-    }
-
     private readonly allowedValuesConstraints;
     getAllowedValuesConstraints() {
         return this.allowedValuesConstraints;
@@ -83,13 +87,62 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return this.expectConstraints;
     }
 
+    private readonly indexConstraints;
+    getIndexConstraints() {
+        return this.indexConstraints;
+    }
+
+    private readonly uniqueConstraints;
+    getUniqueConstraints() {
+        return this.uniqueConstraints;
+    }
+
+    private readonly cardinalityConstraints;
+    getCardinalityConstraints() {
+        return this.cardinalityConstraints;
+    }
+
     getConstraints() {
         return [
             ...this.getAllowedValuesConstraints(),
             ...this.getMatchesConstraints(),
             ...this.getIndexHasKeyConstraints(),
             ...this.getExpectConstraints(),
+            ...this.getIndexConstraints(),
+            ...this.getUniqueConstraints(),
+            ...this.getCardinalityConstraints(),
         ];
+    }
+
+    getNamedModelInstances(): Map<string, INamedModelInstance> {
+        throw new Error('Method not implemented.');
+    }
+    getFieldInstances(): Map<string, AbstractFieldInstance> {
+        throw new Error('Method not implemented.');
+    }
+    getChoiceInstances(): AbstractChoiceInstance {
+        throw new Error('Method not implemented.');
+    }
+    getModelInstances(): IModelInstance {
+        throw new Error('Method not implemented.');
+    }
+    getFlagInstances(): Map<string, AbstractFlagInstance> {
+        throw new Error('Method not implemented.');
+    }
+    getAssemblyInstances(): Map<string, AbstractAssemblyInstance> {
+        throw new Error('Method not implemented');
+    }
+    getJsonKeyFlagInstance(): AbstractFlagInstance | undefined {
+        throw new Error('Method not implemented.');
+    }
+    hasJsonKey(): boolean {
+        throw new Error('Method not implemented.');
+    }
+    isInline(): boolean {
+        return false;
+    }
+    getInlineInstance(): INamedInstance | undefined {
+        return undefined;
     }
 
     private readonly moduleScope;
@@ -97,36 +150,27 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return this.moduleScope;
     }
 
-    getContainingMetaschema() {
+    getContainingMetaschema(): AbstractMetaschema {
         return this.metaschema;
     }
 
-    getInlineInstance() {
-        return undefined;
-    }
-
-    isInline() {
-        return false;
-    }
-
-    constructor(flagDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(assemblyDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.flagDefinitionXml = flagDefinitionXml;
+        this.assemblyDefinitionXml = assemblyDefinitionXml;
 
         const parsed = processElement(
-            flagDefinitionXml,
+            assemblyDefinitionXml,
             {
-                ...NAMED_VALUED_DEFINITION.ATTRIBUTES,
+                ...NAMED_DEFINITION.ATTRIBUTES,
             },
             {
-                ...NAMED_VALUED_DEFINITION.CHILDREN,
+                ...NAMED_DEFINITION.CHILDREN,
             },
         );
 
         this.name = parsed.attributes.name;
         this.moduleScope = parsed.attributes.scope;
-        this.datatype = parsed.attributes['as-type'];
 
         this.useName = parsed.children['use-name'];
         this.formalName = parsed.children['formal-name'];
@@ -137,5 +181,8 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         this.matchesConstraints = parsed.children.constraint?.matchesConstraints ?? [];
         this.indexHasKeyConstraints = parsed.children.constraint?.indexHasConstraints ?? [];
         this.expectConstraints = parsed.children.constraint?.expectConstraints ?? [];
+        this.indexConstraints = parsed.children.constraint?.indexConstraints ?? [];
+        this.uniqueConstraints = parsed.children.constraint?.uniqueConstraints ?? [];
+        this.cardinalityConstraints = parsed.children.constraint?.cardinalityConstraints ?? [];
     }
 }

@@ -24,26 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { optionalOneChild, processNode, requireAttribute } from '@oscal/data-utils';
+import { processBooleanAttribute, processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import {
-    AllowedValuesConstraint,
-    MatchesConstraint,
-    IndexHasConstraint,
-    ExpectConstraint,
-    IndexConstraint,
-    UniqueConstraint,
-    CardinalityConstraint,
-} from '@oscal/metaschema-model-common/constraint';
-import { MarkupLine, IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
-import { AbstractFlagInstance, INamedInstance } from '@oscal/metaschema-model-common/instance';
-import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
+import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
+import { NAMED_VALUED_DEFINITION } from './processing/model.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     private readonly metaschema;
-    private readonly fieldDefinitionXml;
+    protected readonly fieldDefinitionXml;
 
     private readonly name;
     getName() {
@@ -51,17 +40,17 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     }
 
     private readonly useName;
-    getUseName(): string {
+    getUseName() {
         return this.useName ?? this.getName();
     }
 
     private readonly formalName;
-    getFormalName(): string | undefined {
+    getFormalName() {
         return this.formalName;
     }
 
     private readonly description;
-    getDescription(): MarkupLine | undefined {
+    getDescription() {
         return this.description;
     }
 
@@ -78,62 +67,82 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         throw new Error('Method not implemented.');
     }
 
+    private readonly collapsible;
     isCollapsible(): boolean {
-        throw new Error('Method not implemented.');
+        return this.collapsible;
     }
 
-    isInline(): boolean {
+    isInline() {
         return false;
     }
 
-    getInlineInstance(): INamedInstance | undefined {
+    getInlineInstance() {
         return undefined;
     }
 
-    getModuleScope(): ModuleScope {
-        throw new Error('Method not implemented.');
+    private readonly moduleScope;
+    getModuleScope() {
+        return this.moduleScope;
     }
 
-    getContainingMetaschema(): AbstractMetaschema {
+    getContainingMetaschema() {
         return this.metaschema;
     }
 
-    getDatatypeAdapter(): IDatatypeAdapter<never> {
-        // TODO provide default if not exist
-        // return parseDatatypeAdapter('@_as-type', 'define-field', this.fieldDefinitionXml);
-        throw new Error('Method not implemented');
+    private readonly datatype;
+    getDatatypeAdapter() {
+        return this.datatype;
     }
 
     getFlagInstances(): Map<string, AbstractFlagInstance> {
         throw new Error('Method not implemented.');
     }
 
-    getAllowedValuesConstraints(): AllowedValuesConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly allowedValuesConstraints;
+    getAllowedValuesConstraints() {
+        return this.allowedValuesConstraints;
     }
 
-    getMatchesConstraints(): MatchesConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly matchesConstraints;
+    getMatchesConstraints() {
+        return this.matchesConstraints;
     }
 
-    getIndexHasKeyConstraints(): IndexHasConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly indexHasKeyConstraints;
+    getIndexHasKeyConstraints() {
+        return this.indexHasKeyConstraints;
     }
 
-    getExpectConstraints(): ExpectConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly expectConstraints;
+    getExpectConstraints() {
+        return this.expectConstraints;
     }
 
-    getIndexConstraints(): IndexConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly indexConstraints;
+    getIndexConstraints() {
+        return this.indexConstraints;
     }
 
-    getUniqueConstraints(): UniqueConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly uniqueConstraints;
+    getUniqueConstraints() {
+        return this.uniqueConstraints;
     }
 
-    getCardinalityConstraints(): CardinalityConstraint[] {
-        throw new Error('Method not implemented.');
+    private readonly cardinalityConstraints;
+    getCardinalityConstraints() {
+        return this.cardinalityConstraints;
+    }
+
+    getConstraints() {
+        return [
+            ...this.getAllowedValuesConstraints(),
+            ...this.getMatchesConstraints(),
+            ...this.getIndexHasKeyConstraints(),
+            ...this.getExpectConstraints(),
+            ...this.getIndexConstraints(),
+            ...this.getUniqueConstraints(),
+            ...this.getCardinalityConstraints(),
+        ];
     }
 
     hasJsonKey(): boolean {
@@ -144,30 +153,37 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         throw new Error('Method not implemented.');
     }
 
-    constructor(parsedXmlFieldDefinition: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(fieldDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.fieldDefinitionXml = parsedXmlFieldDefinition;
+        this.fieldDefinitionXml = fieldDefinitionXml;
 
-        const parsed = processNode(
+        const parsed = processElement(
             this.fieldDefinitionXml,
             {
-                name: requireAttribute((attr) => attr),
+                ...NAMED_VALUED_DEFINITION.ATTRIBUTES,
+                collapsible: (attr, ctx) => (attr !== null ? processBooleanAttribute(attr, ctx) : true),
             },
             {
-                'use-name': optionalOneChild((child) => processNode(child, {}, {}).body),
-                'formal-name': optionalOneChild((child) => processNode(child, {}, {}).body),
-                description: optionalOneChild(processMarkupLine),
-                remarks: optionalOneChild(processMarkupMultiLine),
+                ...NAMED_VALUED_DEFINITION.CHILDREN,
             },
         );
-
         this.name = parsed.attributes.name;
-        // this.moduleScope = parsed.attributes.scope;
+        this.moduleScope = parsed.attributes.scope;
+        this.datatype = parsed.attributes['as-type'];
+        this.collapsible = parsed.attributes.collapsible;
 
         this.useName = parsed.children['use-name'];
         this.formalName = parsed.children['formal-name'];
         this.description = parsed.children.description;
         this.remarks = parsed.children.remarks;
+
+        this.allowedValuesConstraints = parsed.children.constraint?.allowedValuesConstraints ?? [];
+        this.matchesConstraints = parsed.children.constraint?.matchesConstraints ?? [];
+        this.indexHasKeyConstraints = parsed.children.constraint?.indexHasConstraints ?? [];
+        this.expectConstraints = parsed.children.constraint?.expectConstraints ?? [];
+        this.indexConstraints = parsed.children.constraint?.indexConstraints ?? [];
+        this.uniqueConstraints = parsed.children.constraint?.uniqueConstraints ?? [];
+        this.cardinalityConstraints = parsed.children.constraint?.cardinalityConstraints ?? [];
     }
 }

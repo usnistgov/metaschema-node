@@ -43,13 +43,15 @@ import {
     DefiniteAttributeProcessor,
     forEachChild,
     optionalOneChild,
-    processNode,
+    processBooleanAttribute,
+    processElement,
+    processNumberAttribute,
     requireAttribute,
     requireOneChild,
     undefineableAttribute,
     XmlProcessingError,
 } from '@oscal/data-utils';
-import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
+import { processMarkupLine, processMarkupMultiLine } from './markup.js';
 import { processDatatypeAdapter } from './datatype.js';
 
 const processLevel: AttributeProcessor<Level> = (attribute, context) => {
@@ -93,7 +95,7 @@ type ConstraintsOutput = {
 };
 
 export const processConstraints: ChildProcessor<ConstraintsOutput> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         {},
         {
@@ -117,14 +119,6 @@ export const processConstraints: ChildProcessor<ConstraintsOutput> = (child, _co
     };
 };
 
-const processNumberAttribute: DefiniteAttributeProcessor<number> = (attribute, context) => {
-    const number = +attribute;
-    if (Number.isNaN(number)) {
-        throw XmlProcessingError.withContext(context, `Could not convert "${attribute}" to a numeric value`);
-    }
-    return number;
-};
-
 const CONSTRAINT_COMMON_ATTRS = {
     id: undefineableAttribute((attr) => attr),
     level: processLevel,
@@ -136,7 +130,7 @@ const CONSTRAINT_COMMON_CHILDREN = {
 };
 
 const processCardinalityConstraint: ChildProcessor<CardinalityConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         {
             ...CONSTRAINT_COMMON_ATTRS,
@@ -156,10 +150,10 @@ const processCardinalityConstraint: ChildProcessor<CardinalityConstraint> = (chi
 };
 
 const processExpectConstraint: ChildProcessor<ExpectConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, test: requireAttribute(processMetapath) },
-        { ...CONSTRAINT_COMMON_CHILDREN, message: requireOneChild((child) => processNode(child, {}, {}).body) },
+        { ...CONSTRAINT_COMMON_CHILDREN, message: requireOneChild((child) => processElement(child, {}, {}).body) },
     );
     return new ExpectConstraint(
         processed.attributes.id,
@@ -172,7 +166,7 @@ const processExpectConstraint: ChildProcessor<ExpectConstraint> = (child, _conte
 };
 
 const processKeyFields: ChildProcessor<IKeyField> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         {
             pattern: undefineableAttribute((attribute) => new RegExp(attribute)),
@@ -188,7 +182,7 @@ const processKeyFields: ChildProcessor<IKeyField> = (child, _context) => {
 };
 
 const processIndexHasConstraint: ChildProcessor<IndexHasConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
         { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
@@ -204,7 +198,7 @@ const processIndexHasConstraint: ChildProcessor<IndexHasConstraint> = (child, _c
 };
 
 const processIndexConstraint: ChildProcessor<IndexConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
         { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
@@ -220,7 +214,7 @@ const processIndexConstraint: ChildProcessor<IndexConstraint> = (child, _context
 };
 
 const processUniqueConstraint: ChildProcessor<UniqueConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS },
         { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
@@ -235,7 +229,7 @@ const processUniqueConstraint: ChildProcessor<UniqueConstraint> = (child, _conte
 };
 
 const processMatchesConstraint: ChildProcessor<MatchesConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         {
             ...CONSTRAINT_COMMON_ATTRS,
@@ -254,29 +248,19 @@ const processMatchesConstraint: ChildProcessor<MatchesConstraint> = (child, _con
     );
 };
 
-const processBoolean: DefiniteAttributeProcessor<boolean> = (attribute, context) => {
-    if (attribute === 'true') {
-        return true;
-    } else if (attribute === 'false') {
-        return false;
-    } else {
-        throw XmlProcessingError.withContext(context, `Expected boolean, got ${attribute}`);
-    }
-};
-
 const processAllowedValuesConstraint: ChildProcessor<AllowedValuesConstraint> = (child, _context) => {
-    const processed = processNode(
+    const processed = processElement(
         child,
         {
             ...CONSTRAINT_COMMON_ATTRS,
-            'allow-other': requireAttribute(processBoolean),
+            'allow-other': requireAttribute(processBooleanAttribute),
         },
         {
             ...CONSTRAINT_COMMON_CHILDREN,
             enum: (children, context) => {
                 const allowedValuesMap = new Map<string, IAllowedValue>();
                 children.forEach((child) => {
-                    const processed = processNode(
+                    const processed = processElement(
                         child,
                         {
                             value: requireAttribute((attr) => attr),

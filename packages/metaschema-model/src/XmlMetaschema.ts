@@ -35,11 +35,13 @@ import {
     forEachChild,
     optionalOneChild,
     parseXml,
-    processNode,
+    processElement,
     requireAttribute,
     requireOneChild,
 } from '@oscal/data-utils';
-import { processMarkupLine, processMarkupMultiLine } from './XmlMarkup.js';
+import { processMarkupLine, processMarkupMultiLine } from './processing/markup.js';
+import XmlGlobalFieldDefinition from './XmlGlobalFieldDefinition.js';
+import XmlGlobalAssemblyDefinition from './XmlGlobalAssemblyDefinition.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
     protected metaschemaXml: HTMLElement;
@@ -97,20 +99,36 @@ export default class XmlMetaschema extends AbstractMetaschema {
 
         this.metaschemaXml = metaschemaXml;
 
-        const parsed = processNode(
+        const parsed = processElement(
             metaschemaXml,
             {},
             {
                 'schema-name': requireOneChild(processMarkupLine),
-                'schema-version': requireOneChild((child) => processNode(child, {}, {}).body),
-                'short-name': requireOneChild((child) => processNode(child, {}, {}).body),
-                namespace: requireOneChild((child) => processNode(child, {}, {}).body),
-                'json-base-uri': requireOneChild((child) => processNode(child, {}, {}).body),
+                'schema-version': requireOneChild((child) => processElement(child, {}, {}).body),
+                'short-name': requireOneChild((child) => processElement(child, {}, {}).body),
+                namespace: requireOneChild((child) => processElement(child, {}, {}).body),
+                'json-base-uri': requireOneChild((child) => processElement(child, {}, {}).body),
                 remarks: optionalOneChild(processMarkupMultiLine),
                 'define-flag': (children, _) => {
                     const definitions = new Map();
                     children.forEach((child) => {
-                        const definition: XmlGlobalFlagDefinition = new XmlGlobalFlagDefinition(child, this);
+                        const definition = new XmlGlobalFlagDefinition(child, this);
+                        definitions.set(definition.getName(), definition);
+                    });
+                    return definitions;
+                },
+                'define-field': (children, _) => {
+                    const definitions = new Map();
+                    children.forEach((child) => {
+                        const definition = new XmlGlobalFieldDefinition(child, this);
+                        definitions.set(definition.getName(), definition);
+                    });
+                    return definitions;
+                },
+                'define-assembly': (children, _) => {
+                    const definitions = new Map();
+                    children.forEach((child) => {
+                        const definition = new XmlGlobalAssemblyDefinition(child, this);
                         definitions.set(definition.getName(), definition);
                     });
                     return definitions;
@@ -126,8 +144,8 @@ export default class XmlMetaschema extends AbstractMetaschema {
         this._remarks = parsed.children.remarks;
 
         this._flagDefinitions = parsed.children['define-flag'];
-        this._fieldDefinitions = new Map();
-        this._assemblyDefinitions = new Map();
+        this._fieldDefinitions = parsed.children['define-field'];
+        this._assemblyDefinitions = parsed.children['define-assembly'];
     }
 
     /**
@@ -191,11 +209,11 @@ export default class XmlMetaschema extends AbstractMetaschema {
      * @returns A list of relative or absolute import URIs that must be provided to a given metaschema
      */
     private static parseImports(metaschemaXml: HTMLElement): string[] {
-        return processNode(
+        return processElement(
             metaschemaXml,
             {},
             {
-                import: forEachChild((child) => processNode(child, { href: requireAttribute((attr) => attr) }, {})),
+                import: forEachChild((child) => processElement(child, { href: requireAttribute((attr) => attr) }, {})),
             },
         ).children.import.map((importElem) => importElem.attributes.href);
     }

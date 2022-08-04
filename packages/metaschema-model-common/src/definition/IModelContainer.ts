@@ -36,15 +36,6 @@ import { AbstractConstructor } from '../util/mixin.js';
  */
 export default interface IModelContainer {
     /**
-     * Get the model instance contained within the model with the associated use name
-     * (see {@link AbstractNamedModelInstance.getUseName})
-     *
-     * @param name the use name of the model instance
-     * @returns the matching model instance, or `undefined` if no match was found
-     */
-    getModelInstanceByName(name: string): INamedModelInstance | undefined;
-
-    /**
      * Get all named model instances within the container.
      *
      * @returns an ordered mapping of use name to model instance
@@ -52,29 +43,11 @@ export default interface IModelContainer {
     getNamedModelInstances(): Map<string, INamedModelInstance>;
 
     /**
-     * Get the field instance contained within the model with the associated use name.
-     * (see {@link AbstractFieldInstance.getUseName})
-     *
-     * @param name the use name of the field instance
-     * @returns the matching field instance, or `null` if no match was found
-     */
-    getFieldInstanceByName(name: string): AbstractFieldInstance | undefined;
-
-    /**
      * Get all field instances within the container.
      *
      * @returns a mapping of use name to field instance
      */
     getFieldInstances(): Map<string, AbstractFieldInstance>;
-
-    /**
-     * Get the assembly instance contained within the model with the associated use name.
-     * (see {@link AbstractAssemblyInstance.getUseName})
-     *
-     * @param name the use name of the assembly instance
-     * @returns the matching assembly instance, or `undefined` if no match was found
-     */
-    getAssemblyInstanceByName(name: string): AbstractAssemblyInstance | undefined;
 
     /**
      * Get all assembly instances within the container.
@@ -101,11 +74,8 @@ export default interface IModelContainer {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function modelContainable<TBase extends AbstractConstructor<any>>(Base: TBase) {
     abstract class ModelContainer extends Base implements IModelContainer {
-        abstract getModelInstanceByName(name: string): INamedModelInstance | undefined;
         abstract getNamedModelInstances(): Map<string, INamedModelInstance>;
-        abstract getFieldInstanceByName(name: string): AbstractFieldInstance | undefined;
         abstract getFieldInstances(): Map<string, AbstractFieldInstance>;
-        abstract getAssemblyInstanceByName(name: string): AbstractAssemblyInstance | undefined;
         abstract getAssemblyInstances(): Map<string, AbstractAssemblyInstance>;
         abstract getChoiceInstances(): AbstractChoiceInstance;
         abstract getModelInstances(): IModelInstance;
