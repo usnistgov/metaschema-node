@@ -24,26 +24,159 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { processNode } from './xmlProcessor.js';
-import { forEachChild, parseXml, requireAttribute } from './xmlProcessorUtil.js';
+import { processAttributes, processChildren, processElement } from './xmlProcessor.js';
+import { forEachChild, parseXml, requireAttribute, requireOneChild } from './xmlProcessorUtil.js';
 
-describe('processNode()', () => {
+describe('processElement()', () => {
+    const element = parseXml(`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <DOCUMENT xmlns="http://test.example/fake-schema" someAttr="someValue">
+            <a href="someLink.com">SomeBody</a>
+        </DOCUMENT>`).documentElement;
     it('should process a basic XML document', () => {
-        const result = processNode(
-            parseXml(`
-            <?xml version="1.0" encoding="UTF-8"?>
-            <DOCUMENT xmlns="http://test.example/fake-schema" someAttr="someValue">
-                <a href="someLink.com">SomeBody</a>
-            </DOCUMENT>
-        `).documentElement,
+        const result = processElement(
+            element,
             {
                 someAttr: requireAttribute((attr) => attr),
             },
             {
-                a: forEachChild((child) => processNode(child, { href: requireAttribute((attr) => attr) }, {})),
+                a: forEachChild((child) => processElement(child, { href: requireAttribute((attr) => attr) }, {})),
             },
         );
         expect(result.attributes.someAttr).toBe('someValue');
         expect(result.children.a[0].body).toBe('SomeBody');
+    });
+
+    it('should handle namespaces', () => {
+        const result = processElement(
+            element,
+            {
+                '{http://test.example/fake-schema}someAttr': requireAttribute((attr) => attr),
+            },
+            {
+                '{http://test.example/fake-schema}a': requireOneChild(
+                    (child) => processElement(child, { href: requireAttribute((attr) => attr) }, {}).attributes.href,
+                ),
+            },
+        );
+        expect(result.attributes['{http://test.example/fake-schema}someAttr']).toBe('someValue');
+        expect(result.children['{http://test.example/fake-schema}a']).toBe('someLink.com');
+    });
+
+    it('should throw when throwErrorOnUnexpected is set as appropriate', () => {
+        expect(() => processElement(element, {}, {}, true)).toThrow();
+        expect(() =>
+            processElement(
+                element,
+                {
+                    '{http://test.example/fake-schema}someAttr': requireAttribute((attr) => attr),
+                },
+                {
+                    '{http://test.example/fake-schema}a': forEachChild((child) => child),
+                },
+                true,
+            ),
+        ).not.toThrow();
+    });
+});
+
+describe('processAttributes()', () => {
+    it('should throw when processing an unexpected attribute & throwErrorOnUnexpected is set', () => {
+        const element = parseXml(`<DOCUMENT unexpected="yep"></DOCUMENT>`).documentElement;
+        expect(() => processAttributes(element, {}, true)).toThrow();
+        expect(() => processAttributes(element, {})).not.toThrow();
+        // should not throw when special attributes are set
+        expect(() =>
+            processAttributes(
+                parseXml(`
+                    <DOCUMENT
+                        xmlns="https://test.example/schema"
+                        xmlns:f="https://test.example/schema2"
+                    ></DOCUMENT>`).documentElement,
+                {},
+                true,
+            ),
+        ).not.toThrow();
+    });
+
+    it('should pass null to an attribute processor when the attribute does not exist', () => {
+        const result = processAttributes(parseXml(`<DOCUMENT existentAttr="true"></DOCUMENT>`).documentElement, {
+            // return the attribute value verbatim
+            nonExistentAttr: (attr) => attr,
+            existentAttr: (attr) => attr,
+        });
+        expect(result.nonExistentAttr).toBeNull();
+        expect(result.existentAttr).toBe('true');
+    });
+
+    it('should handle namespaced attributes', () => {
+        const element = parseXml(`
+            <DOCUMENT
+                xmlns="https://test.example/schema"
+                xmlns:f="https://test.example/schema2"
+                test="testValue"
+                f:test="testValue2"
+            >
+                <a test="1"/>
+            </DOCUMENT>
+        `).documentElement;
+        const result = processAttributes(element, {
+            '{https://test.example/schema}test': (attr) => attr,
+            '{https://test.example/schema2}test': (attr) => attr,
+        });
+        expect(result['{https://test.example/schema}test']).toBe('testValue');
+        expect(result['{https://test.example/schema2}test']).toBe('testValue2');
+    });
+});
+
+describe('processChildren()', () => {
+    it('should throw when processing an unexpected child & throwErrorOnUnexpected is set', () => {
+        const element = parseXml(`<DOCUMENT><unexpected/></DOCUMENT>`).documentElement;
+        expect(() => processChildren(element, {}, true)).toThrow();
+        expect(() => processChildren(element, {})).not.toThrow();
+        // should not throw on an unexpected comment node
+        expect(() => processChildren(parseXml(`<DOC><!--A comment--></DOC>`).documentElement, {}, true)).not.toThrow();
+    });
+
+    it('should properly extract text from an element', () => {
+        expect(processChildren(parseXml(`<DOC></DOC>`).documentElement, {}).body).toBe('');
+        expect(processChildren(parseXml(`<DOC><elem/></DOC>`).documentElement, {}).body).toBe('');
+        expect(processChildren(parseXml(`<DOC>some text</DOC>`).documentElement, {}).body).toBe('some text');
+        // all whitespace around the text is considered insignificant
+        expect(
+            processChildren(
+                parseXml(`
+                    <DOC>
+                        some other text
+                    </DOC>`).documentElement,
+                {},
+            ).body,
+        ).toBe('some other text');
+        // the text between the <b/> tags are not counted as part of the body for this mode of parsing
+        expect(processChildren(parseXml(`<DOC>some <b>other</b> text</DOC>`).documentElement, {}).body).toBe(
+            'some text',
+        );
+    });
+
+    it('should handle namespaced children', () => {
+        const element = parseXml(`
+            <DOCUMENT
+                xmlns="https://test.example/schema"
+                xmlns:f="https://test.example/schema2"
+            >
+                <elemUnderDefaultNS>Elem Under Default NS Value</elemUnderDefaultNS>
+                <f:elemUnderFNS>Elem Under F NS Value</f:elemUnderFNS>
+            </DOCUMENT>
+        `).documentElement;
+        const result = processChildren(element, {
+            '{https://test.example/schema}elemUnderDefaultNS': requireOneChild(
+                (child) => processElement(child, {}, {}).body,
+            ),
+            '{https://test.example/schema2}elemUnderFNS': requireOneChild(
+                (child) => processElement(child, {}, {}).body,
+            ),
+        });
+        expect(result.children['{https://test.example/schema}elemUnderDefaultNS']).toBe('Elem Under Default NS Value');
+        expect(result.children['{https://test.example/schema2}elemUnderFNS']).toBe('Elem Under F NS Value');
     });
 });

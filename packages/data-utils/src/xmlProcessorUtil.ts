@@ -123,3 +123,21 @@ export function requireOneChild<T>(childProcessor: Processor<HTMLElement, T>): C
         return childProcessor(children[0], context);
     };
 }
+
+export const processBooleanAttribute: DefiniteAttributeProcessor<boolean> = (attribute, context) => {
+    if (attribute === 'true') {
+        return true;
+    } else if (attribute === 'false') {
+        return false;
+    } else {
+        throw XmlProcessingError.withContext(context, `Expected boolean, got ${attribute}`);
+    }
+};
+
+export const processNumberAttribute: DefiniteAttributeProcessor<number> = (attribute, context) => {
+    const number = +attribute;
+    if (Number.isNaN(number)) {
+        throw XmlProcessingError.withContext(context, `Could not convert "${attribute}" to a numeric value`);
+    }
+    return number;
+};

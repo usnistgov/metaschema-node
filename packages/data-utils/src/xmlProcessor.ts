@@ -26,7 +26,20 @@
 
 import { AttributeProcessor, ChildListProcessor, XmlProcessingError } from './xmlProcessorUtil.js';
 
-export function processNode<
+export function getAttributeDefaultNamespace(attributeNode: Attr): string | null {
+    function getDefaultNS(element: Element | null): string | null {
+        if (element === null || element === undefined) {
+            return null;
+        }
+        if (element.prefix !== null) {
+            return getDefaultNS(element.parentElement);
+        }
+        return element.namespaceURI;
+    }
+    return getDefaultNS(attributeNode.ownerElement);
+}
+
+export function processElement<
     AttributeProcessors extends Record<string, AttributeProcessor<unknown>>,
     ChildProcessors extends Record<string, ChildListProcessor<unknown>>,
 >(
@@ -61,27 +74,43 @@ export function processAttributes<AttributeProcessors extends Record<string, Att
     attributeProcessors: AttributeProcessors,
     throwErrorOnUnexpected = false,
 ) {
-    // used to determine if any unused attributes exist
-    let attributeReferenceCount = 0;
-
-    const ret = Object.keys(attributeProcessors).reduce((acc, key) => {
-        const attribute = element.getAttribute(key);
-        if (attribute !== null) {
-            attributeReferenceCount++;
+    const context = {
+        parent: element,
+    };
+    const ret: Record<string, unknown> = {};
+    for (let i = 0; i < element.attributes.length; i++) {
+        const attributeNode = element.attributes[i];
+        const attributeNS = attributeNode.namespaceURI ?? getAttributeDefaultNamespace(attributeNode);
+        const nsKey = `{${attributeNS ?? ''}}${attributeNode.localName}`;
+        if (attributeNS && nsKey in attributeProcessors) {
+            ret[nsKey] = attributeProcessors[nsKey](attributeNode.value, context);
+        } else if (attributeNode.name in attributeProcessors) {
+            ret[attributeNode.name] = attributeProcessors[attributeNode.name](attributeNode.value, context);
+        } else {
+            if (throwErrorOnUnexpected && !attributeNode.name.startsWith('xmlns')) {
+                throw new XmlProcessingError(`Unexpected attribute(s) of parent ${element.tagName} element`);
+            }
+            continue;
         }
-        acc[key] = attributeProcessors[key](attribute, { parent: element });
-        return acc;
-    }, {} as Record<string, unknown>) as {
+    }
+    Object.keys(attributeProcessors).forEach((key) => {
+        if (!(key in ret)) {
+            ret[key] = attributeProcessors[key](null, context);
+        }
+    });
+
+    return ret as {
         [Property in keyof AttributeProcessors]: ReturnType<AttributeProcessors[Property]>;
     };
-
-    if (throwErrorOnUnexpected && element.attributes.length > attributeReferenceCount) {
-        throw new XmlProcessingError(`Unexpected attribute(s) of parent ${element.tagName} element`);
-    }
-
-    return ret;
 }
 
+/**
+ * Process children and extract the body of an element
+ * @param element
+ * @param childProcessors
+ * @param throwErrorOnUnexpected
+ * @returns The record of processed children + the extracted body
+ */
 export function processChildren<ChildProcessors extends Record<string, ChildListProcessor<unknown>>>(
     element: HTMLElement,
     childProcessors: ChildProcessors,
@@ -93,42 +122,47 @@ export function processChildren<ChildProcessors extends Record<string, ChildList
         const rawChild = element.childNodes[i];
         if (rawChild.nodeType === rawChild.ELEMENT_NODE) {
             const child = rawChild as HTMLElement;
-            const tag = child.tagName;
-            if (!(tag in childElements)) {
-                childElements[tag] = [];
+            const nsKey = `{${child.namespaceURI ?? ''}}${child.localName}`;
+            if (!(nsKey in childElements)) {
+                childElements[nsKey] = [];
             }
-            childElements[tag].push(child);
+            childElements[nsKey].push(child);
         } else if (rawChild.nodeType === rawChild.TEXT_NODE) {
             const child = rawChild as Text;
-            rawBody.push(child.data);
-        } else if (throwErrorOnUnexpected) {
+            rawBody.push(child.data.trim());
+        } else if (rawChild.nodeType !== rawChild.COMMENT_NODE && throwErrorOnUnexpected) {
             throw new XmlProcessingError(`Unexpected child type of parent ${element.tagName}`);
         }
     }
 
-    // used to determine if any unexpected children exist
-    let childTagReferenceCount = 0;
-
-    const children = Object.keys(childProcessors).reduce((acc, key) => {
-        const matchingChildren = childElements[key] ?? [];
-        if (matchingChildren.length === 0) {
-            childTagReferenceCount++;
-        }
-
-        acc[key] = childProcessors[key](matchingChildren, { parent: element });
-        return acc;
-    }, {} as Record<string, unknown>) as {
-        [Property in keyof ChildProcessors]: ReturnType<ChildProcessors[Property]>;
+    const context = {
+        parent: element,
     };
 
-    if (throwErrorOnUnexpected && Object.keys(childElements).length > childTagReferenceCount) {
-        throw new XmlProcessingError(`Unexpected child(ren) of parent ${element.tagName} element`);
-    }
+    const children: Record<string, unknown> = {};
+    Object.keys(childElements).forEach((key) => {
+        const childList = childElements[key];
+        const tagName = childList[0].tagName;
+        if (key in childProcessors) {
+            children[key] = childProcessors[key](childList, context);
+        } else if (tagName in childProcessors) {
+            children[tagName] = childProcessors[tagName](childList, context);
+        } else if (throwErrorOnUnexpected) {
+            throw new XmlProcessingError(`Unexpected child(ren) of parent ${element.tagName} element`);
+        }
+    });
+    Object.keys(childProcessors).forEach((key) => {
+        if (!(key in children)) {
+            children[key] = childProcessors[key]([], context);
+        }
+    });
 
-    const cleanBody = rawBody.join().trim();
+    const cleanBody = rawBody.join(' ').trim();
 
     return {
-        children,
+        children: children as {
+            [Property in keyof ChildProcessors]: ReturnType<ChildProcessors[Property]>;
+        },
         body: cleanBody,
     };
 }
