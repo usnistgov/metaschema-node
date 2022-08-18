@@ -42,12 +42,13 @@ export class XmlProcessingError extends Error {
      */
     static withContext(context: Context, msg: string) {
         // TODO: add context string to error message
-        return new XmlProcessingError(msg);
+        return new XmlProcessingError(`${msg} (field name: ${context.name})`);
     }
 }
 
 export type Context = {
     parent: HTMLElement;
+    name: string;
 };
 
 type AttributeValue = ReturnType<HTMLElement['getAttributeNS']>;
@@ -125,9 +126,9 @@ export function requireOneChild<T>(childProcessor: Processor<HTMLElement, T>): C
 }
 
 export const processBooleanAttribute: DefiniteAttributeProcessor<boolean> = (attribute, context) => {
-    if (attribute === 'true') {
+    if (attribute === 'true' || attribute === 'yes') {
         return true;
-    } else if (attribute === 'false') {
+    } else if (attribute === 'false' || attribute === 'no') {
         return false;
     } else {
         throw XmlProcessingError.withContext(context, `Expected boolean, got ${attribute}`);

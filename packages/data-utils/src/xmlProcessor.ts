@@ -26,19 +26,6 @@
 
 import { AttributeProcessor, ChildListProcessor, XmlProcessingError } from './xmlProcessorUtil.js';
 
-export function getAttributeDefaultNamespace(attributeNode: Attr): string | null {
-    function getDefaultNS(element: Element | null): string | null {
-        if (element === null || element === undefined) {
-            return null;
-        }
-        if (element.prefix !== null) {
-            return getDefaultNS(element.parentElement);
-        }
-        return element.namespaceURI;
-    }
-    return getDefaultNS(attributeNode.ownerElement);
-}
-
 export function processElement<
     AttributeProcessors extends Record<string, AttributeProcessor<unknown>>,
     ChildProcessors extends Record<string, ChildListProcessor<unknown>>,
@@ -74,18 +61,18 @@ export function processAttributes<AttributeProcessors extends Record<string, Att
     attributeProcessors: AttributeProcessors,
     throwErrorOnUnexpected = false,
 ) {
-    const context = {
-        parent: element,
-    };
     const ret: Record<string, unknown> = {};
     for (let i = 0; i < element.attributes.length; i++) {
         const attributeNode = element.attributes[i];
-        const attributeNS = attributeNode.namespaceURI ?? getAttributeDefaultNamespace(attributeNode);
+        const attributeNS = attributeNode.namespaceURI;
         const nsKey = `{${attributeNS ?? ''}}${attributeNode.localName}`;
         if (attributeNS && nsKey in attributeProcessors) {
-            ret[nsKey] = attributeProcessors[nsKey](attributeNode.value, context);
+            ret[nsKey] = attributeProcessors[nsKey](attributeNode.value, { parent: element, name: nsKey });
         } else if (attributeNode.name in attributeProcessors) {
-            ret[attributeNode.name] = attributeProcessors[attributeNode.name](attributeNode.value, context);
+            ret[attributeNode.name] = attributeProcessors[attributeNode.name](attributeNode.value, {
+                parent: element,
+                name: attributeNode.name,
+            });
         } else {
             if (throwErrorOnUnexpected && !attributeNode.name.startsWith('xmlns')) {
                 throw new XmlProcessingError(`Unexpected attribute(s) of parent ${element.tagName} element`);
@@ -95,7 +82,7 @@ export function processAttributes<AttributeProcessors extends Record<string, Att
     }
     Object.keys(attributeProcessors).forEach((key) => {
         if (!(key in ret)) {
-            ret[key] = attributeProcessors[key](null, context);
+            ret[key] = attributeProcessors[key](null, { parent: element, name: key });
         }
     });
 
@@ -135,25 +122,21 @@ export function processChildren<ChildProcessors extends Record<string, ChildList
         }
     }
 
-    const context = {
-        parent: element,
-    };
-
     const children: Record<string, unknown> = {};
     Object.keys(childElements).forEach((key) => {
         const childList = childElements[key];
         const tagName = childList[0].tagName;
         if (key in childProcessors) {
-            children[key] = childProcessors[key](childList, context);
+            children[key] = childProcessors[key](childList, { parent: element, name: key });
         } else if (tagName in childProcessors) {
-            children[tagName] = childProcessors[tagName](childList, context);
+            children[tagName] = childProcessors[tagName](childList, { parent: element, name: tagName });
         } else if (throwErrorOnUnexpected) {
             throw new XmlProcessingError(`Unexpected child(ren) of parent ${element.tagName} element`);
         }
     });
     Object.keys(childProcessors).forEach((key) => {
         if (!(key in children)) {
-            children[key] = childProcessors[key]([], context);
+            children[key] = childProcessors[key]([], { parent: element, name: key });
         }
     });
 

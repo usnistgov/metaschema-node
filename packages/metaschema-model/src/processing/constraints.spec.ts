@@ -26,12 +26,13 @@
 
 // import { loadCardinalityConstraint } from './constraints.js';
 import { parseXml } from '@oscal/data-utils';
+import { placeholderContext } from '../testUtil/index.js';
 import { processConstraints } from './constraints.js';
 
 describe('parseConstraints()', () => {
     it('should parse empty set of constraints', () => {
         const constraintXml = parseXml(`<constraint></constraint>`).documentElement;
-        const constraints = processConstraints(constraintXml, { parent: constraintXml });
+        const constraints = processConstraints(constraintXml, placeholderContext);
         Object.values(constraints).forEach((c) => {
             expect(c.length).toBe(0);
         });

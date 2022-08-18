@@ -30,10 +30,12 @@ import { processDatatypeAdapter } from './datatype.js';
 import { processMarkupLine, processMarkupMultiLine } from './markup.js';
 import { processModuleScope } from './moduleScope.js';
 
+export const METASCHEMA_NS = 'http://csrc.nist.gov/ns/oscal/metaschema/1.0';
+
 export const MODEL_ELEMENT = {
     ATTRIBUTES: {},
     CHILDREN: {
-        remarks: optionalOneChild(processMarkupMultiLine),
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks': optionalOneChild(processMarkupMultiLine),
     },
 } as const;
 
@@ -44,9 +46,13 @@ export const NAMED_MODEL_ELEMENT = {
     },
     CHILDREN: {
         ...MODEL_ELEMENT.CHILDREN,
-        'use-name': optionalOneChild((child) => processElement(child, {}, {}).body),
-        'formal-name': optionalOneChild((child) => processElement(child, {}, {}).body),
-        description: optionalOneChild(processMarkupLine),
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name': optionalOneChild(
+            (child) => processElement(child, {}, {}).body,
+        ),
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name': optionalOneChild(
+            (child) => processElement(child, {}, {}).body,
+        ),
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description': optionalOneChild(processMarkupLine),
     },
 } as const;
 
@@ -57,7 +63,7 @@ export const DEFINITION = {
     },
     CHILDREN: {
         ...NAMED_MODEL_ELEMENT.CHILDREN,
-        constraint: optionalOneChild(processConstraints),
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint': optionalOneChild(processConstraints),
     },
 } as const;
 

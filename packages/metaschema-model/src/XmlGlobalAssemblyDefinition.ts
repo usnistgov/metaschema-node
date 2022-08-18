@@ -138,9 +138,7 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
     hasJsonKey(): boolean {
         throw new Error('Method not implemented.');
     }
-    isInline(): boolean {
-        return false;
-    }
+
     getInlineInstance(): INamedInstance | undefined {
         return undefined;
     }
@@ -172,17 +170,24 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
         this.name = parsed.attributes.name;
         this.moduleScope = parsed.attributes.scope;
 
-        this.useName = parsed.children['use-name'];
-        this.formalName = parsed.children['formal-name'];
-        this.description = parsed.children.description;
-        this.remarks = parsed.children.remarks;
+        this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
+        this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
+        this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
+        this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
 
-        this.allowedValuesConstraints = parsed.children.constraint?.allowedValuesConstraints ?? [];
-        this.matchesConstraints = parsed.children.constraint?.matchesConstraints ?? [];
-        this.indexHasKeyConstraints = parsed.children.constraint?.indexHasConstraints ?? [];
-        this.expectConstraints = parsed.children.constraint?.expectConstraints ?? [];
-        this.indexConstraints = parsed.children.constraint?.indexConstraints ?? [];
-        this.uniqueConstraints = parsed.children.constraint?.uniqueConstraints ?? [];
-        this.cardinalityConstraints = parsed.children.constraint?.cardinalityConstraints ?? [];
+        this.allowedValuesConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.allowedValuesConstraints ?? [];
+        this.matchesConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? [];
+        this.indexHasKeyConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? [];
+        this.expectConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? [];
+        this.indexConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexConstraints ?? [];
+        this.uniqueConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? [];
+        this.cardinalityConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ?? [];
     }
 }

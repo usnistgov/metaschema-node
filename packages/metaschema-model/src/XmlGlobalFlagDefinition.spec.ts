@@ -23,22 +23,35 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
-import INamedInstance from '../instance/INamedInstance.js';
-import { namedDefineable } from './INamedDefinition.js';
 
-/**
- * A trait indicating that the implementation is a localized definition that is declared in-line as
- * an instance.
- *
- * @param <Instance> the associated instance type
- */
-export default abstract class AbstractInlineNamedDefinition<Instance extends INamedInstance> extends namedDefineable(
-    AbstractNamedModelElement,
-) {
-    isInline(): boolean {
-        return true;
-    }
+import { parseXml } from '@oscal/data-utils';
+import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { placeholderMetaschema } from './testUtil/index.js';
+import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 
-    abstract getInlineInstance(): Instance;
-}
+describe('XmlGlobalFlagDefinition', () => {
+    it('should load from XML', () => {
+        const xml = parseXml(`
+            <define-flag xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0" name="subject-uuid" as-type="uuid" scope="local">
+                <formal-name>Subject Universally Unique Identifier Reference</formal-name>
+                <!-- Identifier Reference -->
+                <description>A <a href="/concepts/identifier-use/#machine-oriented">machine-oriented</a> identifier reference to a component, inventory-item, location, party, user, or resource using it's UUID.</description>
+            </define-flag>
+        `).documentElement;
+
+        const flag = new XmlGlobalFlagDefinition(xml, placeholderMetaschema);
+
+        expect(flag.getName()).toBe('subject-uuid');
+        expect(flag.getUseName()).toBe('subject-uuid');
+        // TODO: test datatype
+        expect(flag.getModuleScope()).toBe(ModuleScope.LOCAL);
+        expect(flag.getFormalName()).toBe('Subject Universally Unique Identifier Reference');
+        // TODO: test description
+        // TODO: test remarks
+        expect(flag.getConstraints()).toHaveLength(0); // no constraints were defined
+
+        expect(flag.getInlineInstance()).toBe(undefined);
+        expect(flag.isInline()).toBe(false);
+        expect(flag.getContainingMetaschema()).toBe(placeholderMetaschema);
+    });
+});

@@ -49,7 +49,9 @@ export default interface INamedDefinition extends IDefinition {
 
 export function namedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedDefinition extends defineable(Base) implements INamedDefinition {
-        abstract isInline(): boolean;
+        isInline(): boolean {
+            return this.getInlineInstance() !== undefined;
+        }
         abstract getInlineInstance(): INamedInstance | undefined;
     }
     return NamedDefinition;

@@ -28,3 +28,20 @@
  * User-provided function that resolves raw file contents from a relative or absolute URI
  */
 export type ResourceResolver = (location: string) => Promise<string | Buffer>;
+
+// export function buildLocalResourceResolver(
+//     basePath: string,
+//     options?: Parameters<typeof readFile>[1],
+// ): ResourceResolver {
+//     return (location) => {
+//         const path = join(basePath, location);
+//         return readFile(path, options);
+//     };
+// }
+
+// export function buildFetchResolver(baseUrl: string): ResourceResolver {
+//     return async (location) => {
+//         const resp = await fetch(baseUrl + location);
+//         return resp.body;
+//     };
+// }

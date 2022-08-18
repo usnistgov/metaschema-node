@@ -24,10 +24,28 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AttributeProcessor } from '@oscal/data-utils';
-import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+import { Context, parseXml } from '@oscal/data-utils';
+import { AbstractMetaschema } from '@oscal/metaschema-model-common';
+import XmlMetaschema from '../XmlMetaschema.js';
 
-export const processDatatypeAdapter: AttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
-    // TODO: implement
-    return { name: child ?? '', getDefaultJsonValueKey: () => 'default' };
-};
+/**
+ * Fake context object for testing attribute and child processors
+ */
+export const placeholderContext: Context = { parent: parseXml('<DOC></DOC>').documentElement, name: 'test-field-name' };
+
+/**
+ * Fake Metaschema for testing definitions
+ */
+export const placeholderMetaschema: AbstractMetaschema = new XmlMetaschema(
+    'placeholderSchema.xml',
+    parseXml(`
+        <METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
+            <schema-name>Placeholder</schema-name>
+            <schema-version>Doesn't matter</schema-version>
+            <short-name>Placeholder</short-name>
+            <namespace>SpaceName</namespace>
+            <json-base-uri>space-name</json-base-uri>
+        </METASCHEMA>
+    `).documentElement,
+    [],
+);

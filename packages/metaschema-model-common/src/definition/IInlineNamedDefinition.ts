@@ -23,11 +23,27 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import INamedInstance from '../instance/INamedInstance.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import INamedDefinition, { namedDefineable } from './INamedDefinition.js';
 
-import { AttributeProcessor } from '@oscal/data-utils';
-import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+/**
+ * A trait indicating that the implementation is a localized definition that is declared in-line as
+ * an instance.
+ *
+ * @param <Instance> the associated instance type
+ */
+export default interface IInlineNamedDefinition<Instance extends INamedInstance> extends INamedDefinition {
+    getInlineInstance(): Instance;
+}
 
-export const processDatatypeAdapter: AttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
-    // TODO: implement
-    return { name: child ?? '', getDefaultJsonValueKey: () => 'default' };
-};
+export function inlineNamedDefineable<
+    Instance extends INamedInstance,
+    TBase extends AbstractConstructor<AbstractNamedModelElement>,
+>(Base: TBase) {
+    abstract class InlineNamedDefinition extends namedDefineable(Base) implements IInlineNamedDefinition<Instance> {
+        abstract getInlineInstance(): Instance;
+    }
+    return InlineNamedDefinition;
+}

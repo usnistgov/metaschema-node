@@ -24,11 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { processBooleanAttribute, processElement } from '@oscal/data-utils';
+import { optionalOneChild, processBooleanAttribute, processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
 import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { NAMED_VALUED_DEFINITION } from './processing/model.js';
+import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     private readonly metaschema;
@@ -60,20 +61,19 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     }
 
     getJsonValueKeyFlagInstance(): AbstractFlagInstance | undefined {
-        throw new Error('Method not implemented.');
+        // TODO: implement
+        // throw new Error('Method not implemented.');
+        return undefined;
     }
 
-    getJsonValueKeyName(): string {
-        throw new Error('Method not implemented.');
+    private readonly jsonValueKeyName;
+    getJsonValueKeyName() {
+        return this.jsonValueKeyName ?? this.getDatatypeAdapter().getDefaultJsonValueKey();
     }
 
     private readonly collapsible;
     isCollapsible(): boolean {
         return this.collapsible;
-    }
-
-    isInline() {
-        return false;
     }
 
     getInlineInstance() {
@@ -94,8 +94,9 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         return this.datatype;
     }
 
+    private readonly flagInstances;
     getFlagInstances(): Map<string, AbstractFlagInstance> {
-        throw new Error('Method not implemented.');
+        return this.flagInstances;
     }
 
     private readonly allowedValuesConstraints;
@@ -166,6 +167,17 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
             },
             {
                 ...NAMED_VALUED_DEFINITION.CHILDREN,
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key': optionalOneChild(
+                    (child) => processElement(child, {}, {}).body,
+                ),
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag': (children) => {
+                    const flags = new Map();
+                    children.forEach((child) => {
+                        const flag = new XmlInlineFlagDefinition(child, this);
+                        flags.set(flag.getEffectiveName(), flag);
+                    });
+                    return flags;
+                },
             },
         );
         this.name = parsed.attributes.name;
@@ -173,17 +185,27 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         this.datatype = parsed.attributes['as-type'];
         this.collapsible = parsed.attributes.collapsible;
 
-        this.useName = parsed.children['use-name'];
-        this.formalName = parsed.children['formal-name'];
-        this.description = parsed.children.description;
-        this.remarks = parsed.children.remarks;
+        this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
+        this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
+        this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
+        this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
+        this.jsonValueKeyName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key'];
 
-        this.allowedValuesConstraints = parsed.children.constraint?.allowedValuesConstraints ?? [];
-        this.matchesConstraints = parsed.children.constraint?.matchesConstraints ?? [];
-        this.indexHasKeyConstraints = parsed.children.constraint?.indexHasConstraints ?? [];
-        this.expectConstraints = parsed.children.constraint?.expectConstraints ?? [];
-        this.indexConstraints = parsed.children.constraint?.indexConstraints ?? [];
-        this.uniqueConstraints = parsed.children.constraint?.uniqueConstraints ?? [];
-        this.cardinalityConstraints = parsed.children.constraint?.cardinalityConstraints ?? [];
+        this.flagInstances = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
+
+        this.allowedValuesConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.allowedValuesConstraints ?? [];
+        this.matchesConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? [];
+        this.indexHasKeyConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? [];
+        this.expectConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? [];
+        this.indexConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexConstraints ?? [];
+        this.uniqueConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? [];
+        this.cardinalityConstraints =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ?? [];
     }
 }

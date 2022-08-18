@@ -24,14 +24,21 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { processElement } from '@oscal/data-utils';
+import { processBooleanAttribute, processElement, undefineableAttribute } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { AbstractFlagDefinition } from '@oscal/metaschema-model-common/definition';
+import { MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
+import {
+    AbstractFlagDefinition,
+    INamedModelDefinition,
+    inlineNamedDefineable,
+} from '@oscal/metaschema-model-common/definition';
+import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
+import { ModuleScope } from '@oscal/metaschema-model-common/util';
 import { NAMED_VALUED_DEFINITION } from './processing/model.js';
 
-export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
-    private readonly metaschema;
-    protected readonly flagDefinitionXml;
+class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinition) {
+    private readonly parent;
+    private readonly flagDefinitionXml;
 
     private readonly name;
     getName() {
@@ -92,28 +99,34 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         ];
     }
 
-    private readonly moduleScope;
     getModuleScope() {
-        return this.moduleScope;
+        return ModuleScope.LOCAL;
     }
 
-    getContainingMetaschema() {
-        return this.metaschema;
+    getContainingMetaschema(): AbstractMetaschema {
+        return this.parent.getContainingMetaschema();
     }
 
     getInlineInstance() {
-        return undefined;
+        return this.parent;
     }
 
-    constructor(flagDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    private readonly required;
+    isRequired() {
+        return this.required;
+    }
+
+    constructor(flagDefinitionXml: HTMLElement, parent: XmlInlineFlagDefinition) {
         super();
-        this.metaschema = metaschema;
         this.flagDefinitionXml = flagDefinitionXml;
+        this.parent = parent;
 
         const parsed = processElement(
             flagDefinitionXml,
             {
-                ...NAMED_VALUED_DEFINITION.ATTRIBUTES,
+                name: NAMED_VALUED_DEFINITION.ATTRIBUTES.name,
+                'as-type': NAMED_VALUED_DEFINITION.ATTRIBUTES['as-type'],
+                required: undefineableAttribute(processBooleanAttribute),
             },
             {
                 ...NAMED_VALUED_DEFINITION.CHILDREN,
@@ -121,8 +134,8 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         );
 
         this.name = parsed.attributes.name;
-        this.moduleScope = parsed.attributes.scope;
         this.datatype = parsed.attributes['as-type'];
+        this.required = parsed.attributes.required;
 
         this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
         this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
@@ -137,5 +150,34 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? [];
         this.expectConstraints =
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? [];
+    }
+}
+
+export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
+    private readonly internalFlagDefinition;
+
+    isRequired(): boolean {
+        return this.internalFlagDefinition.isRequired() ?? false;
+    }
+    getDefinition() {
+        return this.internalFlagDefinition;
+    }
+    getRemarks(): MarkupMultiLine | undefined {
+        return this.internalFlagDefinition.getRemarks();
+    }
+    getName() {
+        return this.internalFlagDefinition.getName();
+    }
+    getUseName() {
+        return this.internalFlagDefinition.getUseName();
+    }
+
+    getXmlNamespace() {
+        return undefined;
+    }
+
+    constructor(flagDefinitionXml: HTMLElement, parent: INamedModelDefinition) {
+        super(parent);
+        this.internalFlagDefinition = new InternalFlagDefinition(flagDefinitionXml, this);
     }
 }

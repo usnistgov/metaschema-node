@@ -24,6 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 import AbstractFieldDefinition from '../definition/AbstractFieldDefinition.js';
+import AbstractFlagDefinition from '../definition/AbstractFlagDefinition.js';
 import INamedModelDefinition from '../definition/INamedModelDefinition.js';
 import AbstractFlag from '../element/AbstractFlag.js';
 import { equals } from '../util/equality.js';
@@ -40,6 +41,8 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
     getContainingDefinition(): INamedModelDefinition {
         return this.parent;
     }
+
+    abstract getDefinition(): AbstractFlagDefinition;
 
     /**
      * Determines if a flag value is required to be provided.

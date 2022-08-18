@@ -51,7 +51,7 @@ describe('processElement()', () => {
         const result = processElement(
             element,
             {
-                '{http://test.example/fake-schema}someAttr': requireAttribute((attr) => attr),
+                someAttr: requireAttribute((attr) => attr),
             },
             {
                 '{http://test.example/fake-schema}a': requireOneChild(
@@ -59,7 +59,7 @@ describe('processElement()', () => {
                 ),
             },
         );
-        expect(result.attributes['{http://test.example/fake-schema}someAttr']).toBe('someValue');
+        expect(result.attributes['someAttr']).toBe('someValue');
         expect(result.children['{http://test.example/fake-schema}a']).toBe('someLink.com');
     });
 
@@ -69,7 +69,7 @@ describe('processElement()', () => {
             processElement(
                 element,
                 {
-                    '{http://test.example/fake-schema}someAttr': requireAttribute((attr) => attr),
+                    someAttr: requireAttribute((attr) => attr),
                 },
                 {
                     '{http://test.example/fake-schema}a': forEachChild((child) => child),
@@ -121,10 +121,10 @@ describe('processAttributes()', () => {
             </DOCUMENT>
         `).documentElement;
         const result = processAttributes(element, {
-            '{https://test.example/schema}test': (attr) => attr,
+            test: (attr) => attr,
             '{https://test.example/schema2}test': (attr) => attr,
         });
-        expect(result['{https://test.example/schema}test']).toBe('testValue');
+        expect(result['test']).toBe('testValue');
         expect(result['{https://test.example/schema2}test']).toBe('testValue2');
     });
 });

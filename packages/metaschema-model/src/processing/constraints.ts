@@ -84,6 +84,20 @@ const processMetapath: DefiniteAttributeProcessor<MetapathExpression> = (attribu
     return new MetapathExpression(attribute);
 };
 
+const processTarget: AttributeProcessor<MetapathExpression> = (attribute, context) => {
+    if (attribute === null) {
+        if (context.parent.parentElement?.tagName === 'define-assembly') {
+            throw XmlProcessingError.withContext(context, "target must be set on an assembly's constraint");
+        }
+        return processMetapath('.', context);
+    } else {
+        if (context.parent.parentElement?.tagName === 'define-flag') {
+            throw XmlProcessingError.withContext(context, "target cannot be set on a flag's constraint");
+        }
+        return processMetapath(attribute, context);
+    }
+};
+
 type ConstraintsOutput = {
     cardinalityConstraints: CardinalityConstraint[];
     expectConstraints: ExpectConstraint[];
@@ -99,34 +113,35 @@ export const processConstraints: ChildProcessor<ConstraintsOutput> = (child, _co
         child,
         {},
         {
-            'has-cardinality': forEachChild(processCardinalityConstraint),
-            expect: forEachChild(processExpectConstraint),
-            'index-has-key': forEachChild(processIndexHasConstraint),
-            index: forEachChild(processIndexConstraint),
-            'is-unique': forEachChild(processUniqueConstraint),
-            matches: forEachChild(processMatchesConstraint),
-            'allowed-values': forEachChild(processAllowedValuesConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}has-cardinality': forEachChild(processCardinalityConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}expect': forEachChild(processExpectConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}index-has-key': forEachChild(processIndexHasConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}index': forEachChild(processIndexConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}is-unique': forEachChild(processUniqueConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}matches': forEachChild(processMatchesConstraint),
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}allowed-values':
+                forEachChild(processAllowedValuesConstraint),
         },
     );
     return {
-        cardinalityConstraints: processed.children['has-cardinality'],
-        expectConstraints: processed.children.expect,
-        indexHasConstraints: processed.children['index-has-key'],
-        indexConstraints: processed.children.index,
-        uniqueConstraints: processed.children['is-unique'],
-        matchesConstraints: processed.children.matches,
-        allowedValuesConstraints: processed.children['allowed-values'],
+        cardinalityConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}has-cardinality'],
+        expectConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}expect'],
+        indexHasConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}index-has-key'],
+        indexConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}index'],
+        uniqueConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}is-unique'],
+        matchesConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}matches'],
+        allowedValuesConstraints: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}allowed-values'],
     };
 };
 
 const CONSTRAINT_COMMON_ATTRS = {
     id: undefineableAttribute((attr) => attr),
     level: processLevel,
-    target: requireAttribute(processMetapath),
+    target: processTarget,
 };
 
 const CONSTRAINT_COMMON_CHILDREN = {
-    remarks: optionalOneChild(processMarkupMultiLine),
+    '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks': optionalOneChild(processMarkupMultiLine),
 };
 
 const processCardinalityConstraint: ChildProcessor<CardinalityConstraint> = (child, _context) => {
@@ -142,7 +157,7 @@ const processCardinalityConstraint: ChildProcessor<CardinalityConstraint> = (chi
     return new CardinalityConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
         processed.attributes['min-occurs'],
         processed.attributes['max-occurs'],
@@ -153,15 +168,20 @@ const processExpectConstraint: ChildProcessor<ExpectConstraint> = (child, _conte
     const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, test: requireAttribute(processMetapath) },
-        { ...CONSTRAINT_COMMON_CHILDREN, message: requireOneChild((child) => processElement(child, {}, {}).body) },
+        {
+            ...CONSTRAINT_COMMON_CHILDREN,
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}message': requireOneChild(
+                (child) => processElement(child, {}, {}).body,
+            ),
+        },
     );
     return new ExpectConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
         processed.attributes.test,
-        processed.children.message,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}message'],
     );
 };
 
@@ -176,7 +196,7 @@ const processKeyFields: ChildProcessor<IKeyField> = (child, _context) => {
     );
     return {
         pattern: processed.attributes.pattern,
-        remarks: processed.children.remarks,
+        remarks: processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         target: processed.attributes.target,
     };
 };
@@ -185,14 +205,17 @@ const processIndexHasConstraint: ChildProcessor<IndexHasConstraint> = (child, _c
     const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
-        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+        {
+            ...CONSTRAINT_COMMON_CHILDREN,
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields': forEachChild(processKeyFields),
+        },
     );
     return new IndexHasConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
-        processed.children['key-fields'],
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields'],
         processed.attributes.name,
     );
 };
@@ -201,14 +224,17 @@ const processIndexConstraint: ChildProcessor<IndexConstraint> = (child, _context
     const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS, name: requireAttribute((attr) => attr) },
-        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+        {
+            ...CONSTRAINT_COMMON_CHILDREN,
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields': forEachChild(processKeyFields),
+        },
     );
     return new IndexConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
-        processed.children['key-fields'],
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields'],
         processed.attributes.name,
     );
 };
@@ -217,14 +243,17 @@ const processUniqueConstraint: ChildProcessor<UniqueConstraint> = (child, _conte
     const processed = processElement(
         child,
         { ...CONSTRAINT_COMMON_ATTRS },
-        { ...CONSTRAINT_COMMON_CHILDREN, 'key-fields': forEachChild(processKeyFields) },
+        {
+            ...CONSTRAINT_COMMON_CHILDREN,
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields': forEachChild(processKeyFields),
+        },
     );
     return new UniqueConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
-        processed.children['key-fields'],
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}key-fields'],
     );
 };
 
@@ -241,7 +270,7 @@ const processMatchesConstraint: ChildProcessor<MatchesConstraint> = (child, _con
     return new MatchesConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
         processed.attributes.pattern,
         processed.attributes.datatype,
@@ -257,7 +286,7 @@ const processAllowedValuesConstraint: ChildProcessor<AllowedValuesConstraint> = 
         },
         {
             ...CONSTRAINT_COMMON_CHILDREN,
-            enum: (children, context) => {
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}enum': (children, context) => {
                 const allowedValuesMap = new Map<string, IAllowedValue>();
                 children.forEach((child) => {
                     const processed = processElement(
@@ -280,9 +309,9 @@ const processAllowedValuesConstraint: ChildProcessor<AllowedValuesConstraint> = 
     return new AllowedValuesConstraint(
         processed.attributes.id,
         processed.attributes.level,
-        processed.children.remarks,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'],
         processed.attributes.target,
-        processed.children.enum,
+        processed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}enum'],
         processed.attributes['allow-other'],
     );
 };

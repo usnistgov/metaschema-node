@@ -23,7 +23,7 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import AbstractFlagInstance from './AbstractFlagInstance.js';
@@ -34,7 +34,7 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
     /**
      * Propagate override from {@link IModelInstance}
      */
-    getContainingDefinition(): AbstractAssemblyDefinition;
+    getDefinition(): INamedModelDefinition;
 
     /**
      * Indicates if a flag's value can be used as a property name in the containing object in JSON who's
@@ -61,7 +61,7 @@ export function namedModelInstanceable<TBase extends AbstractConstructor<Abstrac
         extends namedInstanceable(modelInstanceable(Base))
         implements INamedModelInstance
     {
-        abstract getContainingDefinition(): AbstractAssemblyDefinition;
+        abstract getDefinition(): INamedModelDefinition;
 
         hasJsonKey(): boolean {
             return this.getDefinition().hasJsonKey();

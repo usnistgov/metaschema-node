@@ -30,7 +30,7 @@ import { ModuleScope } from '@oscal/metaschema-model-common/util';
 export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute, context) => {
     if (attribute === 'local') {
         return ModuleScope.LOCAL;
-    } else if (attribute === 'inherited' || attribute === undefined) {
+    } else if (attribute === 'inherited' || attribute === null) {
         return ModuleScope.INHERITED;
     }
     throw XmlProcessingError.withContext(context, `Unknown module scope ${attribute}`);

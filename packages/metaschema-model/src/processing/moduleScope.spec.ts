@@ -24,10 +24,18 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AttributeProcessor } from '@oscal/data-utils';
-import { IDatatypeAdapter } from '@oscal/metaschema-model-common/datatype';
+import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { placeholderContext } from '../testUtil/index.js';
+import { processModuleScope } from './moduleScope.js';
 
-export const processDatatypeAdapter: AttributeProcessor<IDatatypeAdapter<unknown>> = (child, _context) => {
-    // TODO: implement
-    return { name: child ?? '', getDefaultJsonValueKey: () => 'default' };
-};
+describe('processModuleScope()', () => {
+    it('should process modules scope', () => {
+        expect(processModuleScope('local', placeholderContext)).toBe(ModuleScope.LOCAL);
+        expect(processModuleScope('inherited', placeholderContext)).toBe(ModuleScope.INHERITED);
+        expect(processModuleScope(null, placeholderContext)).toBe(ModuleScope.INHERITED);
+    });
+
+    it('should throw on invalid module scope', () => {
+        expect(() => processModuleScope('invalid', placeholderContext)).toThrow();
+    });
+});
