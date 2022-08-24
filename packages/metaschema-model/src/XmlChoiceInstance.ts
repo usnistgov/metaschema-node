@@ -24,18 +24,54 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { ModuleScope } from '@oscal/metaschema-model-common/util';
-import { placeholderContext } from '../testUtil/index.js';
-import { processModuleScope } from './moduleScope.js';
+import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
+import { AbstractAssemblyInstance, AbstractChoiceInstance } from '@oscal/metaschema-model-common/instance';
+import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
-describe('processModuleScope()', () => {
-    it('should process modules scope', () => {
-        expect(processModuleScope('local', placeholderContext)).toBe(ModuleScope.LOCAL);
-        expect(processModuleScope('inherited', placeholderContext)).toBe(ModuleScope.INHERITED);
-        expect(processModuleScope(null, placeholderContext)).toBe(ModuleScope.INHERITED);
-    });
+export default class XmlChoiceInstance extends AbstractChoiceInstance {
+    getGroupAsName() {
+        return undefined;
+    }
 
-    it('should throw on invalid module scope', () => {
-        expect(() => processModuleScope('invalid', placeholderContext)).toThrow();
-    });
-});
+    getRemarks() {
+        // TODO: add support if remarks are added
+        return undefined;
+    }
+
+    getAssemblyInstances(): Map<string, AbstractAssemblyInstance> {
+        return this.modelContainer.assemblyInstances;
+    }
+
+    getChoiceInstances() {
+        return this.modelContainer.choiceInstances;
+    }
+
+    getFieldInstances() {
+        return this.modelContainer.fieldInstances;
+    }
+
+    getModelInstances() {
+        return this.modelContainer.modelInstances;
+    }
+
+    getNamedModelInstances() {
+        return this.modelContainer.namedModelInstances;
+    }
+
+    private readonly choiceInstanceXml;
+    private readonly containingAssembly;
+    private _modelContainer: XmlModelContainerSupport | undefined;
+    protected get modelContainer() {
+        if (this._modelContainer === undefined) {
+            this._modelContainer = new XmlModelContainerSupport(this.choiceInstanceXml, this.containingAssembly);
+        }
+
+        return this._modelContainer;
+    }
+
+    constructor(choiceInstanceXml: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+        super(containingAssembly);
+        this.choiceInstanceXml = choiceInstanceXml;
+        this.containingAssembly = containingAssembly;
+    }
+}

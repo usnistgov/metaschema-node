@@ -24,16 +24,29 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { optionalOneChild, processElement } from '@oscal/data-utils';
-import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
+import { processElement } from '@oscal/data-utils';
+import { AbstractAssemblyDefinition, inlineNamedDefineable } from '@oscal/metaschema-model-common/definition';
 import { AbstractAssemblyInstance } from '@oscal/metaschema-model-common/instance';
-import { NAMED_DEFINITION, NAMED_MODEL_DEFINITION } from './processing/model.js';
+import { JsonGroupAsBehavior, ModuleScope } from '@oscal/metaschema-model-common/util';
+import { MODEL_INSTANCE, NAMED_DEFINITION, NAMED_MODEL_DEFINITION } from './processing/model.js';
 import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
-export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinition {
+class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyDefinition) {
     protected readonly assemblyDefinitionXml;
+
+    private readonly parent;
+    getInlineInstance() {
+        return this.parent;
+    }
+
+    getModuleScope(): ModuleScope {
+        return ModuleScope.LOCAL;
+    }
+
+    getRootName() {
+        return undefined;
+    }
 
     private readonly name;
     getName() {
@@ -150,35 +163,19 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
         return this.jsonKey ? this.getFlagInstances().get(this.jsonKey) : undefined;
     }
 
-    private readonly rootName;
-    getRootName() {
-        return this.rootName;
-    }
-
-    getInlineInstance() {
-        return undefined;
-    }
-
-    private readonly moduleScope;
-    getModuleScope() {
-        return this.moduleScope;
-    }
-
-    private readonly metaschema;
     getContainingMetaschema() {
-        return this.metaschema;
+        return this.getInlineInstance().getContainingMetaschema();
     }
 
-    constructor(assemblyDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(assemblyDefinitionXml: HTMLElement, parent: XmlInlineAssemblyDefinition) {
         super();
-        this.metaschema = metaschema;
+        this.parent = parent;
         this.assemblyDefinitionXml = assemblyDefinitionXml;
 
         const parsed = processElement(
             assemblyDefinitionXml,
             {
-                ...NAMED_DEFINITION.ATTRIBUTES,
-                ...NAMED_MODEL_DEFINITION.ATTRIBUTES,
+                name: NAMED_DEFINITION.ATTRIBUTES.name,
             },
             {
                 ...NAMED_DEFINITION.CHILDREN,
@@ -191,21 +188,16 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
                     });
                     return flags;
                 },
-                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}root-name': optionalOneChild(
-                    (child) => processElement(child, {}, {}).body,
-                ),
             },
         );
 
         this.name = parsed.attributes.name;
-        this.moduleScope = parsed.attributes.scope;
 
         this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
         this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
         this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
         this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
         this.jsonKey = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'];
-        this.rootName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}root-name'];
 
         this.flagInstances = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
 
@@ -223,5 +215,63 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? [];
         this.cardinalityConstraints =
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ?? [];
+    }
+}
+
+export default class XmlInlineAssemblyDefinition extends AbstractAssemblyInstance {
+    private readonly internalAssemblyDefinition;
+    getDefinition() {
+        return this.internalAssemblyDefinition;
+    }
+
+    getName() {
+        return this.getDefinition().getName();
+    }
+
+    getUseName() {
+        return this.getDefinition().getUseName();
+    }
+
+    getRemarks() {
+        return this.getDefinition().getRemarks();
+    }
+
+    private readonly minOccurs;
+    getMinOccurs() {
+        return this.minOccurs;
+    }
+
+    private readonly maxOccurs;
+    getMaxOccurs() {
+        return this.maxOccurs;
+    }
+
+    private readonly groupAsName;
+    getGroupAsName() {
+        return this.groupAsName;
+    }
+
+    private readonly jsonGroupAsBehavior;
+    getJsonGroupAsBehavior() {
+        return this.jsonGroupAsBehavior;
+    }
+
+    private readonly xmlGroupAsBehavior;
+    getXmlGroupAsBehavior() {
+        return this.xmlGroupAsBehavior;
+    }
+
+    constructor(assemblyDefinitionXml: HTMLElement, parent: AbstractAssemblyDefinition) {
+        super(parent);
+        this.internalAssemblyDefinition = new InternalAssemblyDefinition(assemblyDefinitionXml, this);
+        const parsed = processElement(assemblyDefinitionXml, MODEL_INSTANCE.ATTRIBUTES, MODEL_INSTANCE.CHILDREN);
+        this.minOccurs = parsed.attributes['min-occurs'];
+        this.maxOccurs = parsed.attributes['max-occurs'];
+        this.groupAsName =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes.name ?? undefined;
+        this.jsonGroupAsBehavior =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes['in-json'] ??
+            JsonGroupAsBehavior.SINGLETON_OR_LIST;
+        this.xmlGroupAsBehavior = parsed.attributes['in-xml'];
     }
 }

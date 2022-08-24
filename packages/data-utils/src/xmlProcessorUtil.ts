@@ -78,6 +78,24 @@ export function requireAttribute<T>(definiteAttributeProcessor: DefiniteAttribut
 }
 
 /**
+ * Return a fallback value if the attribute does not exist
+ * @param definiteAttributeProcessor The processor to wrap
+ * @param defaultValue The default value to return if the attribute does not exist
+ * @returns The wrapped attribute processor
+ */
+export function defaultibleAttribute<T, DEFAULT_T>(
+    definiteAttributeProcessor: DefiniteAttributeProcessor<T>,
+    defaultValue: DEFAULT_T,
+): AttributeProcessor<T | DEFAULT_T> {
+    return (attribute, context) => {
+        if (attribute === null) {
+            return defaultValue;
+        }
+        return definiteAttributeProcessor(attribute, context);
+    };
+}
+
+/**
  * Return undefined if the attribute does not exist
  * @param definiteAttributeProcessor The processor to wrap
  * @returns The wrapped attribute processor
@@ -85,12 +103,7 @@ export function requireAttribute<T>(definiteAttributeProcessor: DefiniteAttribut
 export function undefineableAttribute<T>(
     definiteAttributeProcessor: DefiniteAttributeProcessor<T>,
 ): AttributeProcessor<T | undefined> {
-    return (attribute, context) => {
-        if (attribute === null) {
-            return undefined;
-        }
-        return definiteAttributeProcessor(attribute, context);
-    };
+    return defaultibleAttribute(definiteAttributeProcessor, undefined);
 }
 
 /**

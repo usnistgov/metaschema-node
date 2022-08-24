@@ -25,8 +25,6 @@
  */
 
 import { processBooleanAttribute, processElement, undefineableAttribute } from '@oscal/data-utils';
-import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { MarkupMultiLine } from '@oscal/metaschema-model-common/datatype';
 import {
     AbstractFlagDefinition,
     INamedModelDefinition,
@@ -103,17 +101,12 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
         return ModuleScope.LOCAL;
     }
 
-    getContainingMetaschema(): AbstractMetaschema {
+    getContainingMetaschema() {
         return this.parent.getContainingMetaschema();
     }
 
     getInlineInstance() {
         return this.parent;
-    }
-
-    private readonly required;
-    isRequired() {
-        return this.required;
     }
 
     constructor(flagDefinitionXml: HTMLElement, parent: XmlInlineFlagDefinition) {
@@ -126,7 +119,6 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
             {
                 name: NAMED_VALUED_DEFINITION.ATTRIBUTES.name,
                 'as-type': NAMED_VALUED_DEFINITION.ATTRIBUTES['as-type'],
-                required: undefineableAttribute(processBooleanAttribute),
             },
             {
                 ...NAMED_VALUED_DEFINITION.CHILDREN,
@@ -135,7 +127,6 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
 
         this.name = parsed.attributes.name;
         this.datatype = parsed.attributes['as-type'];
-        this.required = parsed.attributes.required;
 
         this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
         this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
@@ -156,13 +147,15 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
 export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
     private readonly internalFlagDefinition;
 
-    isRequired(): boolean {
-        return this.internalFlagDefinition.isRequired() ?? false;
+    private readonly required;
+    isRequired() {
+        return this.required ?? false;
     }
+
     getDefinition() {
         return this.internalFlagDefinition;
     }
-    getRemarks(): MarkupMultiLine | undefined {
+    getRemarks() {
         return this.internalFlagDefinition.getRemarks();
     }
     getName() {
@@ -179,5 +172,13 @@ export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
     constructor(flagDefinitionXml: HTMLElement, parent: INamedModelDefinition) {
         super(parent);
         this.internalFlagDefinition = new InternalFlagDefinition(flagDefinitionXml, this);
+        const parsed = processElement(
+            flagDefinitionXml,
+            {
+                required: undefineableAttribute(processBooleanAttribute),
+            },
+            {},
+        );
+        this.required = parsed.attributes.required;
     }
 }

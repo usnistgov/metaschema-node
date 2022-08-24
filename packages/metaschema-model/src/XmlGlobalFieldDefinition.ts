@@ -27,8 +27,7 @@
 import { optionalOneChild, processBooleanAttribute, processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
-import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
-import { NAMED_VALUED_DEFINITION } from './processing/model.js';
+import { NAMED_MODEL_DEFINITION, NAMED_VALUED_DEFINITION } from './processing/model.js';
 import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
@@ -60,19 +59,8 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         return this.remarks;
     }
 
-    getJsonValueKeyFlagInstance(): AbstractFlagInstance | undefined {
-        // TODO: implement
-        // throw new Error('Method not implemented.');
-        return undefined;
-    }
-
-    private readonly jsonValueKeyName;
-    getJsonValueKeyName() {
-        return this.jsonValueKeyName ?? this.getDatatypeAdapter().getDefaultJsonValueKey();
-    }
-
     private readonly collapsible;
-    isCollapsible(): boolean {
+    isCollapsible() {
         return this.collapsible;
     }
 
@@ -95,7 +83,7 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     }
 
     private readonly flagInstances;
-    getFlagInstances(): Map<string, AbstractFlagInstance> {
+    getFlagInstances() {
         return this.flagInstances;
     }
 
@@ -146,12 +134,22 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         ];
     }
 
-    hasJsonKey(): boolean {
-        throw new Error('Method not implemented.');
+    private readonly jsonKey;
+    hasJsonKey() {
+        return this.jsonKey !== undefined;
     }
 
-    getJsonKeyFlagInstance(): AbstractFlagInstance | undefined {
-        throw new Error('Method not implemented.');
+    getJsonKeyFlagInstance() {
+        return this.hasJsonKey() ? this.getFlagInstances().get(this.jsonKey) : undefined;
+    }
+
+    private readonly jsonValueKeyName;
+    getJsonValueKeyName() {
+        return this.jsonValueKeyName ?? this.getDatatypeAdapter().getDefaultJsonValueKey();
+    }
+
+    getJsonValueKeyFlagInstance() {
+        return this.getFlagInstances().get(this.getJsonValueKeyName());
     }
 
     constructor(fieldDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
@@ -163,10 +161,12 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
             this.fieldDefinitionXml,
             {
                 ...NAMED_VALUED_DEFINITION.ATTRIBUTES,
+                ...NAMED_MODEL_DEFINITION.ATTRIBUTES,
                 collapsible: (attr, ctx) => (attr !== null ? processBooleanAttribute(attr, ctx) : true),
             },
             {
                 ...NAMED_VALUED_DEFINITION.CHILDREN,
+                ...NAMED_MODEL_DEFINITION.CHILDREN,
                 '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key': optionalOneChild(
                     (child) => processElement(child, {}, {}).body,
                 ),
@@ -190,6 +190,7 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
         this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
         this.jsonValueKeyName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key'];
+        this.jsonKey = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'];
 
         this.flagInstances = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
 

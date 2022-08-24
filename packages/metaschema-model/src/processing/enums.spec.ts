@@ -24,14 +24,18 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AttributeProcessor, XmlProcessingError } from '@oscal/data-utils';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { placeholderContext } from '../testUtil/index.js';
+import { processModuleScope } from './enums.js';
 
-export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute, context) => {
-    if (attribute === 'local') {
-        return ModuleScope.LOCAL;
-    } else if (attribute === 'inherited' || attribute === null) {
-        return ModuleScope.INHERITED;
-    }
-    throw XmlProcessingError.withContext(context, `Unknown module scope ${attribute}`);
-};
+describe('processModuleScope()', () => {
+    it('should process modules scope', () => {
+        expect(processModuleScope('local', placeholderContext)).toBe(ModuleScope.LOCAL);
+        expect(processModuleScope('inherited', placeholderContext)).toBe(ModuleScope.INHERITED);
+        expect(processModuleScope(null, placeholderContext)).toBe(ModuleScope.INHERITED);
+    });
+
+    it('should throw on invalid module scope', () => {
+        expect(() => processModuleScope('invalid', placeholderContext)).toThrow();
+    });
+});

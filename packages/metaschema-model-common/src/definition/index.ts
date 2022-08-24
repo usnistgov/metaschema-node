@@ -27,7 +27,6 @@ import AbstractAssemblyDefinition from './AbstractAssemblyDefinition.js';
 import AbstractFieldDefinition from './AbstractFieldDefinition.js';
 import AbstractFlagDefinition from './AbstractFlagDefinition.js';
 import IInlineNamedDefinition from './IInlineNamedDefinition.js';
-import AbstractRootAssemblyDefinition from './AbstractRootAssemblyDefinition.js';
 import IDefinition from './IDefinition.js';
 import IModelContainer from './IModelContainer.js';
 import INamedDefinition from './INamedDefinition.js';
@@ -42,7 +41,6 @@ export {
     AbstractFieldDefinition,
     AbstractFlagDefinition,
     IInlineNamedDefinition,
-    AbstractRootAssemblyDefinition,
     IDefinition,
     IModelContainer,
     INamedDefinition,

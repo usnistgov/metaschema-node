@@ -23,32 +23,37 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import QName from '../util/QName.js';
-import AbstractAssemblyDefinition from './AbstractAssemblyDefinition.js';
 
-export default abstract class AbstractRootAssemblyDefinition extends AbstractAssemblyDefinition {
-    /**
-     * Get the root name.
-     *
-     * @returns the root name
-     */
-    abstract getRootName(): string;
+import { AttributeProcessor, XmlProcessingError } from '@oscal/data-utils';
+import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
 
-    /**
-     * Get the XML qualified name to use in XML as the root element.
-     *
-     * @returns the root XML qualified name
-     */
-    getRootXmlQName(): QName {
-        return new QName(this.getRootName(), this.getContainingMetaschema().xmlNamespace);
+export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute, context) => {
+    if (attribute === 'local') {
+        return ModuleScope.LOCAL;
+    } else if (attribute === 'inherited' || attribute === null) {
+        return ModuleScope.INHERITED;
     }
+    throw XmlProcessingError.withContext(context, `Unknown module scope ${attribute}`);
+};
 
-    /**
-     * Get the name used for the associated property in JSON/YAML.
-     *
-     * @returns the root JSON property name
-     */
-    getRootJsonName() {
-        return this.getRootName();
+export const processXmlGroupAsBehavior: AttributeProcessor<XmlGroupAsBehavior> = (attribute, context) => {
+    if (attribute === 'WITH_WRAPPER') {
+        return XmlGroupAsBehavior.GROUPED;
+    } else if (attribute === 'UNWRAPPED') {
+        return XmlGroupAsBehavior.UNGROUPED;
     }
-}
+    throw XmlProcessingError.withContext(context, `Unknown xml group-as behavior ${attribute}`);
+};
+
+export const processJsonGroupAsBehavior: AttributeProcessor<JsonGroupAsBehavior> = (attribute, context) => {
+    switch (attribute) {
+        case 'ARRAY':
+            return JsonGroupAsBehavior.LIST;
+        case 'SINGLETON_OR_ARRAY':
+            return JsonGroupAsBehavior.SINGLETON_OR_LIST;
+        case 'BY_KEY':
+            return JsonGroupAsBehavior.KEYED;
+        default:
+            throw XmlProcessingError.withContext(context, `Unknown json group-as behavior ${attribute}`);
+    }
+};

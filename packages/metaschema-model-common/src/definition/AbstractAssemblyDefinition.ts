@@ -27,6 +27,7 @@ import CardinalityConstraint from '../constraint/CardinalityConstraint.js';
 import IndexConstraint from '../constraint/IndexConstraint.js';
 import UniqueConstraint from '../constraint/UniqueConstraint.js';
 import AbstractAssembly from '../element/AbstractAssembly.js';
+import QName from '../util/QName.js';
 import { modelContainable } from './IModelContainer.js';
 import { namedModelDefineable } from './INamedModelDefinition.js';
 
@@ -53,4 +54,39 @@ export default abstract class AbstractAssemblyDefinition extends modelContainabl
      * @returns the collection of cardinality constraints, which may be empty
      */
     abstract getCardinalityConstraints(): CardinalityConstraint[];
+
+    /**
+     * Get the root name.
+     *
+     * @returns the root name
+     */
+    abstract getRootName(): string | undefined;
+
+    /*
+     * @returns true if getRootName is set
+     */
+    isRoot() {
+        return this.getRootName() !== undefined;
+    }
+
+    /**
+     * Get the XML qualified name to use in XML as the root element.
+     *
+     * @returns the root XML qualified name
+     */
+    getRootXmlQName() {
+        const rootName = this.getRootName();
+        if (rootName) {
+            return new QName(rootName, this.getContainingMetaschema().xmlNamespace);
+        }
+    }
+
+    /**
+     * Get the name used for the associated property in JSON/YAML.
+     *
+     * @returns the root JSON property name
+     */
+    getRootJsonName() {
+        return this.getRootName();
+    }
 }

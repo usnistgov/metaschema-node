@@ -28,7 +28,6 @@ import MarkupMultiLine from './datatype/markup/markupMultiLine.js';
 import AbstractAssemblyDefinition from './definition/AbstractAssemblyDefinition.js';
 import AbstractFieldDefinition from './definition/AbstractFieldDefinition.js';
 import AbstractFlagDefinition from './definition/AbstractFlagDefinition.js';
-import AbstractRootAssemblyDefinition from './definition/AbstractRootAssemblyDefinition.js';
 import INamedModelDefinition from './definition/INamedModelDefinition.js';
 
 /**
@@ -124,10 +123,8 @@ export default abstract class AbstractMetaschema {
      */
     abstract readonly assemblyDefinitions: Map<string, AbstractAssemblyDefinition>;
 
-    get rootAssemblyDefinitions(): Map<string, AbstractRootAssemblyDefinition> {
-        return new Map(
-            [...this.assemblyDefinitions].filter(([, v]) => v instanceof AbstractRootAssemblyDefinition),
-        ) as Map<string, AbstractRootAssemblyDefinition>; // TS doesn't know how to propagate instanceof check
+    get rootAssemblyDefinitions() {
+        return new Map([...this.assemblyDefinitions].filter(([, v]) => v.isRoot()));
     }
 
     /**

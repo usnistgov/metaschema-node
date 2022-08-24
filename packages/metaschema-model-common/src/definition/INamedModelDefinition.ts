@@ -64,6 +64,7 @@ export default interface INamedModelDefinition extends INamedDefinition {
      * @return `true` if the flag's value can be used as a property name, or `false` otherwise
      */
     hasJsonKey(): boolean;
+
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
     /**

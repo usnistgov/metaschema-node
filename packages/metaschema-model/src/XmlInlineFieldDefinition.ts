@@ -24,16 +24,20 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { optionalOneChild, processElement } from '@oscal/data-utils';
-import { AbstractMetaschema } from '@oscal/metaschema-model-common';
-import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
-import { AbstractAssemblyInstance } from '@oscal/metaschema-model-common/instance';
-import { NAMED_DEFINITION, NAMED_MODEL_DEFINITION } from './processing/model.js';
+import { optionalOneChild, processBooleanAttribute, processElement } from '@oscal/data-utils';
+import {
+    AbstractAssemblyDefinition,
+    AbstractFieldDefinition,
+    inlineNamedDefineable,
+} from '@oscal/metaschema-model-common/definition';
+import { AbstractFieldInstance } from '@oscal/metaschema-model-common/instance';
+import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
+import { MODEL_INSTANCE, NAMED_MODEL_DEFINITION, NAMED_VALUED_DEFINITION } from './processing/model.js';
 import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
-import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
-export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinition {
-    protected readonly assemblyDefinitionXml;
+class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinition) {
+    private readonly parent;
+    private readonly fieldDefinitionXml;
 
     private readonly name;
     getName() {
@@ -58,6 +62,33 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
     private readonly remarks;
     getRemarks() {
         return this.remarks;
+    }
+
+    private readonly collapsible;
+    isCollapsible() {
+        return this.collapsible;
+    }
+
+    getInlineInstance() {
+        return this.parent;
+    }
+
+    getModuleScope() {
+        return ModuleScope.LOCAL;
+    }
+
+    getContainingMetaschema() {
+        return this.parent.getContainingMetaschema();
+    }
+
+    private readonly datatype;
+    getDatatypeAdapter() {
+        return this.datatype;
+    }
+
+    private readonly flagInstances;
+    getFlagInstances() {
+        return this.flagInstances;
     }
 
     private readonly allowedValuesConstraints;
@@ -107,82 +138,43 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
         ];
     }
 
-    private readonly flagInstances;
-    getFlagInstances() {
-        return this.flagInstances;
-    }
-
-    private _modelContainer: XmlModelContainerSupport | undefined;
-    protected get modelContainer(): XmlModelContainerSupport {
-        if (this._modelContainer === undefined) {
-            this._modelContainer = new XmlModelContainerSupport(this.assemblyDefinitionXml, this);
-        }
-
-        return this._modelContainer;
-    }
-
-    getAssemblyInstances(): Map<string, AbstractAssemblyInstance> {
-        return this.modelContainer.assemblyInstances;
-    }
-
-    getChoiceInstances() {
-        return this.modelContainer.choiceInstances;
-    }
-
-    getFieldInstances() {
-        return this.modelContainer.fieldInstances;
-    }
-
-    getModelInstances() {
-        return this.modelContainer.modelInstances;
-    }
-
-    getNamedModelInstances() {
-        return this.modelContainer.namedModelInstances;
-    }
-
     private readonly jsonKey;
     hasJsonKey() {
         return this.jsonKey !== undefined;
     }
 
     getJsonKeyFlagInstance() {
-        return this.jsonKey ? this.getFlagInstances().get(this.jsonKey) : undefined;
+        return this.hasJsonKey() ? this.getFlagInstances().get(this.jsonKey) : undefined;
     }
 
-    private readonly rootName;
-    getRootName() {
-        return this.rootName;
+    private readonly jsonValueKeyName;
+    getJsonValueKeyName() {
+        return this.jsonValueKeyName ?? this.getDatatypeAdapter().getDefaultJsonValueKey();
     }
 
-    getInlineInstance() {
-        return undefined;
+    getJsonValueKeyFlagInstance() {
+        return this.getFlagInstances().get(this.getJsonValueKeyName());
     }
 
-    private readonly moduleScope;
-    getModuleScope() {
-        return this.moduleScope;
-    }
-
-    private readonly metaschema;
-    getContainingMetaschema() {
-        return this.metaschema;
-    }
-
-    constructor(assemblyDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(fieldDefinitionXml: HTMLElement, parent: XmlInlineFieldDefinition) {
         super();
-        this.metaschema = metaschema;
-        this.assemblyDefinitionXml = assemblyDefinitionXml;
+        this.fieldDefinitionXml = fieldDefinitionXml;
+        this.parent = parent;
 
         const parsed = processElement(
-            assemblyDefinitionXml,
+            fieldDefinitionXml,
             {
-                ...NAMED_DEFINITION.ATTRIBUTES,
-                ...NAMED_MODEL_DEFINITION.ATTRIBUTES,
+                name: NAMED_VALUED_DEFINITION.ATTRIBUTES.name,
+                'as-type': NAMED_VALUED_DEFINITION.ATTRIBUTES['as-type'],
+                collapsible: (attr, ctx) => (attr !== null ? processBooleanAttribute(attr, ctx) : true),
+                'in-xml': (attr) => attr,
             },
             {
-                ...NAMED_DEFINITION.CHILDREN,
+                ...NAMED_VALUED_DEFINITION.CHILDREN,
                 ...NAMED_MODEL_DEFINITION.CHILDREN,
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key': optionalOneChild(
+                    (child) => processElement(child, {}, {}).body,
+                ),
                 '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag': (children) => {
                     const flags = new Map();
                     children.forEach((child) => {
@@ -191,21 +183,19 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
                     });
                     return flags;
                 },
-                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}root-name': optionalOneChild(
-                    (child) => processElement(child, {}, {}).body,
-                ),
             },
         );
 
         this.name = parsed.attributes.name;
-        this.moduleScope = parsed.attributes.scope;
+        this.datatype = parsed.attributes['as-type'];
+        this.collapsible = parsed.attributes.collapsible;
 
         this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
         this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
         this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
         this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
+        this.jsonValueKeyName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key'];
         this.jsonKey = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'];
-        this.rootName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}root-name'];
 
         this.flagInstances = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
 
@@ -223,5 +213,71 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? [];
         this.cardinalityConstraints =
             parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ?? [];
+    }
+}
+
+export default class XmlInlineFieldDefinition extends AbstractFieldInstance {
+    private readonly internalFieldDefinition;
+    getDefinition() {
+        return this.internalFieldDefinition;
+    }
+
+    getName() {
+        return this.getDefinition().getName();
+    }
+
+    getUseName() {
+        return this.getDefinition().getUseName();
+    }
+
+    getRemarks() {
+        return this.getDefinition().getRemarks();
+    }
+
+    isInXmlWrapped() {
+        if (this.getDefinition().getDatatypeAdapter().name === 'markup-multiline') {
+            return this.xmlGroupAsBehavior === XmlGroupAsBehavior.GROUPED ?? true;
+        } else {
+            return true;
+        }
+    }
+
+    private readonly minOccurs;
+    getMinOccurs() {
+        return this.minOccurs;
+    }
+
+    private readonly maxOccurs;
+    getMaxOccurs() {
+        return this.maxOccurs;
+    }
+
+    private readonly groupAsName;
+    getGroupAsName() {
+        return this.groupAsName;
+    }
+
+    private readonly jsonGroupAsBehavior;
+    getJsonGroupAsBehavior() {
+        return this.jsonGroupAsBehavior;
+    }
+
+    private readonly xmlGroupAsBehavior;
+    getXmlGroupAsBehavior() {
+        return this.xmlGroupAsBehavior;
+    }
+
+    constructor(fieldDefinitionXml: HTMLElement, parent: AbstractAssemblyDefinition) {
+        super(parent);
+        this.internalFieldDefinition = new InternalFieldDefinition(fieldDefinitionXml, this);
+        const parsed = processElement(fieldDefinitionXml, MODEL_INSTANCE.ATTRIBUTES, MODEL_INSTANCE.CHILDREN);
+        this.minOccurs = parsed.attributes['min-occurs'];
+        this.maxOccurs = parsed.attributes['max-occurs'];
+        this.groupAsName =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes.name ?? undefined;
+        this.jsonGroupAsBehavior =
+            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes['in-json'] ??
+            JsonGroupAsBehavior.SINGLETON_OR_LIST;
+        this.xmlGroupAsBehavior = parsed.attributes['in-xml'];
     }
 }

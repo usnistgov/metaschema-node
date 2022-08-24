@@ -24,11 +24,18 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { requireAttribute, optionalOneChild, processElement } from '@oscal/data-utils';
+import {
+    requireAttribute,
+    optionalOneChild,
+    processElement,
+    processNumberAttribute,
+    defaultibleAttribute,
+} from '@oscal/data-utils';
 import { processConstraints } from './constraints.js';
 import { processDatatypeAdapter } from './datatype.js';
 import { processMarkupLine, processMarkupMultiLine } from './markup.js';
-import { processModuleScope } from './moduleScope.js';
+import { processJsonGroupAsBehavior, processModuleScope, processXmlGroupAsBehavior } from './enums.js';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
 
 export const METASCHEMA_NS = 'http://csrc.nist.gov/ns/oscal/metaschema/1.0';
 
@@ -96,3 +103,39 @@ export const NAMED_VALUED_DEFINITION = {
         ...VALUED_DEFINITION.CHILDREN,
     },
 } as const;
+
+export const NAMED_MODEL_DEFINITION = {
+    ATTRIBUTES: {
+        ...NAMED_DEFINITION.ATTRIBUTES,
+    },
+    CHILDREN: {
+        ...NAMED_DEFINITION.CHILDREN,
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key': optionalOneChild(
+            (child) =>
+                processElement(child, { 'flag-name': requireAttribute((attr) => attr) }, {}).attributes['flag-name'],
+        ),
+    },
+} as const;
+
+export const MODEL_INSTANCE = {
+    ATTRIBUTES: {
+        'min-occurs': defaultibleAttribute(processNumberAttribute, 0),
+        'max-occurs': defaultibleAttribute(
+            (attribute, context) => (attribute === 'unbounded' ? -1 : processNumberAttribute(attribute, context)),
+            -1,
+        ),
+        'in-xml': defaultibleAttribute(processXmlGroupAsBehavior, XmlGroupAsBehavior.UNGROUPED),
+    },
+    CHILDREN: {
+        '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as': optionalOneChild((child) =>
+            processElement(
+                child,
+                {
+                    name: (attr) => attr,
+                    'in-json': defaultibleAttribute(processJsonGroupAsBehavior, JsonGroupAsBehavior.SINGLETON_OR_LIST),
+                },
+                {},
+            ),
+        ),
+    },
+};

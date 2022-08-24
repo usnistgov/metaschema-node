@@ -61,14 +61,14 @@ export default interface IModelContainer {
      *
      * @returns a list of choice instances
      */
-    getChoiceInstances(): AbstractChoiceInstance;
+    getChoiceInstances(): AbstractChoiceInstance[];
 
     /**
      * Get all model instances within the container.
      *
      * @returns an ordered collection of model instances
      */
-    getModelInstances(): IModelInstance;
+    getModelInstances(): IModelInstance[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,8 +77,8 @@ export function modelContainable<TBase extends AbstractConstructor<any>>(Base: T
         abstract getNamedModelInstances(): Map<string, INamedModelInstance>;
         abstract getFieldInstances(): Map<string, AbstractFieldInstance>;
         abstract getAssemblyInstances(): Map<string, AbstractAssemblyInstance>;
-        abstract getChoiceInstances(): AbstractChoiceInstance;
-        abstract getModelInstances(): IModelInstance;
+        abstract getChoiceInstances(): AbstractChoiceInstance[];
+        abstract getModelInstances(): IModelInstance[];
     }
     return ModelContainer;
 }
