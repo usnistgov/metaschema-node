@@ -27,9 +27,9 @@
 import { optionalOneChild, processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
-import { AbstractAssemblyInstance } from '@oscal/metaschema-model-common/instance';
+import { AbstractAssemblyInstance, AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { NAMED_DEFINITION, NAMED_MODEL_DEFINITION } from './processing/model.js';
-import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
+import XmlFlagContainerSupport from './XmlFlagContainerSupport.js';
 import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
 export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinition {
@@ -110,8 +110,12 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
         ];
     }
 
-    getFlagInstances() {
-        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
+    private flagContainerSupport: XmlFlagContainerSupport | undefined;
+    getFlagInstances(): Map<string, AbstractFlagInstance> {
+        if (this.flagContainerSupport === undefined) {
+            this.flagContainerSupport = new XmlFlagContainerSupport(this.xml, this);
+        }
+        return this.flagContainerSupport.flagInstances;
     }
 
     private _modelContainer: XmlModelContainerSupport | undefined;
@@ -182,14 +186,6 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
             {
                 ...NAMED_DEFINITION.CHILDREN,
                 ...NAMED_MODEL_DEFINITION.CHILDREN,
-                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag': (children) => {
-                    const flags = new Map();
-                    children.forEach((child) => {
-                        const flag = new XmlInlineFlagDefinition(child, this);
-                        flags.set(flag.getEffectiveName(), flag);
-                    });
-                    return flags;
-                },
                 '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}root-name': optionalOneChild(
                     (child) => processElement(child, {}, {}).body,
                 ),

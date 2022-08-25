@@ -27,12 +27,13 @@
 import { optionalOneChild, processBooleanAttribute, processElement } from '@oscal/data-utils';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import { AbstractFieldDefinition } from '@oscal/metaschema-model-common/definition';
+import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { NAMED_MODEL_DEFINITION, NAMED_VALUED_DEFINITION } from './processing/model.js';
-import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
+import XmlFlagContainerSupport from './XmlFlagContainerSupport.js';
 
 export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     private readonly metaschema;
-    protected readonly fieldDefinitionXml;
+    protected readonly xml;
     private readonly parsed;
 
     getName() {
@@ -75,8 +76,12 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         return this.parsed.attributes['as-type'];
     }
 
-    getFlagInstances() {
-        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
+    private flagContainerSupport: XmlFlagContainerSupport | undefined;
+    getFlagInstances(): Map<string, AbstractFlagInstance> {
+        if (this.flagContainerSupport === undefined) {
+            this.flagContainerSupport = new XmlFlagContainerSupport(this.xml, this);
+        }
+        return this.flagContainerSupport.flagInstances;
     }
 
     getAllowedValuesConstraints() {
@@ -138,7 +143,7 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     }
 
     getJsonKeyFlagInstance() {
-        return this.hasJsonKey()
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key']
             ? this.getFlagInstances().get(
                   this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'],
               )
@@ -159,10 +164,10 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     constructor(fieldDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.fieldDefinitionXml = fieldDefinitionXml;
+        this.xml = fieldDefinitionXml;
 
         this.parsed = processElement(
-            this.fieldDefinitionXml,
+            fieldDefinitionXml,
             {
                 ...NAMED_VALUED_DEFINITION.ATTRIBUTES,
                 ...NAMED_MODEL_DEFINITION.ATTRIBUTES,
@@ -174,14 +179,6 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
                 '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key': optionalOneChild(
                     (child) => processElement(child, {}, {}).body,
                 ),
-                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag': (children) => {
-                    const flags = new Map();
-                    children.forEach((child) => {
-                        const flag = new XmlInlineFlagDefinition(child, this);
-                        flags.set(flag.getEffectiveName(), flag);
-                    });
-                    return flags;
-                },
             },
         );
     }

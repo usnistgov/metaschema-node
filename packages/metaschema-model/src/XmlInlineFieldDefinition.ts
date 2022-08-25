@@ -30,14 +30,16 @@ import {
     AbstractFieldDefinition,
     inlineNamedDefineable,
 } from '@oscal/metaschema-model-common/definition';
-import { AbstractFieldInstance } from '@oscal/metaschema-model-common/instance';
+import { AbstractFieldInstance, AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
 import { MODEL_INSTANCE, NAMED_MODEL_DEFINITION, NAMED_VALUED_DEFINITION } from './processing/model.js';
+import XmlFlagContainerSupport from './XmlFlagContainerSupport.js';
 import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 
 class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinition) {
     private readonly parent;
     private readonly parsed;
+    private readonly xml;
 
     getName() {
         return this.parsed.attributes.name;
@@ -79,8 +81,12 @@ class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinit
         return this.parsed.attributes['as-type'];
     }
 
-    getFlagInstances() {
-        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
+    private flagContainerSupport: XmlFlagContainerSupport | undefined;
+    getFlagInstances(): Map<string, AbstractFlagInstance> {
+        if (this.flagContainerSupport === undefined) {
+            this.flagContainerSupport = new XmlFlagContainerSupport(this.xml, this);
+        }
+        return this.flagContainerSupport.flagInstances;
     }
 
     getAllowedValuesConstraints() {
@@ -142,7 +148,7 @@ class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinit
     }
 
     getJsonKeyFlagInstance() {
-        return this.hasJsonKey()
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key']
             ? this.getFlagInstances().get(
                   this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'],
               )
@@ -163,6 +169,7 @@ class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinit
     constructor(fieldDefinitionXml: HTMLElement, parent: XmlInlineFieldDefinition) {
         super();
         this.parent = parent;
+        this.xml = fieldDefinitionXml;
 
         this.parsed = processElement(
             fieldDefinitionXml,
