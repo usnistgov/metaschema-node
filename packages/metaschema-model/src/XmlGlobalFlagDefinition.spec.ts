@@ -25,7 +25,7 @@
  */
 
 import { parseXml } from '@oscal/data-utils';
-import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { ModelType, ModuleScope } from '@oscal/metaschema-model-common/util';
 import { placeholderMetaschema } from './testUtil/index.js';
 import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 
@@ -53,5 +53,7 @@ describe('XmlGlobalFlagDefinition', () => {
         expect(flag.getInlineInstance()).toBe(undefined);
         expect(flag.isInline()).toBe(false);
         expect(flag.getContainingMetaschema()).toBe(placeholderMetaschema);
+
+        expect(flag.getModelType()).toBe(ModelType.FLAG);
     });
 });

@@ -26,7 +26,6 @@
 
 import { forEachChild, processElement, requireOneChild } from '@oscal/data-utils';
 import { AbstractAssemblyDefinition } from '@oscal/metaschema-model-common/definition';
-import { AbstractChoice } from '@oscal/metaschema-model-common/element';
 import {
     AbstractAssemblyInstance,
     AbstractChoiceInstance,
@@ -72,7 +71,7 @@ export default class XmlModelContainerSupport {
         this._assemblyInstances = new Map();
         this._choiceInstances = [];
 
-        if (xmlContent instanceof AbstractChoice) {
+        if (xmlContent.tagName === 'choice') {
             this.parseChoice(xmlContent, containingAssembly);
         } else {
             this.parseModel(xmlContent, containingAssembly);

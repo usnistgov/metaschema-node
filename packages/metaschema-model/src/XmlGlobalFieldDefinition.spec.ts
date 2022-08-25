@@ -25,7 +25,7 @@
  */
 
 import { parseXml } from '@oscal/data-utils';
-import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { ModelType, ModuleScope } from '@oscal/metaschema-model-common/util';
 import { placeholderMetaschema } from './testUtil/index.js';
 import XmlGlobalFieldDefinition from './XmlGlobalFieldDefinition.js';
 
@@ -81,5 +81,9 @@ describe('XmlGlobalFlagDefinition', () => {
         expect(flags.get('system')?.getDefinition().getConstraints()[0].target.toString()).toBe('.');
 
         expect(flags.get('href')?.getDefinition().getName()).toBe('href');
+
+        expect(field.isSimple()).toBe(false);
+
+        expect(field.getModelType()).toBe(ModelType.FIELD);
     });
 });

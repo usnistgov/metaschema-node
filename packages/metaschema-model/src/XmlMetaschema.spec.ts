@@ -200,3 +200,88 @@ describe('XmlMetaschema.parseImports()', () => {
         }),
     );
 });
+
+describe('XmlMetaschema e2e', () => {
+    it('should export scoped members', async () => {
+        const metaschema = await XmlMetaschema.load(
+            'file://not-real.xml',
+            // fake the resolver to always return our target xml
+            async (_) => `<?xml version="1.0" encoding="UTF-8"?>
+            <METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
+                <schema-name>Test Schema</schema-name>
+                <schema-version>0.0.1</schema-version>
+                <short-name>testschema</short-name>
+                <namespace>SpaceName</namespace>
+                <json-base-uri>space-name</json-base-uri>
+
+                <!-- Exported Flag Example -->
+                <define-flag name="param-id" as-type="token">
+                    <!-- This is an id because the identifier is assigned and managed by humans. -->
+                    <formal-name>Parameter ID</formal-name>
+                    <!-- Identifier Reference -->
+                    <description>A <a href="/concepts/identifier-use/#human-oriented">human-oriented</a> reference to a <code>parameter</code> within a control, who's catalog has been imported into the current implementation context.</description>
+                    <example>
+                        <set-param xmlns="http://csrc.nist.gov/ns/oscal/example" param-id="ac-2_prm_2">
+                                <enum>System ISSO</enum>
+                        </set-param>
+                    </example>
+                </define-flag>
+
+                <!-- ===== Exported Field Example ===== -->
+                <define-field name="system-id" as-type="string">
+                      <!-- This is an id because the identifier is assigned and managed by humans. -->
+                      <formal-name>System Identification</formal-name>
+                      <!-- Identifier Declaration -->
+                      <description>A <a href="/concepts/identifier-use/#human-oriented">human-oriented</a>, <a href="/concepts/identifier-use/#globally-unique">globally unique</a> identifier with <a href="/concepts/identifier-use/#cross-instance">cross-instance</a> scope that can be used to reference this system identification property elsewhere in <a href="/concepts/identifier-use/#scope">this or other OSCAL instances</a>. When referencing an externally defined <code>system identification</code>, the <code>system identification</code> must be used in the context of the external / imported OSCAL instance (e.g., uri-reference). This string should be assigned <a href="/concepts/identifier-use/#consistency">per-subject</a>, which means it should be consistently used to identify the same system across revisions of the document.</description>
+                      <json-value-key>id</json-value-key>
+                      <define-flag name="identifier-type" as-type="uri">
+                            <formal-name>Identification System Type</formal-name>
+                            <description>Identifies the identification system from which the provided identifier was assigned. </description>
+                            <constraint>
+                                  <allowed-values allow-other="yes">
+                                        <enum value="https://fedramp.gov" deprecated="1.0.3">**deprecated** The identifier was assigned by FedRAMP. This has been deprecated; use <code>http://fedramp.gov/ns/oscal</code> instead.</enum>
+                                        <enum value="http://fedramp.gov/ns/oscal">The identifier was assigned by FedRAMP.</enum>
+                                        <enum value="https://ietf.org/rfc/rfc4122" deprecated="1.0.3">**deprecated** A Universally Unique Identifier (UUID) as defined by RFC4122. This value has been deprecated; use <code>http://ietf.org/rfc/rfc4122</code> instead.</enum>
+                                        <enum value="http://ietf.org/rfc/rfc4122">A Universally Unique Identifier (UUID) as defined by RFC4122.</enum>
+                                  </allowed-values>
+                            </constraint>
+                      </define-flag>
+                </define-field>
+
+                <!-- Exported Assembly with Instance Example -->
+                <define-assembly name="set-parameter">
+                    <formal-name>Set Parameter Value</formal-name>
+                    <description>Identifies the parameter that will be set by the enclosed value.</description>
+                    <flag ref="param-id" required="yes"/>
+                    <model>
+                        <define-field name="parameter-value" as-type="string" min-occurs="1" max-occurs="unbounded">
+                                <!-- CHANGED type from "markup-line" to "string" since this is intended to be a scalar value -->
+                                <formal-name>Parameter Value</formal-name>
+                                <description>A parameter value or set of values.</description>
+                                <use-name>value</use-name>
+                                <group-as name="values" in-json="ARRAY"/>
+                        </define-field>
+                    </model>
+                </define-assembly>
+            </METASCHEMA>`,
+        );
+
+        expect(metaschema.getScopedFlagDefinitionByName('param-id')?.getFormalName()).toBe('Parameter ID');
+        expect(metaschema.getScopedFieldDefinitionByName('system-id')?.getFormalName()).toBe('System Identification');
+        expect(metaschema.getScopedAssemblyDefinitionByName('set-parameter')?.getFormalName()).toBe(
+            'Set Parameter Value',
+        );
+
+        // The set-parameter assembly references the param-id flag
+        expect(
+            metaschema
+                .getScopedAssemblyDefinitionByName('set-parameter')
+                ?.getFlagInstances()
+                .get('param-id')
+                ?.getDefinition()
+                ?.getFormalName(),
+        ).toBe('Parameter ID');
+
+        expect(metaschema.assemblyAndFieldDefinitions.length).toBe(2);
+    });
+});

@@ -25,6 +25,7 @@
  */
 
 import { parseXml } from '@oscal/data-utils';
+import { ModelType } from '@oscal/metaschema-model-common/util';
 import { placeholderMetaschema } from './testUtil/placeholders.js';
 import XmlGlobalAssemblyDefinition from './XmlGlobalAssemblyDefinition.js';
 
@@ -58,6 +59,7 @@ describe('XmlGlobalAssemblyDefinition', () => {
                 <remarks>
                     <p>A set of parameter value choices, that may be picked from to set the parameter value.</p>
                 </remarks>
+                <root-name>test-root</root-name>
             </define-assembly>
         `).documentElement;
 
@@ -68,5 +70,12 @@ describe('XmlGlobalAssemblyDefinition', () => {
         // TODO: test description
         // TODO: test remarks
         expect(assembly.getFieldInstances().get('choice')?.getDefinition().getFormalName()).toBe('Choice');
+
+        expect(assembly.isRoot()).toBe(true);
+        expect(assembly.getRootName()).toBe('test-root');
+        expect(assembly.getRootJsonName()).toBe('test-root');
+        expect(assembly.getRootXmlQName()?.toString()).toBe('SpaceName:test-root');
+
+        expect(assembly.getModelType()).toBe(ModelType.ASSEMBLY);
     });
 });
