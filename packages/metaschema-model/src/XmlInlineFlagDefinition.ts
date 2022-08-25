@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { processBooleanAttribute, processElement, undefineableAttribute } from '@oscal/data-utils';
+import { defaultibleAttribute, processBooleanAttribute, processElement } from '@oscal/data-utils';
 import {
     AbstractFlagDefinition,
     INamedModelDefinition,
@@ -36,56 +36,55 @@ import { NAMED_VALUED_DEFINITION } from './processing/model.js';
 
 class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinition) {
     private readonly parent;
-    private readonly flagDefinitionXml;
+    private readonly parsed;
 
-    private readonly name;
     getName() {
-        return this.name;
+        return this.parsed.attributes.name;
     }
 
-    private readonly useName;
     getUseName() {
-        return this.useName ?? this.getName();
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'] ?? this.getName();
     }
 
-    private readonly formalName;
     getFormalName() {
-        return this.formalName;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
     }
 
-    private readonly description;
     getDescription() {
-        return this.description;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
     }
 
-    private readonly remarks;
     getRemarks() {
-        return this.remarks;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
     }
 
-    private readonly datatype;
     getDatatypeAdapter() {
-        return this.datatype;
+        return this.parsed.attributes['as-type'];
     }
 
-    private readonly allowedValuesConstraints;
     getAllowedValuesConstraints() {
-        return this.allowedValuesConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']
+                ?.allowedValuesConstraints ?? []
+        );
     }
 
-    private readonly matchesConstraints;
     getMatchesConstraints() {
-        return this.matchesConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? []
+        );
     }
 
-    private readonly indexHasKeyConstraints;
     getIndexHasKeyConstraints() {
-        return this.indexHasKeyConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? []
+        );
     }
 
-    private readonly expectConstraints;
     getExpectConstraints() {
-        return this.expectConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? []
+        );
     }
 
     getConstraints() {
@@ -111,10 +110,8 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
 
     constructor(flagDefinitionXml: HTMLElement, parent: XmlInlineFlagDefinition) {
         super();
-        this.flagDefinitionXml = flagDefinitionXml;
         this.parent = parent;
-
-        const parsed = processElement(
+        this.parsed = processElement(
             flagDefinitionXml,
             {
                 name: NAMED_VALUED_DEFINITION.ATTRIBUTES.name,
@@ -124,32 +121,16 @@ class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinitio
                 ...NAMED_VALUED_DEFINITION.CHILDREN,
             },
         );
-
-        this.name = parsed.attributes.name;
-        this.datatype = parsed.attributes['as-type'];
-
-        this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
-        this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
-        this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
-        this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
-
-        this.allowedValuesConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.allowedValuesConstraints ?? [];
-        this.matchesConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? [];
-        this.indexHasKeyConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? [];
-        this.expectConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? [];
     }
 }
 
 export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
     private readonly internalFlagDefinition;
+    protected readonly xml;
+    private readonly parsed;
 
-    private readonly required;
     isRequired() {
-        return this.required ?? false;
+        return this.parsed.attributes.required;
     }
 
     getDefinition() {
@@ -171,14 +152,14 @@ export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
 
     constructor(flagDefinitionXml: HTMLElement, parent: INamedModelDefinition) {
         super(parent);
+        this.xml = flagDefinitionXml;
         this.internalFlagDefinition = new InternalFlagDefinition(flagDefinitionXml, this);
-        const parsed = processElement(
+        this.parsed = processElement(
             flagDefinitionXml,
             {
-                required: undefineableAttribute(processBooleanAttribute),
+                required: defaultibleAttribute(processBooleanAttribute, false),
             },
             {},
         );
-        this.required = parsed.attributes.required;
     }
 }

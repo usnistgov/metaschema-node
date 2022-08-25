@@ -34,10 +34,15 @@ import {
     IModelInstance,
     INamedModelInstance,
 } from '@oscal/metaschema-model-common/instance';
+import XmlAssemblyInstance from './XmlAssemblyInstance.js';
 import XmlChoiceInstance from './XmlChoiceInstance.js';
+import XmlFieldInstance from './XmlFieldInstance.js';
 import XmlInlineAssemblyDefinition from './XmlInlineAssemblyDefinition.js';
 import XmlInlineFieldDefinition from './XmlInlineFieldDefinition.js';
 
+/**
+ * This utility class supports Assembly and Choice object types in collecting child instances.
+ */
 export default class XmlModelContainerSupport {
     _fieldInstances: Map<string, AbstractFieldInstance>;
     get fieldInstances() {
@@ -77,14 +82,16 @@ export default class XmlModelContainerSupport {
     private processChoiceChildren(containingAssembly: AbstractAssemblyDefinition) {
         return {
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}assembly': forEachChild((child) => {
-                console.log('TODO');
+                const assembly = new XmlAssemblyInstance(child, containingAssembly);
+                this._assemblyInstances.set(assembly.getEffectiveName(), assembly);
             }),
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-assembly': forEachChild((child) => {
                 const assembly = new XmlInlineAssemblyDefinition(child, containingAssembly);
                 this._assemblyInstances.set(assembly.getEffectiveName(), assembly);
             }),
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}field': forEachChild((child) => {
-                console.log('TODO');
+                const field = new XmlFieldInstance(child, containingAssembly);
+                this._fieldInstances.set(field.getEffectiveName(), field);
             }),
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-field': forEachChild((child) => {
                 const field = new XmlInlineFieldDefinition(child, containingAssembly);
@@ -102,19 +109,18 @@ export default class XmlModelContainerSupport {
             xmlContent,
             {},
             {
-                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}model': requireOneChild(
-                    (child) =>
-                        processElement(
-                            child,
-                            {},
-                            {
-                                // Model parsing shares most items with Choice parsing
-                                ...this.processChoiceChildren(containingAssembly),
-                                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}choice': forEachChild((child) =>
-                                    this._choiceInstances.push(new XmlChoiceInstance(child, containingAssembly)),
-                                ),
-                            },
-                        ).children,
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}model': requireOneChild((child) =>
+                    processElement(
+                        child,
+                        {},
+                        {
+                            // Model parsing shares most items with Choice parsing
+                            ...this.processChoiceChildren(containingAssembly),
+                            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}choice': forEachChild((child) =>
+                                this._choiceInstances.push(new XmlChoiceInstance(child, containingAssembly)),
+                            ),
+                        },
+                    ),
                 ),
             },
         );

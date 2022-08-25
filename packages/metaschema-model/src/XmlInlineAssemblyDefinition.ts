@@ -33,14 +33,14 @@ import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
 class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyDefinition) {
-    protected readonly assemblyDefinitionXml;
-
+    protected readonly xml;
+    private readonly parsed;
     private readonly parent;
     getInlineInstance() {
         return this.parent;
     }
 
-    getModuleScope(): ModuleScope {
+    getModuleScope() {
         return ModuleScope.LOCAL;
     }
 
@@ -48,64 +48,66 @@ class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyD
         return undefined;
     }
 
-    private readonly name;
     getName() {
-        return this.name;
+        return this.parsed.attributes.name;
     }
 
-    private readonly useName;
     getUseName() {
-        return this.useName ?? this.getName();
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'] ?? this.getName();
     }
 
-    private readonly formalName;
     getFormalName() {
-        return this.formalName;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
     }
 
-    private readonly description;
     getDescription() {
-        return this.description;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
     }
 
-    private readonly remarks;
     getRemarks() {
-        return this.remarks;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
     }
 
-    private readonly allowedValuesConstraints;
     getAllowedValuesConstraints() {
-        return this.allowedValuesConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']
+                ?.allowedValuesConstraints ?? []
+        );
     }
 
-    private readonly matchesConstraints;
     getMatchesConstraints() {
-        return this.matchesConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? []
+        );
     }
 
-    private readonly indexHasKeyConstraints;
     getIndexHasKeyConstraints() {
-        return this.indexHasKeyConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? []
+        );
     }
 
-    private readonly expectConstraints;
     getExpectConstraints() {
-        return this.expectConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? []
+        );
     }
 
-    private readonly indexConstraints;
     getIndexConstraints() {
-        return this.indexConstraints;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexConstraints ?? [];
     }
 
-    private readonly uniqueConstraints;
     getUniqueConstraints() {
-        return this.uniqueConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? []
+        );
     }
 
-    private readonly cardinalityConstraints;
     getCardinalityConstraints() {
-        return this.cardinalityConstraints;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ??
+            []
+        );
     }
 
     getConstraints() {
@@ -120,15 +122,14 @@ class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyD
         ];
     }
 
-    private readonly flagInstances;
     getFlagInstances() {
-        return this.flagInstances;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
     }
 
     private _modelContainer: XmlModelContainerSupport | undefined;
     protected get modelContainer(): XmlModelContainerSupport {
         if (this._modelContainer === undefined) {
-            this._modelContainer = new XmlModelContainerSupport(this.assemblyDefinitionXml, this);
+            this._modelContainer = new XmlModelContainerSupport(this.xml, this);
         }
 
         return this._modelContainer;
@@ -154,13 +155,16 @@ class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyD
         return this.modelContainer.namedModelInstances;
     }
 
-    private readonly jsonKey;
     hasJsonKey() {
-        return this.jsonKey !== undefined;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'] !== undefined;
     }
 
     getJsonKeyFlagInstance() {
-        return this.jsonKey ? this.getFlagInstances().get(this.jsonKey) : undefined;
+        return this.this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key']
+            ? this.getFlagInstances().get(
+                  this.this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'],
+              )
+            : undefined;
     }
 
     getContainingMetaschema() {
@@ -170,9 +174,9 @@ class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyD
     constructor(assemblyDefinitionXml: HTMLElement, parent: XmlInlineAssemblyDefinition) {
         super();
         this.parent = parent;
-        this.assemblyDefinitionXml = assemblyDefinitionXml;
+        this.xml = assemblyDefinitionXml;
 
-        const parsed = processElement(
+        this.parsed = processElement(
             assemblyDefinitionXml,
             {
                 name: NAMED_DEFINITION.ATTRIBUTES.name,
@@ -190,31 +194,6 @@ class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyD
                 },
             },
         );
-
-        this.name = parsed.attributes.name;
-
-        this.useName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}use-name'];
-        this.formalName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}formal-name'];
-        this.description = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}description'];
-        this.remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
-        this.jsonKey = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-key'];
-
-        this.flagInstances = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
-
-        this.allowedValuesConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.allowedValuesConstraints ?? [];
-        this.matchesConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.matchesConstraints ?? [];
-        this.indexHasKeyConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexHasConstraints ?? [];
-        this.expectConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.expectConstraints ?? [];
-        this.indexConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.indexConstraints ?? [];
-        this.uniqueConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.uniqueConstraints ?? [];
-        this.cardinalityConstraints =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}constraint']?.cardinalityConstraints ?? [];
     }
 }
 
@@ -236,42 +215,36 @@ export default class XmlInlineAssemblyDefinition extends AbstractAssemblyInstanc
         return this.getDefinition().getRemarks();
     }
 
-    private readonly minOccurs;
+    private readonly parsed;
+
     getMinOccurs() {
-        return this.minOccurs;
+        return this.parsed.attributes['min-occurs'];
     }
 
-    private readonly maxOccurs;
     getMaxOccurs() {
-        return this.maxOccurs;
+        return this.parsed.attributes['max-occurs'];
     }
 
-    private readonly groupAsName;
     getGroupAsName() {
-        return this.groupAsName;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes.name ?? undefined
+        );
     }
 
-    private readonly jsonGroupAsBehavior;
     getJsonGroupAsBehavior() {
-        return this.jsonGroupAsBehavior;
+        return (
+            this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes['in-json'] ??
+            JsonGroupAsBehavior.SINGLETON_OR_LIST
+        );
     }
 
-    private readonly xmlGroupAsBehavior;
     getXmlGroupAsBehavior() {
-        return this.xmlGroupAsBehavior;
+        return this.parsed.attributes['in-xml'];
     }
 
     constructor(assemblyDefinitionXml: HTMLElement, parent: AbstractAssemblyDefinition) {
         super(parent);
         this.internalAssemblyDefinition = new InternalAssemblyDefinition(assemblyDefinitionXml, this);
-        const parsed = processElement(assemblyDefinitionXml, MODEL_INSTANCE.ATTRIBUTES, MODEL_INSTANCE.CHILDREN);
-        this.minOccurs = parsed.attributes['min-occurs'];
-        this.maxOccurs = parsed.attributes['max-occurs'];
-        this.groupAsName =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes.name ?? undefined;
-        this.jsonGroupAsBehavior =
-            parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}group-as']?.attributes['in-json'] ??
-            JsonGroupAsBehavior.SINGLETON_OR_LIST;
-        this.xmlGroupAsBehavior = parsed.attributes['in-xml'];
+        this.parsed = processElement(assemblyDefinitionXml, MODEL_INSTANCE.ATTRIBUTES, MODEL_INSTANCE.CHILDREN);
     }
 }

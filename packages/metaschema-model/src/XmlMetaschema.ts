@@ -23,11 +23,7 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import {
-    AbstractAssemblyDefinition,
-    AbstractFieldDefinition,
-    AbstractFlagDefinition,
-} from '@oscal/metaschema-model-common/definition';
+
 import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 import { ResourceResolver } from './resolver.js';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
@@ -44,51 +40,42 @@ import XmlGlobalFieldDefinition from './XmlGlobalFieldDefinition.js';
 import XmlGlobalAssemblyDefinition from './XmlGlobalAssemblyDefinition.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    protected metaschemaXml: HTMLElement;
-
-    private readonly _name;
+    protected xml: HTMLElement;
+    private readonly parsed;
 
     get name() {
-        return this._name;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}schema-name'];
     }
 
-    private readonly _version;
     get version() {
-        return this._version;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}schema-version'];
     }
 
-    private readonly _shortName;
     get shortName() {
-        return this._shortName;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}short-name'];
     }
 
-    private readonly _xmlNamespace;
     get xmlNamespace() {
-        return this._xmlNamespace;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}namespace'];
     }
-    private readonly _jsonBaseUri;
     get jsonBaseUri() {
-        return this._jsonBaseUri;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-base-uri'];
     }
 
-    private readonly _remarks;
     get remarks() {
-        return this._remarks;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
     }
 
-    private _flagDefinitions: Map<string, AbstractFlagDefinition>;
     get flagDefinitions() {
-        return this._flagDefinitions;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
     }
 
-    private _fieldDefinitions: Map<string, AbstractFieldDefinition>;
     get fieldDefinitions() {
-        return this._fieldDefinitions;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-field'];
     }
 
-    private _assemblyDefinitions: Map<string, AbstractAssemblyDefinition>;
     get assemblyDefinitions() {
-        return this._assemblyDefinitions;
+        return this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-assembly'];
     }
 
     readonly location;
@@ -97,9 +84,9 @@ export default class XmlMetaschema extends AbstractMetaschema {
         super(importedMetaschemas);
         this.location = location;
 
-        this.metaschemaXml = metaschemaXml;
+        this.xml = metaschemaXml;
 
-        const parsed = processElement(
+        this.parsed = processElement(
             metaschemaXml,
             {},
             {
@@ -143,17 +130,6 @@ export default class XmlMetaschema extends AbstractMetaschema {
                 },
             },
         );
-
-        this._name = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}schema-name'];
-        this._version = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}schema-version'];
-        this._shortName = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}short-name'];
-        this._xmlNamespace = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}namespace'];
-        this._jsonBaseUri = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-base-uri'];
-        this._remarks = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}remarks'];
-
-        this._flagDefinitions = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag'];
-        this._fieldDefinitions = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-field'];
-        this._assemblyDefinitions = parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-assembly'];
     }
 
     /**
