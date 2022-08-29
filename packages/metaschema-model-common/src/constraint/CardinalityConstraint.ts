@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
+import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
 import { Level } from '../util/types.js';
 import AbstractConstraint from './AbstractConstraint.js';

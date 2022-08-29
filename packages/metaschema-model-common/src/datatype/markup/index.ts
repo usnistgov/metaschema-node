@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import MarkupLine from './markupLine.js';
-import MarkupMultiLine from './markupMultiLine.js';
+import MarkupLine from './MarkupLine.js';
+import MarkupMultiLine from './MarkupMultiLine.js';
 
 export { MarkupLine, MarkupMultiLine };

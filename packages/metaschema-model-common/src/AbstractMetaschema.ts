@@ -23,8 +23,8 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupLine from './datatype/markup/markupLine.js';
-import MarkupMultiLine from './datatype/markup/markupMultiLine.js';
+import MarkupLine from './datatype/markup/MarkupLine.js';
+import MarkupMultiLine from './datatype/markup/MarkupMultiLine.js';
 import AbstractAssemblyDefinition from './definition/AbstractAssemblyDefinition.js';
 import AbstractFieldDefinition from './definition/AbstractFieldDefinition.js';
 import AbstractFlagDefinition from './definition/AbstractFlagDefinition.js';
@@ -39,13 +39,13 @@ import INamedModelDefinition from './definition/INamedModelDefinition.js';
  * Global scoped Metaschema definitions can be accessed using
  * {@link getScopedAssemblyDefinitionByName()}, {@link getScopedFieldDefinitionByName()}, and
  * {@link getScopedFlagDefinitionByName()}. These methods take into consideration the import
- * order to provide the global definitions that are in scope within the given Metschema.
+ * order to provide the global definitions that are in scope within the given Metaschema.
  *
  * Global scoped definitions exported by this Metaschema, available for use by importing
  * Metaschemas, can be accessed using {@link exportedAssemblyDefinitions},
  * {@link exportedFieldDefinitions}, and {@link exportedFlagDefinitions}.
  *
- * Global scoped definitions defined direclty within the given Metaschema can be accessed using
+ * Global scoped definitions defined directly within the given Metaschema can be accessed using
  * {@link assemblyDefinitions}, {@link fieldDefinitions}, and {@link flagDefinitions}, along with
  * similarly named accessors.
  */

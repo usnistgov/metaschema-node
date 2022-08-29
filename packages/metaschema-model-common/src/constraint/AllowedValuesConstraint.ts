@@ -23,8 +23,8 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupLine from '../datatype/markup/markupLine.js';
-import MarkupMultiLine from '../datatype/markup/markupMultiLine.js';
+import MarkupLine from '../datatype/markup/MarkupLine.js';
+import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
 import { Level } from '../util/types.js';
 import AbstractConstraint from './AbstractConstraint.js';
