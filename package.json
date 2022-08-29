@@ -22,5 +22,8 @@
     "lint-fix": "eslint --fix .",
     "build": "lerna run build",
     "test": "jest"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
