@@ -28,11 +28,11 @@ import IndexConstraint from '../constraint/IndexConstraint.js';
 import UniqueConstraint from '../constraint/UniqueConstraint.js';
 import AbstractAssembly from '../element/AbstractAssembly.js';
 import QName from '../util/QName.js';
-import { modelContainable } from './IModelContainer.js';
-import { namedModelDefineable } from './INamedModelDefinition.js';
+import { modelContainerMixin } from './IModelContainer.js';
+import { namedModelDefinitionMixin } from './INamedModelDefinition.js';
 
-export default abstract class AbstractAssemblyDefinition extends modelContainable(
-    namedModelDefineable(AbstractAssembly),
+export default abstract class AbstractAssemblyDefinition extends modelContainerMixin(
+    namedModelDefinitionMixin(AbstractAssembly),
 ) {
     /**
      * Get any index constraints associated with this assembly definition.

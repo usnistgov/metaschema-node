@@ -25,11 +25,11 @@
  */
 import AbstractField from '../element/AbstractField.js';
 import AbstractFlagInstance from '../instance/AbstractFlagInstance.js';
-import { namedModelDefineable } from './INamedModelDefinition.js';
-import { namedValuedDefineable } from './INamedValuedDefinition.js';
+import { namedModelDefinitionMixin } from './INamedModelDefinition.js';
+import { namedValuedDefinitionMixin } from './INamedValuedDefinition.js';
 
-export default abstract class AbstractFieldDefinition extends namedValuedDefineable(
-    namedModelDefineable(AbstractField),
+export default abstract class AbstractFieldDefinition extends namedValuedDefinitionMixin(
+    namedModelDefinitionMixin(AbstractField),
 ) /*implements IModelContainer*/ {
     /**
      * Retrieves the flag instance who's value will be used as the "value key".

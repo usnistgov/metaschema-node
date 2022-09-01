@@ -24,6 +24,6 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 import AbstractFlag from '../element/AbstractFlag.js';
-import { namedValuedDefineable } from './INamedValuedDefinition.js';
+import { namedValuedDefinitionMixin } from './INamedValuedDefinition.js';
 
-export default abstract class AbstractFlagDefinition extends namedValuedDefineable(AbstractFlag) {}
+export default abstract class AbstractFlagDefinition extends namedValuedDefinitionMixin(AbstractFlag) {}

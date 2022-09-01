@@ -26,7 +26,7 @@
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import INamedInstance from '../instance/INamedInstance.js';
 import { AbstractConstructor } from '../util/mixin.js';
-import IDefinition, { defineable } from './IDefinition.js';
+import IDefinition, { definitionMixin } from './IDefinition.js';
 
 /**
  * This marker interface is used for some collections that contain various named definitions.
@@ -47,8 +47,8 @@ export default interface INamedDefinition extends IDefinition {
     getInlineInstance(): INamedInstance | undefined;
 }
 
-export function namedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class NamedDefinition extends defineable(Base) implements INamedDefinition {
+export function namedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class NamedDefinition extends definitionMixin(Base) implements INamedDefinition {
         isInline(): boolean {
             return this.getInlineInstance() !== undefined;
         }

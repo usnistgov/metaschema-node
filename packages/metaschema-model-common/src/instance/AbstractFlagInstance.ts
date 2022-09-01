@@ -28,9 +28,9 @@ import AbstractFlagDefinition from '../definition/AbstractFlagDefinition.js';
 import INamedModelDefinition from '../definition/INamedModelDefinition.js';
 import AbstractFlag from '../element/AbstractFlag.js';
 import { equals } from '../util/equality.js';
-import { namedInstanceable } from './INamedInstance.js';
+import { namedInstanceMixin } from './INamedInstance.js';
 
-export default abstract class AbstractFlagInstance extends namedInstanceable(AbstractFlag) {
+export default abstract class AbstractFlagInstance extends namedInstanceMixin(AbstractFlag) {
     private readonly parent;
 
     constructor(parent: INamedModelDefinition) {

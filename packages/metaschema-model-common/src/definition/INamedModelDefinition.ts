@@ -33,7 +33,7 @@ import UniqueConstraint from '../constraint/UniqueConstraint.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import AbstractFlagInstance from '../instance/AbstractFlagInstance.js';
 import { AbstractConstructor } from '../util/mixin.js';
-import INamedDefinition, { namedDefineable } from './INamedDefinition.js';
+import INamedDefinition, { namedDefinitionMixin } from './INamedDefinition.js';
 
 /**
  * This marker interface identifies a definition that is intended to be part of an Assembly's model.
@@ -117,8 +117,8 @@ export default interface INamedModelDefinition extends INamedDefinition {
     getCardinalityConstraints(): CardinalityConstraint[];
 }
 
-export function namedModelDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class NamedModelDefinition extends namedDefineable(Base) implements INamedModelDefinition {
+export function namedModelDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class NamedModelDefinition extends namedDefinitionMixin(Base) implements INamedModelDefinition {
         abstract getFlagInstances(): Map<string, AbstractFlagInstance>;
 
         isSimple(): boolean {

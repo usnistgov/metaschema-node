@@ -27,9 +27,9 @@ import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition
 import AbstractFieldDefinition from '../definition/AbstractFieldDefinition.js';
 import AbstractField from '../element/AbstractField.js';
 import QName from '../util/QName.js';
-import { namedModelInstanceable } from './INamedModelInstance.js';
+import { namedModelInstanceMixin } from './INamedModelInstance.js';
 
-export default abstract class AbstractFieldInstance extends namedModelInstanceable(AbstractField) {
+export default abstract class AbstractFieldInstance extends namedModelInstanceMixin(AbstractField) {
     private readonly parent;
 
     constructor(parent: AbstractAssemblyDefinition) {

@@ -72,7 +72,7 @@ export default interface IModelContainer {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function modelContainable<TBase extends AbstractConstructor<any>>(Base: TBase) {
+export function modelContainerMixin<TBase extends AbstractConstructor<any>>(Base: TBase) {
     abstract class ModelContainer extends Base implements IModelContainer {
         abstract getNamedModelInstances(): Map<string, INamedModelInstance>;
         abstract getFieldInstances(): Map<string, AbstractFieldInstance>;

@@ -30,7 +30,7 @@ import MatchesConstraint from '../constraint/MatchesConstraint.js';
 import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
-import IDefinition, { defineable } from './IDefinition.js';
+import IDefinition, { definitionMixin } from './IDefinition.js';
 
 /**
  * This marker interface identifies Metaschema definition types that have associated values (i.e.,
@@ -68,8 +68,8 @@ export default interface IValuedDefinition extends IDefinition {
     getExpectConstraints(): ExpectConstraint[];
 }
 
-export function valuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {
+export function valuedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class ValuedDefinition extends definitionMixin(Base) implements IValuedDefinition {
         abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
         abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];

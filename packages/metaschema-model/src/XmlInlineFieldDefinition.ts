@@ -28,7 +28,7 @@ import { optionalOneChild, processBooleanAttribute, processElement } from '@osca
 import {
     AbstractAssemblyDefinition,
     AbstractFieldDefinition,
-    inlineNamedDefineable,
+    inlineNamedDefinitionMixin,
 } from '@oscal/metaschema-model-common/definition';
 import { AbstractFieldInstance, AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
@@ -36,7 +36,7 @@ import { MODEL_INSTANCE, NAMED_MODEL_DEFINITION, NAMED_VALUED_DEFINITION } from 
 import XmlFlagContainerSupport from './XmlFlagContainerSupport.js';
 import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
 
-class InternalFieldDefinition extends inlineNamedDefineable(AbstractFieldDefinition) {
+class InternalFieldDefinition extends inlineNamedDefinitionMixin(AbstractFieldDefinition) {
     private readonly parent;
     private readonly parsed;
     private readonly xml;

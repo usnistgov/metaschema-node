@@ -28,13 +28,13 @@ import { defaultibleAttribute, processBooleanAttribute, processElement } from '@
 import {
     AbstractFlagDefinition,
     INamedModelDefinition,
-    inlineNamedDefineable,
+    inlineNamedDefinitionMixin,
 } from '@oscal/metaschema-model-common/definition';
 import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { ModuleScope } from '@oscal/metaschema-model-common/util';
 import { NAMED_VALUED_DEFINITION } from './processing/model.js';
 
-class InternalFlagDefinition extends inlineNamedDefineable(AbstractFlagDefinition) {
+class InternalFlagDefinition extends inlineNamedDefinitionMixin(AbstractFlagDefinition) {
     private readonly parent;
     private readonly parsed;
 

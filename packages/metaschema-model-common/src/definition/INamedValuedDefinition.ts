@@ -25,8 +25,8 @@
  */
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
-import INamedDefinition, { namedDefineable } from './INamedDefinition.js';
-import IValuedDefinition, { valuedDefineable } from './IValuedDefinition.js';
+import INamedDefinition, { namedDefinitionMixin } from './INamedDefinition.js';
+import IValuedDefinition, { valuedDefinitionMixin } from './IValuedDefinition.js';
 
 /**
  * This marker interface is used for some collections that contain various named definitions that
@@ -34,9 +34,9 @@ import IValuedDefinition, { valuedDefineable } from './IValuedDefinition.js';
  */
 export default interface INamedValuedDefinition extends IValuedDefinition, INamedDefinition {}
 
-export function namedValuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+export function namedValuedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedValuedDefinition
-        extends namedDefineable(valuedDefineable(Base))
+        extends namedDefinitionMixin(valuedDefinitionMixin(Base))
         implements INamedValuedDefinition {}
     return NamedValuedDefinition;
 }

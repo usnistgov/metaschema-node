@@ -27,7 +27,7 @@ import AbstractModelElement from '../element/AbstractModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import QName from '../util/QName.js';
 import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types.js';
-import IInstance, { instanceable } from './IInstance.js';
+import IInstance, { instanceMixin } from './IInstance.js';
 
 /**
  * This marker interface is used to identify a field or assembly instance that is a member of an
@@ -91,8 +91,8 @@ export default interface IModelInstance extends IInstance {
     getXmlGroupAsBehavior(): XmlGroupAsBehavior;
 }
 
-export function modelInstanceable<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
-    abstract class ModelInstance extends instanceable(Base) implements IModelInstance {
+export function modelInstanceMixin<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
+    abstract class ModelInstance extends instanceMixin(Base) implements IModelInstance {
         abstract getMinOccurs(): number;
         abstract getMaxOccurs(): number;
         abstract getGroupAsName(): string | undefined;

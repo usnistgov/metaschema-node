@@ -25,9 +25,9 @@
  */
 import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
 import AbstractAssembly from '../element/AbstractAssembly.js';
-import { namedModelInstanceable } from './INamedModelInstance.js';
+import { namedModelInstanceMixin } from './INamedModelInstance.js';
 
-abstract class AbstractAssemblyInstance extends namedModelInstanceable(AbstractAssembly) {
+abstract class AbstractAssemblyInstance extends namedModelInstanceMixin(AbstractAssembly) {
     private readonly parent;
 
     constructor(parent: AbstractAssemblyDefinition) {

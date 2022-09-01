@@ -25,14 +25,14 @@
  */
 
 import { processElement } from '@oscal/data-utils';
-import { AbstractAssemblyDefinition, inlineNamedDefineable } from '@oscal/metaschema-model-common/definition';
+import { AbstractAssemblyDefinition, inlineNamedDefinitionMixin } from '@oscal/metaschema-model-common/definition';
 import { AbstractAssemblyInstance, AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
 import { JsonGroupAsBehavior, ModuleScope } from '@oscal/metaschema-model-common/util';
 import { MODEL_INSTANCE, NAMED_DEFINITION, NAMED_MODEL_DEFINITION } from './processing/model.js';
 import XmlFlagContainerSupport from './XmlFlagContainerSupport.js';
 import XmlModelContainerSupport from './XmlModelContainerSupport.js';
 
-class InternalAssemblyDefinition extends inlineNamedDefineable(AbstractAssemblyDefinition) {
+class InternalAssemblyDefinition extends inlineNamedDefinitionMixin(AbstractAssemblyDefinition) {
     protected readonly xml;
     private readonly parsed;
     private readonly parent;

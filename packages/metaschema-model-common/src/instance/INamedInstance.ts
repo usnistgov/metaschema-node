@@ -26,7 +26,7 @@
 import MarkupLine from '../datatype/markup/MarkupLine.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import QName from '../util/QName.js';
-import IInstance, { instanceable } from './IInstance.js';
+import IInstance, { instanceMixin } from './IInstance.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import INamedDefinition from '../definition/INamedDefinition.js';
 
@@ -55,8 +55,8 @@ export default interface INamedInstance extends IInstance, AbstractNamedModelEle
     getXmlNamespace(): string | undefined;
 }
 
-export function namedInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class NamedInstance extends instanceable(Base) implements INamedInstance {
+export function namedInstanceMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class NamedInstance extends instanceMixin(Base) implements INamedInstance {
         abstract getDefinition(): INamedDefinition;
         getXmlQName(): QName | undefined {
             return new QName(this.getEffectiveName(), this.getXmlNamespace());

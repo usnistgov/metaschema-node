@@ -27,8 +27,8 @@ import INamedModelDefinition from '../definition/INamedModelDefinition.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import AbstractFlagInstance from './AbstractFlagInstance.js';
-import IModelInstance, { modelInstanceable } from './IModelInstance.js';
-import INamedInstance, { namedInstanceable } from './INamedInstance.js';
+import IModelInstance, { modelInstanceMixin } from './IModelInstance.js';
+import INamedInstance, { namedInstanceMixin } from './INamedInstance.js';
 
 export default interface INamedModelInstance extends INamedInstance, IModelInstance {
     /**
@@ -56,9 +56,9 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 }
 
-export function namedModelInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+export function namedModelInstanceMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedModelInstance
-        extends namedInstanceable(modelInstanceable(Base))
+        extends namedInstanceMixin(modelInstanceMixin(Base))
         implements INamedModelInstance
     {
         abstract getDefinition(): INamedModelDefinition;

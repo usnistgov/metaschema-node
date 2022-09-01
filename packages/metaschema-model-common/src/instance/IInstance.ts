@@ -38,7 +38,7 @@ export default interface IInstance extends AbstractModelElement {
     getContainingDefinition(): INamedModelDefinition;
 }
 
-export function instanceable<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
+export function instanceMixin<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
     abstract class Instance extends Base implements IInstance {
         abstract getContainingDefinition(): INamedModelDefinition;
         getContainingMetaschema(): AbstractMetaschema {

@@ -26,7 +26,7 @@
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import INamedInstance from '../instance/INamedInstance.js';
 import { AbstractConstructor } from '../util/mixin.js';
-import INamedDefinition, { namedDefineable } from './INamedDefinition.js';
+import INamedDefinition, { namedDefinitionMixin } from './INamedDefinition.js';
 
 /**
  * A trait indicating that the implementation is a localized definition that is declared in-line as
@@ -38,11 +38,14 @@ export default interface IInlineNamedDefinition<Instance extends INamedInstance>
     getInlineInstance(): Instance;
 }
 
-export function inlineNamedDefineable<
+export function inlineNamedDefinitionMixin<
     Instance extends INamedInstance,
     TBase extends AbstractConstructor<AbstractNamedModelElement>,
 >(Base: TBase) {
-    abstract class InlineNamedDefinition extends namedDefineable(Base) implements IInlineNamedDefinition<Instance> {
+    abstract class InlineNamedDefinition
+        extends namedDefinitionMixin(Base)
+        implements IInlineNamedDefinition<Instance>
+    {
         abstract getInlineInstance(): Instance;
     }
     return InlineNamedDefinition;

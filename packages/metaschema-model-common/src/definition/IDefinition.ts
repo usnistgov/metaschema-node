@@ -44,7 +44,7 @@ export default interface IDefinition extends AbstractModelElement {
     getModuleScope(): ModuleScope;
 }
 
-export function defineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+export function definitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class Definition extends Base implements IDefinition {
         abstract getConstraints(): AbstractConstraint[];
         abstract getModuleScope(): ModuleScope;
