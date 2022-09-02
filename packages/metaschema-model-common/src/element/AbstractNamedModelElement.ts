@@ -23,8 +23,8 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupLine from '../datatype/markup/MarkupLine';
-import AbstractModelElement from './AbstractModelElement';
+import MarkupLine from '../datatype/markup/MarkupLine.js';
+import AbstractModelElement from './AbstractModelElement.js';
 
 /**
  * A marker interface for Metaschema constructs that can be members of a Metaschema definition's

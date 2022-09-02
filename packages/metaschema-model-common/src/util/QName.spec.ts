@@ -23,22 +23,20 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractNamedModelElement } from '../element';
-import INamedInstance from '../instance/INamedInstance';
-import { namedDefineable } from './INamedDefinition';
 
-/**
- * A trait indicating that the implementation is a localized definition that is declared in-line as
- * an instance.
- *
- * @param <Instance> the associated instance type
- */
-export default abstract class AbstractInlineNamedDefinition<Instance extends INamedInstance> extends namedDefineable(
-    AbstractNamedModelElement,
-) {
-    isInline(): boolean {
-        return true;
-    }
+import QName from './QName.js';
 
-    abstract getInlineInstance(): Instance;
-}
+describe('QName', () => {
+    [
+        {
+            name: 'should handle QName with a namespace',
+            instance: new QName('name', 'namespace'),
+            expected: 'namespace:name',
+        },
+        {
+            name: 'should handle QName with no namespace',
+            instance: new QName('name'),
+            expected: 'name',
+        },
+    ].map(({ name, instance, expected }) => it(name, () => expect(instance.toString()).toBe(expected)));
+});

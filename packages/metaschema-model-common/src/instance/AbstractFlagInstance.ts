@@ -23,13 +23,14 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { INamedModelDefinition } from '../definition';
-import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
-import { AbstractFlag } from '../element';
-import { equals } from '../util/equality';
-import { namedInstanceable } from './INamedInstance';
+import AbstractFieldDefinition from '../definition/AbstractFieldDefinition.js';
+import AbstractFlagDefinition from '../definition/AbstractFlagDefinition.js';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import AbstractFlag from '../element/AbstractFlag.js';
+import { equals } from '../util/equality.js';
+import { namedInstanceMixin } from './INamedInstance.js';
 
-export default abstract class AbstractFlagInstance extends namedInstanceable(AbstractFlag) {
+export default abstract class AbstractFlagInstance extends namedInstanceMixin(AbstractFlag) {
     private readonly parent;
 
     constructor(parent: INamedModelDefinition) {
@@ -40,6 +41,8 @@ export default abstract class AbstractFlagInstance extends namedInstanceable(Abs
     getContainingDefinition(): INamedModelDefinition {
         return this.parent;
     }
+
+    abstract getDefinition(): AbstractFlagDefinition;
 
     /**
      * Determines if a flag value is required to be provided.

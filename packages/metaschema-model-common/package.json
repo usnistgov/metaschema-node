@@ -7,8 +7,49 @@
         "email": "nikita.wootten@nist.gov"
     },
     "scripts": {
-        "build": "tsc -p .",
-        "lint": "eslint"
+        "build": "tsc -p tsconfig.build.json"
     },
+    "exports": {
+        "./lib": null,
+        "./src": null,
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./lib/index.js"
+        },
+        "./constraint": {
+            "types": "./src/constraint/index.ts",
+            "default": "./lib/constraint/index.js"
+        },
+        "./datatype": {
+            "types": "./src/datatype/index.ts",
+            "default": "./lib/datatype/index.js"
+        },
+        "./definition": {
+            "types": "./src/definition/index.ts",
+            "default": "./lib/definition/index.js"
+        },
+        "./element": {
+            "types": "./src/element/index.ts",
+            "default": "./lib/element/index.js"
+        },
+        "./instance": {
+            "types": "./src/instance/index.ts",
+            "default": "./lib/instance/index.js"
+        },
+        "./metapath": {
+            "types": "./src/metapath/index.ts",
+            "default": "./lib/metapath/index.js"
+        },
+        "./util": {
+            "types": "./src/util/index.ts",
+            "default": "./lib/util/index.js"
+        }
+    },
+    "main": "./lib/index.js",
+    "types": "./src/index.ts",
+    "files": [
+        "lib"
+    ],
+    "type": "module",
     "license": "NIST-PD-fallback"
 }

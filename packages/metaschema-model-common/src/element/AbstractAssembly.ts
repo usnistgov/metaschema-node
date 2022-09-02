@@ -23,8 +23,8 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { ModelType } from '../util/types';
-import AbstractNamedModelElement from './AbstractNamedModelElement';
+import { ModelType } from '../util/types.js';
+import AbstractNamedModelElement from './AbstractNamedModelElement.js';
 
 /**
  * A marker interface for an information element that is an assembly model type.

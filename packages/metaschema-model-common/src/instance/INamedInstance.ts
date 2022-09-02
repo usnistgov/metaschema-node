@@ -23,12 +23,12 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import INamedModelDefinition from '../definition/INamedModelDefinition';
-import { AbstractNamedModelElement } from '../element';
-import MarkupLine from '../datatype/markup/MarkupLine';
-import { AbstractConstructor } from '../util/mixin';
-import QName from '../util/QName';
-import IInstance, { instanceable } from './IInstance';
+import MarkupLine from '../datatype/markup/MarkupLine.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import QName from '../util/QName.js';
+import IInstance, { instanceMixin } from './IInstance.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import INamedDefinition from '../definition/INamedDefinition.js';
 
 /**
  * This marker interface indicates that the instance has a flag, field, or assembly name associated
@@ -40,7 +40,7 @@ export default interface INamedInstance extends IInstance, AbstractNamedModelEle
      *
      * @returns the corresponding definition
      */
-    getDefinition(): INamedModelDefinition;
+    getDefinition(): INamedDefinition;
     /**
      * Get the XML qualified name to use in XML.
      *
@@ -55,16 +55,15 @@ export default interface INamedInstance extends IInstance, AbstractNamedModelEle
     getXmlNamespace(): string | undefined;
 }
 
-export function namedInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class NamedInstance extends instanceable(Base) implements INamedInstance {
-        abstract getDefinition(): INamedModelDefinition;
+export function namedInstanceMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class NamedInstance extends instanceMixin(Base) implements INamedInstance {
+        abstract getDefinition(): INamedDefinition;
         getXmlQName(): QName | undefined {
             return new QName(this.getEffectiveName(), this.getXmlNamespace());
         }
         getXmlNamespace(): string | undefined {
-            return this.getContainingMetaschema().getXmlNamespace();
+            return this.getContainingMetaschema().xmlNamespace;
         }
-        abstract getContainingDefinition(): INamedModelDefinition;
         getFormalName(): string | undefined {
             return undefined;
         }

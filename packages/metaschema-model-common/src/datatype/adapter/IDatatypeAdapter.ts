@@ -24,6 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+// TODO: implement
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default interface IDatatypeAdapter<T> {
     /**
      * Get the metaschema type name associated with this adapter. This name must be unique with respect
@@ -37,4 +39,5 @@ export default interface IDatatypeAdapter<T> {
      * @return the class
      */
     // readonly class: unknown;
+    getDefaultJsonValueKey(): string;
 }

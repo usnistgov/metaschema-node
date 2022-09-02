@@ -1,0 +1,29 @@
+{
+    "name": "@oscal/data-utils",
+    "version": "0.0.0",
+    "description": "",
+    "author": {
+        "name": "Nikita Wootten",
+        "email": "nikita.wootten@nist.gov"
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "test": "jest"
+    },
+    "exports": {
+        "./lib": null,
+        "./src": null,
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./lib/index.js"
+        }
+    },
+    "main": "./lib/index.js",
+    "types": "./src/index.ts",
+    "type": "module",
+    "license": "NIST-PD-fallback",
+    "dependencies": {
+        "@xmldom/xmldom": "^0.8.2",
+        "fast-xml-parser": "^4.0.8"
+    }
+}

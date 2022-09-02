@@ -23,7 +23,7 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import IDatatype from './IDatatype';
+import IDatatype from './IDatatype.js';
 
 export default abstract class AbstractDatatype<T extends IDatatype<T>, V> implements IDatatype<T> {
     abstract copy(): T;

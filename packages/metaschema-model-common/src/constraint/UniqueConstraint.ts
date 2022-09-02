@@ -23,6 +23,6 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractKeyConstraint from './AbstractKeyConstraint';
+import AbstractKeyConstraint from './AbstractKeyConstraint.js';
 
 export default class UniqueConstraint extends AbstractKeyConstraint {}

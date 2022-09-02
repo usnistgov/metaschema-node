@@ -23,15 +23,14 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyInstance from './AbstractAssemblyInstance';
-import AbstractChoiceInstance from './AbstractChoiceInstance';
-import AbstractFieldInstance from './AbstractFieldInstance';
-import AbstractFlagInstance from './AbstractFlagInstance';
-import IInstance from './IInstance';
-import IModelInstance from './IModelInstance';
-import INamedInstance from './INamedInstance';
-import INamedModelInstance from './INamedModelInstance';
-import RootAssemblyDefinitionInstance from './RootAssemblyDefininitionInstance';
+import AbstractAssemblyInstance from './AbstractAssemblyInstance.js';
+import AbstractChoiceInstance from './AbstractChoiceInstance.js';
+import AbstractFieldInstance from './AbstractFieldInstance.js';
+import AbstractFlagInstance from './AbstractFlagInstance.js';
+import IInstance from './IInstance.js';
+import IModelInstance from './IModelInstance.js';
+import INamedInstance from './INamedInstance.js';
+import INamedModelInstance from './INamedModelInstance.js';
 
 export {
     AbstractAssemblyInstance,
@@ -42,5 +41,4 @@ export {
     IModelInstance,
     INamedInstance,
     INamedModelInstance,
-    RootAssemblyDefinitionInstance,
 };

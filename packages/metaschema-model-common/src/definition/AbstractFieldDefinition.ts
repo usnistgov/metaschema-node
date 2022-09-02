@@ -23,13 +23,13 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractField from '../element/AbstractField';
-import AbstractFlagInstance from '../instance/AbstractFlagInstance';
-import { namedModelDefineable } from './INamedModelDefinition';
-import { namedValuedDefineable } from './INamedValuedDefinition';
+import AbstractField from '../element/AbstractField.js';
+import AbstractFlagInstance from '../instance/AbstractFlagInstance.js';
+import { namedModelDefinitionMixin } from './INamedModelDefinition.js';
+import { namedValuedDefinitionMixin } from './INamedValuedDefinition.js';
 
-export default abstract class AbstractFieldDefinition extends namedValuedDefineable(
-    namedModelDefineable(AbstractField),
+export default abstract class AbstractFieldDefinition extends namedValuedDefinitionMixin(
+    namedModelDefinitionMixin(AbstractField),
 ) /*implements IModelContainer*/ {
     /**
      * Retrieves the flag instance who's value will be used as the "value key".

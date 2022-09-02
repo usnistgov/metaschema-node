@@ -23,15 +23,16 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import CardinalityConstraint from '../constraint/CardinalityConstraint';
-import IndexConstraint from '../constraint/IndexConstraint';
-import UniqueConstraint from '../constraint/UniqueConstraint';
-import { AbstractAssembly } from '../element';
-import { modelContainable } from './IModelContainer';
-import { namedModelDefineable } from './INamedModelDefinition';
+import CardinalityConstraint from '../constraint/CardinalityConstraint.js';
+import IndexConstraint from '../constraint/IndexConstraint.js';
+import UniqueConstraint from '../constraint/UniqueConstraint.js';
+import AbstractAssembly from '../element/AbstractAssembly.js';
+import QName from '../util/QName.js';
+import { modelContainerMixin } from './IModelContainer.js';
+import { namedModelDefinitionMixin } from './INamedModelDefinition.js';
 
-export default abstract class AbstractAssemblyDefinition extends modelContainable(
-    namedModelDefineable(AbstractAssembly),
+export default abstract class AbstractAssemblyDefinition extends modelContainerMixin(
+    namedModelDefinitionMixin(AbstractAssembly),
 ) {
     /**
      * Get any index constraints associated with this assembly definition.
@@ -53,4 +54,39 @@ export default abstract class AbstractAssemblyDefinition extends modelContainabl
      * @returns the collection of cardinality constraints, which may be empty
      */
     abstract getCardinalityConstraints(): CardinalityConstraint[];
+
+    /**
+     * Get the root name.
+     *
+     * @returns the root name
+     */
+    abstract getRootName(): string | undefined;
+
+    /*
+     * @returns true if getRootName is set
+     */
+    isRoot() {
+        return this.getRootName() !== undefined;
+    }
+
+    /**
+     * Get the XML qualified name to use in XML as the root element.
+     *
+     * @returns the root XML qualified name
+     */
+    getRootXmlQName() {
+        const rootName = this.getRootName();
+        if (rootName) {
+            return new QName(rootName, this.getContainingMetaschema().xmlNamespace);
+        }
+    }
+
+    /**
+     * Get the name used for the associated property in JSON/YAML.
+     *
+     * @returns the root JSON property name
+     */
+    getRootJsonName() {
+        return this.getRootName();
+    }
 }

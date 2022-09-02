@@ -23,14 +23,14 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint';
-import ExpectConstraint from '../constraint/ExpectConstraint';
-import IndexHasConstraint from '../constraint/IndexHasConstraint';
-import MatchesConstraint from '../constraint/MatchesConstraint';
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter';
-import { AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import IDefinition, { defineable } from './IDefinition';
+import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint.js';
+import ExpectConstraint from '../constraint/ExpectConstraint.js';
+import IndexHasConstraint from '../constraint/IndexHasConstraint.js';
+import MatchesConstraint from '../constraint/MatchesConstraint.js';
+import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import IDefinition, { definitionMixin } from './IDefinition.js';
 
 /**
  * This marker interface identifies Metaschema definition types that have associated values (i.e.,
@@ -44,7 +44,7 @@ export default interface IValuedDefinition extends IDefinition {
      *
      * @returns the list of allowed value constraints
      */
-    getAllowedValuesContraints(): AllowedValuesConstraint;
+    getAllowedValuesConstraints(): AllowedValuesConstraint[];
 
     /**
      * Retrieve the list of matches constraints that apply to this definition's value.
@@ -68,10 +68,10 @@ export default interface IValuedDefinition extends IDefinition {
     getExpectConstraints(): ExpectConstraint[];
 }
 
-export function valuedDefineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
-    abstract class ValuedDefinition extends defineable(Base) implements IValuedDefinition {
+export function valuedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+    abstract class ValuedDefinition extends definitionMixin(Base) implements IValuedDefinition {
         abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
-        abstract getAllowedValuesContraints(): AllowedValuesConstraint;
+        abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];
         abstract getIndexHasKeyConstraints(): IndexHasConstraint[];
         abstract getExpectConstraints(): ExpectConstraint[];

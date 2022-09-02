@@ -23,10 +23,11 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractConstraint from '../constraint/AbstractConstraint';
-import { AbstractModelElement, AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import { ModuleScope } from '../util/types';
+import AbstractConstraint from '../constraint/AbstractConstraint.js';
+import AbstractModelElement from '../element/AbstractModelElement.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import { ModuleScope } from '../util/types.js';
 
 export default interface IDefinition extends AbstractModelElement {
     /**
@@ -43,7 +44,7 @@ export default interface IDefinition extends AbstractModelElement {
     getModuleScope(): ModuleScope;
 }
 
-export function defineable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+export function definitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class Definition extends Base implements IDefinition {
         abstract getConstraints(): AbstractConstraint[];
         abstract getModuleScope(): ModuleScope;

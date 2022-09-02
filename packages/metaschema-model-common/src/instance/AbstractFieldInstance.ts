@@ -23,13 +23,13 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractAssemblyDefinition } from '../definition';
-import AbstractFieldDefinition from '../definition/AbstractFieldDefinition';
-import AbstractField from '../element/AbstractField';
-import QName from '../util/QName';
-import { namedModelInstanceable } from './INamedModelInstance';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import AbstractFieldDefinition from '../definition/AbstractFieldDefinition.js';
+import AbstractField from '../element/AbstractField.js';
+import QName from '../util/QName.js';
+import { namedModelInstanceMixin } from './INamedModelInstance.js';
 
-export default abstract class AbstractFieldInstance extends namedModelInstanceable(AbstractField) {
+export default abstract class AbstractFieldInstance extends namedModelInstanceMixin(AbstractField) {
     private readonly parent;
 
     constructor(parent: AbstractAssemblyDefinition) {
@@ -51,13 +51,13 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceab
 
     getJsonName(): string {
         if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
-            return this.getGroupAsName() ?? 'null group-as name';
+            return this.getGroupAsName() ?? 'null group-as name.js';
         }
         return this.getEffectiveName();
     }
 
     getGroupAsXmlNamespace(): string | undefined {
-        return this.isInXmlWrapped() ? this.getContainingMetaschema().getXmlNamespace() : undefined;
+        return this.isInXmlWrapped() ? this.getContainingMetaschema().xmlNamespace : undefined;
     }
 
     abstract getDefinition(): AbstractFieldDefinition;

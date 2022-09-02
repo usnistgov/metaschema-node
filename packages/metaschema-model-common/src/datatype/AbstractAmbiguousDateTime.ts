@@ -23,7 +23,7 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractDatatype from './AbstractDatatype';
+import AbstractDatatype from './AbstractDatatype.js';
 
 export default abstract class AbstractAmbiguousDateTime<
     T extends AbstractAmbiguousDateTime<T>,

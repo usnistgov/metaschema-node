@@ -23,24 +23,24 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from './AbstractAssemblyDefinition';
-import AbstractFieldDefinition from './AbstractFieldDefinition';
-import AbstractFlagDefinition from './AbstractFlagDefinition';
-import AbstractInlineNamedDefinition from './AbstractInlineNamedDefinition';
-import AbstractRootAssemblyDefinition from './AbstractRootAssemblyDefinition';
-import IDefinition from './IDefinition';
-import IModelContainer from './IModelContainer';
-import INamedDefinition from './INamedDefinition';
-import INamedModelDefinition from './INamedModelDefinition';
-import INamedValuedDefinition from './INamedValuedDefinition';
-import IValuedDefinition from './IValuedDefinition';
+import AbstractAssemblyDefinition from './AbstractAssemblyDefinition.js';
+import AbstractFieldDefinition from './AbstractFieldDefinition.js';
+import AbstractFlagDefinition from './AbstractFlagDefinition.js';
+import IInlineNamedDefinition from './IInlineNamedDefinition.js';
+import IDefinition from './IDefinition.js';
+import IModelContainer from './IModelContainer.js';
+import INamedDefinition from './INamedDefinition.js';
+import INamedModelDefinition from './INamedModelDefinition.js';
+import INamedValuedDefinition from './INamedValuedDefinition.js';
+import IValuedDefinition from './IValuedDefinition.js';
+
+export * from './IInlineNamedDefinition.js';
 
 export {
     AbstractAssemblyDefinition,
     AbstractFieldDefinition,
     AbstractFlagDefinition,
-    AbstractInlineNamedDefinition,
-    AbstractRootAssemblyDefinition,
+    IInlineNamedDefinition,
     IDefinition,
     IModelContainer,
     INamedDefinition,

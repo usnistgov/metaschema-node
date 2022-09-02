@@ -23,18 +23,18 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
-import { AbstractNamedModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import AbstractFlagInstance from './AbstractFlagInstance';
-import IModelInstance, { modelInstanceable } from './IModelInstance';
-import INamedInstance, { namedInstanceable } from './INamedInstance';
+import INamedModelDefinition from '../definition/INamedModelDefinition.js';
+import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import AbstractFlagInstance from './AbstractFlagInstance.js';
+import IModelInstance, { modelInstanceMixin } from './IModelInstance.js';
+import INamedInstance, { namedInstanceMixin } from './INamedInstance.js';
 
 export default interface INamedModelInstance extends INamedInstance, IModelInstance {
     /**
      * Propagate override from {@link IModelInstance}
      */
-    getContainingDefinition(): AbstractAssemblyDefinition;
+    getDefinition(): INamedModelDefinition;
 
     /**
      * Indicates if a flag's value can be used as a property name in the containing object in JSON who's
@@ -56,11 +56,13 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 }
 
-export function namedModelInstanceable<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
+export function namedModelInstanceMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class NamedModelInstance
-        extends namedInstanceable(modelInstanceable(Base))
+        extends namedInstanceMixin(modelInstanceMixin(Base))
         implements INamedModelInstance
     {
+        abstract getDefinition(): INamedModelDefinition;
+
         hasJsonKey(): boolean {
             return this.getDefinition().hasJsonKey();
         }

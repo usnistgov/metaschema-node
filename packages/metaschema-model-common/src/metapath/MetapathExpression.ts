@@ -24,4 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-export default class MetapathExpression {}
+export default class MetapathExpression {
+    private readonly expression;
+    constructor(expression: string) {
+        this.expression = expression;
+    }
+    toString() {
+        return this.expression;
+    }
+}

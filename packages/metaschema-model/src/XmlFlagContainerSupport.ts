@@ -23,32 +23,31 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import QName from '../util/QName';
-import AbstractAssemblyDefinition from './AbstractAssemblyDefinition';
 
-export default abstract class AbstractRootAssemblyDefinition extends AbstractAssemblyDefinition {
-    /**
-     * Get the root name.
-     *
-     * @returns the root name
-     */
-    abstract getRootName(): string;
+import { forEachChild, processElement } from '@oscal/data-utils';
+import { INamedModelDefinition } from '@oscal/metaschema-model-common/definition';
+import { AbstractFlagInstance } from '@oscal/metaschema-model-common/instance';
+import XmlInlineFlagDefinition from './XmlInlineFlagDefinition.js';
+import XmlFlagInstance from './XmlFlagInstance.js';
 
-    /**
-     * Get the XML qualified name to use in XML as the root element.
-     *
-     * @returns the root XML qualified name
-     */
-    getRootXmlQName(): QName {
-        return new QName(this.getRootName(), this.getContainingMetaschema().getXmlNamespace());
-    }
+export default class XmlFlagContainerSupport {
+    readonly flagInstances: Map<string, AbstractFlagInstance>;
 
-    /**
-     * Get the name used for the associated property in JSON/YAML.
-     *
-     * @returns the root JSON property name
-     */
-    getRootJsonName() {
-        return this.getRootName();
+    constructor(xml: HTMLElement, container: INamedModelDefinition) {
+        this.flagInstances = new Map();
+        processElement(
+            xml,
+            {},
+            {
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}define-flag': forEachChild((child) => {
+                    const flag = new XmlInlineFlagDefinition(child, container);
+                    this.flagInstances.set(flag.getEffectiveName(), flag);
+                }),
+                '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}flag': forEachChild((child) => {
+                    const flag = new XmlFlagInstance(child, container);
+                    this.flagInstances.set(flag.getEffectiveName(), flag);
+                }),
+            },
+        );
     }
 }

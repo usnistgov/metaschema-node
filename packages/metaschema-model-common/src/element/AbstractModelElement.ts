@@ -23,9 +23,9 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import MarkupMultiLine from '../datatype/markup/MarkupMultiLine';
-import AbstractMetaschema from '../AbstractMetaschema';
-import { ModelType } from '../util/types';
+import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
+import AbstractMetaschema from '../AbstractMetaschema.js';
+import { ModelType } from '../util/types.js';
 
 /**
  * A marker interface for Metaschema constructs that can be members of a Metaschema definition's

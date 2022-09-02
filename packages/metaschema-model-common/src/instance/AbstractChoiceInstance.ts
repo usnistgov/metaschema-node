@@ -23,16 +23,16 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import { AbstractAssemblyDefinition } from '../definition';
-import { modelContainable } from '../definition/IModelContainer';
-import { AbstractChoice } from '../element';
-import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types';
-import { modelInstanceable } from './IModelInstance';
+import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition.js';
+import { modelContainerMixin } from '../definition/IModelContainer.js';
+import AbstractChoice from '../element/AbstractChoice.js';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types.js';
+import { modelInstanceMixin } from './IModelInstance.js';
 
 /**
  * This marker interface represents a choice of allowed instances in a Metaschema.
  */
-export default abstract class AbstractChoiceInstance extends modelContainable(modelInstanceable(AbstractChoice)) {
+export default abstract class AbstractChoiceInstance extends modelContainerMixin(modelInstanceMixin(AbstractChoice)) {
     private readonly parent;
 
     constructor(parent: AbstractAssemblyDefinition) {

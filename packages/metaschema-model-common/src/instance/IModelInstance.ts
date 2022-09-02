@@ -23,25 +23,17 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractAssemblyDefinition from '../definition/AbstractAssemblyDefinition';
-import { AbstractModelElement } from '../element';
-import { AbstractConstructor } from '../util/mixin';
-import QName from '../util/QName';
-import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types';
-import IInstance from './IInstance';
+import AbstractModelElement from '../element/AbstractModelElement.js';
+import { AbstractConstructor } from '../util/mixin.js';
+import QName from '../util/QName.js';
+import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '../util/types.js';
+import IInstance, { instanceMixin } from './IInstance.js';
 
 /**
  * This marker interface is used to identify a field or assembly instance that is a member of an
  * assembly's model.
  */
 export default interface IModelInstance extends IInstance {
-    /**
-     * Retrieve the Metaschema assembly definition on which the info element was declared.
-     *
-     * @returns the Metaschema assembly definition on which the info element was declared
-     */
-    getContainingDefinition(): AbstractAssemblyDefinition;
-
     /**
      * Get the name used for the associated element wrapping a collection of elements in XML. This value
      * is required when {@link getXmlGroupAsBehavior} = {@link XmlGroupAsBehavior.GROUPED}. This name
@@ -99,15 +91,14 @@ export default interface IModelInstance extends IInstance {
     getXmlGroupAsBehavior(): XmlGroupAsBehavior;
 }
 
-export function modelInstanceable<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
-    abstract class ModelInstance extends Base implements IModelInstance {
+export function modelInstanceMixin<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
+    abstract class ModelInstance extends instanceMixin(Base) implements IModelInstance {
         abstract getMinOccurs(): number;
         abstract getMaxOccurs(): number;
         abstract getGroupAsName(): string | undefined;
         abstract getGroupAsXmlNamespace(): string | undefined;
         abstract getJsonGroupAsBehavior(): JsonGroupAsBehavior;
         abstract getXmlGroupAsBehavior(): XmlGroupAsBehavior;
-        abstract getContainingDefinition(): AbstractAssemblyDefinition;
         getXmlGroupAsQName(): QName | undefined {
             const groupAsName = this.getGroupAsName();
             return this.getXmlGroupAsBehavior() === XmlGroupAsBehavior.GROUPED && groupAsName

@@ -1,0 +1,68 @@
+[
+  {
+    "root": [
+      {
+        "#text": "hi"
+      },
+      {
+        "nodeWithAttrs": [],
+        ":@": {
+          "@_test": "true",
+          "@_its": "astring",
+          "@_profit": "15"
+        }
+      },
+      {
+        "nodeWithText": [
+          {
+            "#text": "I am text"
+          }
+        ]
+      },
+      {
+        "nodeWithMixedContent": [
+          {
+            "#text": "I am text"
+          },
+          {
+            "b": [
+              {
+                "#text": "I am text in a tag"
+              }
+            ]
+          },
+          {
+            "a": [
+              {
+                "#text": "I am text with an attribute"
+              }
+            ],
+            ":@": {
+              "@_href": "test.example"
+            }
+          },
+          {
+            "#text": "Bottom text"
+          }
+        ]
+      },
+      {
+        "nodeWithChildrenAndAttrs": [
+          {
+            "child": []
+          },
+          {
+            "child": [
+              {
+                "#text": "Hello"
+              }
+            ]
+          }
+        ],
+        ":@": {
+          "@_numChildren": "2"
+        }
+      }
+    ]
+  }
+]
