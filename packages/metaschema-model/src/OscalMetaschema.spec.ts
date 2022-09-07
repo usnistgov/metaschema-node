@@ -24,26 +24,18 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
-import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
-import MetapathExpression from '../metapath/MetapathExpression.js';
-import { Level } from '../util/types.js';
-import AbstractConstraint from './AbstractConstraint.js';
+import XmlMetaschema from './XmlMetaschema.js';
 
-export default class MatchesConstraint extends AbstractConstraint {
-    readonly pattern;
-    readonly adapter;
+const BASE_URL = 'https://raw.githubusercontent.com/nikitawootten-nist/oscal-resolved/main/resolved';
 
-    constructor(
-        id: string | undefined,
-        level: Level,
-        remarks: MarkupMultiLine | undefined,
-        target: MetapathExpression,
-        pattern: RegExp | undefined,
-        adapter: IDatatypeAdapter<never>,
-    ) {
-        super(id, level, remarks, target);
-        this.pattern = pattern;
-        this.adapter = adapter;
-    }
-}
+describe('Load OSCAL Metaschema', () => {
+    it('should load from local XML', async () => {
+        const metaschema = await XmlMetaschema.load(
+            'oscal_complete_metaschema.xml',
+            async (filename) => await (await fetch(`${BASE_URL}/${filename}`)).text(),
+        );
+
+        expect(metaschema.name.toString()).toBe('OSCAL Unified Model of Models');
+        expect(metaschema.importedMetaschemas.length).toBe(7);
+    });
+});
