@@ -154,6 +154,8 @@ export default class XmlMetaschema extends AbstractMetaschema {
             seen = new Set();
         }
 
+        // TODO: normalize location paths for consistent URIs
+
         // attempt to return early if this metaschema has already been loaded
         const shortCircuitAttempt = loaded[location];
         if (shortCircuitAttempt) {

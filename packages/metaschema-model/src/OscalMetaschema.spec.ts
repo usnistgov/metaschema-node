@@ -37,5 +37,11 @@ describe('Load OSCAL Metaschema', () => {
 
         expect(metaschema.name.toString()).toBe('OSCAL Unified Model of Models');
         expect(metaschema.importedMetaschemas.length).toBe(7);
+
+        expect(metaschema.exportedFlagDefinitions.get('control-id')?.getFormalName()).toBe(
+            'Control Identifier Reference',
+        );
+        expect(metaschema.exportedFieldDefinitions.get('remarks')?.getDatatypeAdapter().name).toBe('markup-multiline');
+        expect(metaschema.exportedAssemblyDefinitions.get('control')?.getEffectiveName()).toBe('control');
     });
 });
