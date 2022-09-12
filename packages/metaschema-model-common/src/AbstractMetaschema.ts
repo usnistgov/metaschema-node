@@ -136,7 +136,7 @@ export default abstract class AbstractMetaschema {
         return [...this.assemblyDefinitions.values(), ...this.fieldDefinitions.values()];
     }
 
-    private _exportedFlagDefinitions: Map<string, AbstractFlagDefinition> = new Map();
+    private _exportedFlagDefinitions: Map<string, AbstractFlagDefinition> | undefined;
     /**
      * Retrieve the top-level flag definitions that are marked global in this Metaschema or in any
      * imported Metaschema. The resulting collection is built by adding global definitions from each
@@ -146,12 +146,17 @@ export default abstract class AbstractMetaschema {
      *
      * @returns the collection of exported flag definitions
      */
-    get exportedFlagDefinitions() {
-        this.initExports();
+    get exportedFlagDefinitions(): Map<string, AbstractFlagDefinition> {
+        if (this._exportedFlagDefinitions === undefined) {
+            this._exportedFlagDefinitions = new Map([
+                ...this.flagDefinitions,
+                ...this.importedMetaschemas.flatMap((metaschema) => [...metaschema.exportedFlagDefinitions]),
+            ]);
+        }
         return this._exportedFlagDefinitions;
     }
 
-    private _exportedFieldDefinitions: Map<string, AbstractFieldDefinition> = new Map();
+    private _exportedFieldDefinitions: Map<string, AbstractFieldDefinition> | undefined;
     /**
      * Retrieve the top-level field definitions that are marked global in this Metaschema or in any
      * imported Metaschema. The resulting collection is built by adding global definitions from each
@@ -161,12 +166,17 @@ export default abstract class AbstractMetaschema {
      *
      * @returns the collection of exported field definitions
      */
-    get exportedFieldDefinitions() {
-        this.initExports();
+    get exportedFieldDefinitions(): Map<string, AbstractFieldDefinition> {
+        if (this._exportedFieldDefinitions === undefined) {
+            this._exportedFieldDefinitions = new Map([
+                ...this.fieldDefinitions,
+                ...this.importedMetaschemas.flatMap((metaschema) => [...metaschema.exportedFieldDefinitions]),
+            ]);
+        }
         return this._exportedFieldDefinitions;
     }
 
-    private _exportedAssemblyDefinitions: Map<string, AbstractAssemblyDefinition> = new Map();
+    private _exportedAssemblyDefinitions: Map<string, AbstractAssemblyDefinition> | undefined;
     /**
      * Retrieve the top-level assembly definitions that are marked global in this Metaschema or in any
      * imported Metaschema. The resulting collection is built by adding global definitions from each
@@ -177,39 +187,14 @@ export default abstract class AbstractMetaschema {
      *
      * @returns the collection of exported assembly definitions
      */
-    get exportedAssemblyDefinitions() {
-        this.initExports();
-        return this._exportedAssemblyDefinitions;
-    }
-
-    private exportsNeedInit = false;
-    /**
-     * Processes the definitions exported by the Metaschema, saving a list of all exported by specific
-     * model types.
-     */
-    protected initExports() {
-        if (this.exportsNeedInit) {
-            this.importedMetaschemas.map((metaschema) => {
-                this._exportedFlagDefinitions = new Map([
-                    ...this._exportedFlagDefinitions,
-                    ...metaschema.exportedFlagDefinitions,
-                ]);
-
-                this._exportedFieldDefinitions = new Map([
-                    ...this._exportedFieldDefinitions,
-                    ...metaschema.exportedFieldDefinitions,
-                ]);
-
-                this._exportedAssemblyDefinitions = new Map([
-                    ...this._exportedAssemblyDefinitions,
-                    ...metaschema.exportedAssemblyDefinitions,
-                ]);
-            });
-
-            // TODO: handle shadowed definitions
-
-            this.exportsNeedInit = false;
+    get exportedAssemblyDefinitions(): Map<string, AbstractAssemblyDefinition> {
+        if (this._exportedAssemblyDefinitions === undefined) {
+            this._exportedAssemblyDefinitions = new Map([
+                ...this.assemblyDefinitions,
+                ...this.importedMetaschemas.flatMap((metaschema) => [...metaschema.exportedAssemblyDefinitions]),
+            ]);
         }
+        return this._exportedAssemblyDefinitions;
     }
 
     /**

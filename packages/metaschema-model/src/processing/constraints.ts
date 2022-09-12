@@ -40,6 +40,7 @@ import { Level } from '@oscal/metaschema-model-common/util';
 import {
     AttributeProcessor,
     ChildProcessor,
+    defaultibleAttribute,
     DefiniteAttributeProcessor,
     forEachChild,
     optionalOneChild,
@@ -47,7 +48,6 @@ import {
     processElement,
     processNumberAttribute,
     requireAttribute,
-    requireOneChild,
     undefineableAttribute,
     XmlProcessingError,
 } from '@oscal/data-utils';
@@ -170,7 +170,7 @@ const processExpectConstraint: ChildProcessor<ExpectConstraint> = (child, _conte
         { ...CONSTRAINT_COMMON_ATTRS, test: requireAttribute(processMetapath) },
         {
             ...CONSTRAINT_COMMON_CHILDREN,
-            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}message': requireOneChild(
+            '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}message': optionalOneChild(
                 (child) => processElement(child, {}, {}).body,
             ),
         },
@@ -262,7 +262,7 @@ const processMatchesConstraint: ChildProcessor<MatchesConstraint> = (child, _con
         child,
         {
             ...CONSTRAINT_COMMON_ATTRS,
-            pattern: requireAttribute((attribute) => new RegExp(attribute)),
+            pattern: undefineableAttribute((attribute) => new RegExp(attribute)),
             datatype: requireAttribute(processDatatypeAdapter),
         },
         { ...CONSTRAINT_COMMON_CHILDREN },
@@ -282,7 +282,7 @@ const processAllowedValuesConstraint: ChildProcessor<AllowedValuesConstraint> = 
         child,
         {
             ...CONSTRAINT_COMMON_ATTRS,
-            'allow-other': requireAttribute(processBooleanAttribute),
+            'allow-other': defaultibleAttribute(processBooleanAttribute, false),
         },
         {
             ...CONSTRAINT_COMMON_CHILDREN,
