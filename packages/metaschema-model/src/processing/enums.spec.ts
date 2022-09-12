@@ -24,18 +24,32 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { ModuleScope } from '@oscal/metaschema-model-common/util';
+import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
 import { placeholderContext } from '../testUtil/index.js';
-import { processModuleScope } from './enums.js';
+import { processJsonGroupAsBehavior, processModuleScope, processXmlGroupAsBehavior } from './enums.js';
 
-describe('processModuleScope()', () => {
-    it('should process modules scope', () => {
+describe('enums', () => {
+    it('processModuleScope()', () => {
         expect(processModuleScope('local', placeholderContext)).toBe(ModuleScope.LOCAL);
         expect(processModuleScope('inherited', placeholderContext)).toBe(ModuleScope.INHERITED);
         expect(processModuleScope(null, placeholderContext)).toBe(ModuleScope.INHERITED);
+        expect(() => processModuleScope('invalid', placeholderContext)).toThrow();
     });
 
-    it('should throw on invalid module scope', () => {
-        expect(() => processModuleScope('invalid', placeholderContext)).toThrow();
+    it('processXmlGroupAsBehavior()', () => {
+        expect(processXmlGroupAsBehavior('WITH_WRAPPER', placeholderContext)).toBe(XmlGroupAsBehavior.GROUPED);
+        expect(processXmlGroupAsBehavior('UNWRAPPED', placeholderContext)).toBe(XmlGroupAsBehavior.UNGROUPED);
+        expect(() => processXmlGroupAsBehavior(null, placeholderContext)).toThrow();
+        expect(() => processXmlGroupAsBehavior('invalid', placeholderContext)).toThrow();
+    });
+
+    it('processJsonGroupAsBehavior()', () => {
+        expect(processJsonGroupAsBehavior('ARRAY', placeholderContext)).toBe(JsonGroupAsBehavior.LIST);
+        expect(processJsonGroupAsBehavior('SINGLETON_OR_ARRAY', placeholderContext)).toBe(
+            JsonGroupAsBehavior.SINGLETON_OR_LIST,
+        );
+        expect(processJsonGroupAsBehavior('BY_KEY', placeholderContext)).toBe(JsonGroupAsBehavior.KEYED);
+        expect(() => processJsonGroupAsBehavior(null, placeholderContext)).toThrow();
+        expect(() => processJsonGroupAsBehavior('invalid', placeholderContext)).toThrow();
     });
 });
