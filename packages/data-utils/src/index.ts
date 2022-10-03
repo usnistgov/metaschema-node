@@ -26,3 +26,4 @@
 
 export * from './xmlProcessor.js';
 export * from './xmlProcessorUtil.js';
+export * from './errorUtil.js';

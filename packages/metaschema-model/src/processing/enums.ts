@@ -24,28 +24,28 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AttributeProcessor, XmlProcessingError } from '@oscal/data-utils';
+import { AttributeProcessor } from '@oscal/data-utils';
 import { JsonGroupAsBehavior, ModuleScope, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
 
-export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute, context) => {
+export const processModuleScope: AttributeProcessor<ModuleScope> = (attribute) => {
     if (attribute === 'local') {
         return ModuleScope.LOCAL;
     } else if (attribute === 'inherited' || attribute === null) {
         return ModuleScope.INHERITED;
     }
-    throw XmlProcessingError.withContext(context, `Unknown module scope ${attribute}`);
+    throw new Error(`Unknown module scope ${attribute}`);
 };
 
-export const processXmlGroupAsBehavior: AttributeProcessor<XmlGroupAsBehavior> = (attribute, context) => {
+export const processXmlGroupAsBehavior: AttributeProcessor<XmlGroupAsBehavior> = (attribute) => {
     if (attribute === 'WITH_WRAPPER') {
         return XmlGroupAsBehavior.GROUPED;
     } else if (attribute === 'UNWRAPPED') {
         return XmlGroupAsBehavior.UNGROUPED;
     }
-    throw XmlProcessingError.withContext(context, `Unknown xml group-as behavior ${attribute}`);
+    throw new Error(`Unknown xml group-as behavior ${attribute}`);
 };
 
-export const processJsonGroupAsBehavior: AttributeProcessor<JsonGroupAsBehavior> = (attribute, context) => {
+export const processJsonGroupAsBehavior: AttributeProcessor<JsonGroupAsBehavior> = (attribute) => {
     switch (attribute) {
         case 'ARRAY':
             return JsonGroupAsBehavior.LIST;
@@ -54,6 +54,6 @@ export const processJsonGroupAsBehavior: AttributeProcessor<JsonGroupAsBehavior>
         case 'BY_KEY':
             return JsonGroupAsBehavior.KEYED;
         default:
-            throw XmlProcessingError.withContext(context, `Unknown json group-as behavior ${attribute}`);
+            throw new Error(`Unknown json group-as behavior ${attribute}`);
     }
 };

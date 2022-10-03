@@ -49,12 +49,11 @@ import {
     processNumberAttribute,
     requireAttribute,
     undefineableAttribute,
-    XmlProcessingError,
 } from '@oscal/data-utils';
 import { processMarkupLine, processMarkupMultiLine } from './markup.js';
 import { processDatatypeAdapter } from './datatype.js';
 
-const processLevel: AttributeProcessor<Level> = (attribute, context) => {
+const processLevel: AttributeProcessor<Level> = (attribute) => {
     if (attribute === null) {
         return Level.ERROR;
     }
@@ -74,7 +73,7 @@ const processLevel: AttributeProcessor<Level> = (attribute, context) => {
             level = Level.CRITICAL;
             break;
         default:
-            throw XmlProcessingError.withContext(context, `Invalid level "${attribute}"`);
+            throw new Error(`Invalid level "${attribute}"`);
     }
 
     return level;
@@ -87,12 +86,12 @@ const processMetapath: DefiniteAttributeProcessor<MetapathExpression> = (attribu
 const processTarget: AttributeProcessor<MetapathExpression> = (attribute, context) => {
     if (attribute === null) {
         if (context.parent.parentElement?.tagName === 'define-assembly') {
-            throw XmlProcessingError.withContext(context, "target must be set on an assembly's constraint");
+            throw new Error("target must be set on an assembly's constraint");
         }
         return processMetapath('.', context);
     } else {
         if (context.parent.parentElement?.tagName === 'define-flag') {
-            throw XmlProcessingError.withContext(context, "target cannot be set on a flag's constraint");
+            throw new Error("target cannot be set on a flag's constraint");
         }
         return processMetapath(attribute, context);
     }

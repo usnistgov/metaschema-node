@@ -28,6 +28,8 @@ import XmlGlobalFlagDefinition from './XmlGlobalFlagDefinition.js';
 import { ResourceResolver } from './resolver.js';
 import { AbstractMetaschema } from '@oscal/metaschema-model-common';
 import {
+    ErrorWithLocationContext,
+    ErrorWithNodeContext,
     forEachChild,
     optionalOneChild,
     parseXml,
@@ -176,17 +178,25 @@ export default class XmlMetaschema extends AbstractMetaschema {
         const rootXml = parseXml(raw);
         const metaschemaXml = rootXml.documentElement;
 
-        // get all imports, and recursively import metaschemas for those imports
-        const importLocs = this.parseImports(metaschemaXml);
-        const imports = [];
-        for (const importLoc of importLocs) {
-            const imported = await this.load(importLoc, resolver, loaded, seen);
-            // allow future metaschemas to short-circuit imports
-            loaded[importLoc] = imported;
-            imports.push(imported);
-        }
+        try {
+            // get all imports, and recursively import metaschemas for those imports
+            const importLocs = this.parseImports(metaschemaXml);
+            const imports = [];
+            for (const importLoc of importLocs) {
+                const imported = await this.load(importLoc, resolver, loaded, seen);
+                // allow future metaschemas to short-circuit imports
+                loaded[importLoc] = imported;
+                imports.push(imported);
+            }
 
-        return new this(location, metaschemaXml, imports);
+            return new this(location, metaschemaXml, imports);
+        } catch (err) {
+            if (err instanceof ErrorWithNodeContext) {
+                throw new ErrorWithLocationContext(err, location);
+            } else {
+                throw err;
+            }
+        }
     }
 
     /**

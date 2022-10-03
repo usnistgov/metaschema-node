@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { parseXml } from '@oscal/data-utils';
+import { ErrorWithLocationContext, parseXml } from '@oscal/data-utils';
 import { ResourceResolver } from './resolver.js';
 import XmlMetaschema from './XmlMetaschema.js';
 
@@ -164,6 +164,38 @@ describe('XmlMetaschema.load()', () => {
         expect(metaschema.importedMetaschemas[1].importedMetaschemas).toHaveLength(1);
         expect(metaschema.importedMetaschemas[0].importedMetaschemas[0].location).toBe('some.example/bottom.xml');
         expect(metaschema.importedMetaschemas[1].importedMetaschemas[0].location).toBe('some.example/bottom.xml');
+    });
+
+    /**
+     * An invalid import without an href attribute
+     */
+    it('should fail on an invalid import', async () => {
+        const resolver = mockResolverBuilder({
+            'some.example/invalid_import.xml': `<METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
+                    <schema-name>Test</schema-name>
+                    <schema-version>Doesn't matter</schema-version>
+                    <short-name>Longer</short-name>
+                    <namespace>SpaceName</namespace>
+                    <json-base-uri>space-name</json-base-uri>
+                    <import/>
+                </METASCHEMA>`,
+        });
+
+        // Weird syntax for async exceptions
+        await expect(async () => {
+            try {
+                await XmlMetaschema.load('some.example/invalid_import.xml', resolver);
+            } catch (err) {
+                expect(err).toBeInstanceOf(ErrorWithLocationContext);
+                if (err instanceof ErrorWithLocationContext) {
+                    expect(err.context.location).toBe('some.example/invalid_import.xml');
+                    expect(err.context.lineNumber).toBe(7);
+                    expect(err.context.columnNumber).toBe(21);
+                    expect(err.message.endsWith('(at some.example/invalid_import.xml:7:21)'));
+                }
+                throw err;
+            }
+        }).rejects.toThrow();
     });
 });
 
