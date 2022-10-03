@@ -7,8 +7,7 @@
         "email": "nikita.wootten@nist.gov"
     },
     "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "test": "jest"
+        "build": "tsc -p tsconfig.build.json"
     },
     "exports": {
         "./lib": null,
