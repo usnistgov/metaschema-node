@@ -24,7 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AttributeProcessor, ChildListProcessor, XmlProcessingError } from './xmlProcessorUtil.js';
+import { ErrorWithNodeContext, injectNodeContextOnError } from './errorUtil.js';
+import { AttributeProcessor, ChildListProcessor } from './xmlProcessorUtil.js';
 
 export function processElement<
     AttributeProcessors extends Record<string, AttributeProcessor<unknown>>,
@@ -62,28 +63,44 @@ export function processAttributes<AttributeProcessors extends Record<string, Att
     throwErrorOnUnexpected = false,
 ) {
     const ret: Record<string, unknown> = {};
-    for (let i = 0; i < element.attributes.length; i++) {
-        const attributeNode = element.attributes[i];
-        const attributeNS = attributeNode.namespaceURI;
-        const nsKey = `{${attributeNS ?? ''}}${attributeNode.localName}`;
-        if (attributeNS && nsKey in attributeProcessors) {
-            ret[nsKey] = attributeProcessors[nsKey](attributeNode.value, { parent: element, name: nsKey });
-        } else if (attributeNode.name in attributeProcessors) {
-            ret[attributeNode.name] = attributeProcessors[attributeNode.name](attributeNode.value, {
-                parent: element,
-                name: attributeNode.name,
-            });
-        } else {
-            if (throwErrorOnUnexpected && !attributeNode.name.startsWith('xmlns')) {
-                throw new XmlProcessingError(`Unexpected attribute(s) of parent ${element.tagName} element`);
+
+    injectNodeContextOnError(element, () => {
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attributeNode = element.attributes[i];
+            const attributeNS = attributeNode.namespaceURI;
+            const nsKey = `{${attributeNS ?? ''}}${attributeNode.localName}`;
+
+            let key = nsKey;
+            if (attributeNS && nsKey in attributeProcessors) {
+                key = nsKey;
+            } else if (attributeNode.name in attributeProcessors) {
+                key = attributeNode.name;
+            } else {
+                if (throwErrorOnUnexpected && !attributeNode.name.startsWith('xmlns')) {
+                    throw new ErrorWithNodeContext(
+                        `Unexpected attribute(s) of parent ${element.tagName} element`,
+                        attributeNode,
+                    );
+                }
+                continue;
             }
-            continue;
+
+            injectNodeContextOnError(
+                attributeNode,
+                () =>
+                    (ret[key] = attributeProcessors[key](attributeNode.value, {
+                        parent: element,
+                        name: key,
+                    })),
+            );
         }
-    }
-    Object.keys(attributeProcessors).forEach((key) => {
-        if (!(key in ret)) {
-            ret[key] = attributeProcessors[key](null, { parent: element, name: key });
-        }
+
+        // Call the attribute processors for attributes that did not appear in the target element
+        Object.keys(attributeProcessors).forEach((key) => {
+            if (!(key in ret)) {
+                ret[key] = attributeProcessors[key](null, { parent: element, name: key });
+            }
+        });
     });
 
     return ret as {
@@ -105,47 +122,61 @@ export function processChildren<ChildProcessors extends Record<string, ChildList
 ) {
     const childElements: Record<string, Array<HTMLElement>> = {};
     const rawBody: string[] = [];
-    for (let i = 0; i < element.childNodes.length; i++) {
-        const rawChild = element.childNodes[i];
-        if (rawChild.nodeType === rawChild.ELEMENT_NODE) {
-            const child = rawChild as HTMLElement;
-            const nsKey = `{${child.namespaceURI ?? ''}}${child.localName}`;
-            if (!(nsKey in childElements)) {
-                childElements[nsKey] = [];
-            }
-            childElements[nsKey].push(child);
-        } else if (rawChild.nodeType === rawChild.TEXT_NODE) {
-            const child = rawChild as Text;
-            rawBody.push(child.data.trim());
-        } else if (rawChild.nodeType !== rawChild.COMMENT_NODE && throwErrorOnUnexpected) {
-            throw new XmlProcessingError(`Unexpected child type of parent ${element.tagName}`);
-        }
-    }
-
     const children: Record<string, unknown> = {};
-    Object.keys(childElements).forEach((key) => {
-        const childList = childElements[key];
-        const tagName = childList[0].tagName;
-        if (key in childProcessors) {
-            children[key] = childProcessors[key](childList, { parent: element, name: key });
-        } else if (tagName in childProcessors) {
-            children[tagName] = childProcessors[tagName](childList, { parent: element, name: tagName });
-        } else if (throwErrorOnUnexpected) {
-            throw new XmlProcessingError(`Unexpected child(ren) of parent ${element.tagName} element`);
-        }
-    });
-    Object.keys(childProcessors).forEach((key) => {
-        if (!(key in children)) {
-            children[key] = childProcessors[key]([], { parent: element, name: key });
-        }
-    });
 
-    const cleanBody = rawBody.join(' ').trim();
+    // Catch all errors and inject the location of the current element
+    injectNodeContextOnError(element, () => {
+        // Iterate through the child nodes in order, populate the childElement key->elements map
+        for (let i = 0; i < element.childNodes.length; i++) {
+            const rawChild = element.childNodes[i];
+            if (rawChild.nodeType === rawChild.ELEMENT_NODE) {
+                const child = rawChild as HTMLElement;
+                const nsKey = `{${child.namespaceURI ?? ''}}${child.localName}`;
+                if (!(nsKey in childElements)) {
+                    childElements[nsKey] = [];
+                }
+                childElements[nsKey].push(child);
+            } else if (rawChild.nodeType === rawChild.TEXT_NODE) {
+                const child = rawChild as Text;
+                rawBody.push(child.data.trim());
+            } else if (rawChild.nodeType !== rawChild.COMMENT_NODE && throwErrorOnUnexpected) {
+                throw new ErrorWithNodeContext(`Unexpected child type of parent ${element.tagName}`, rawChild);
+            }
+        }
+
+        // For each key in the key->elements map, run the appropriate attribute processor
+        Object.keys(childElements).forEach((name) => {
+            const childList = childElements[name];
+            const tagName = childList[0].tagName;
+
+            let key = undefined;
+            if (name in childProcessors) {
+                key = name;
+            } else if (tagName in childProcessors) {
+                key = tagName;
+            } else {
+                if (throwErrorOnUnexpected) {
+                    throw new Error(`Unexpected child(ren) of parent ${element.tagName} element`);
+                }
+                return;
+            }
+
+            children[key] = childProcessors[key](childList, { parent: element, name: key });
+        });
+
+        // For childProcessors that did not have associated elements in the target element,
+        // run the attribute processor on an empty list.
+        Object.keys(childProcessors).forEach((key) => {
+            if (!(key in children)) {
+                children[key] = childProcessors[key]([], { parent: element, name: key });
+            }
+        });
+    });
 
     return {
         children: children as {
             [Property in keyof ChildProcessors]: ReturnType<ChildProcessors[Property]>;
         },
-        body: cleanBody,
+        body: rawBody.join(' ').trim(),
     };
 }

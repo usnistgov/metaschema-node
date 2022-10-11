@@ -29,23 +29,6 @@ export function parseXml(raw: string | Buffer) {
     return new DOMParser().parseFromString(raw.toString(), 'text/xml');
 }
 
-export class XmlProcessingError extends Error {
-    constructor(msg: string) {
-        super(msg);
-        Object.setPrototypeOf(this, XmlProcessingError.prototype);
-    }
-
-    /**
-     * Attach the XML processing context to the error message
-     * @param context The context to add to the error
-     * @param msg The error message
-     */
-    static withContext(context: Context, msg: string) {
-        // TODO: add context string to error message
-        return new XmlProcessingError(`${msg} (field name: ${context.name})`);
-    }
-}
-
 export type Context = {
     parent: HTMLElement;
     name: string;
@@ -71,7 +54,7 @@ export type ChildProcessor<T> = Processor<HTMLElement, T>;
 export function requireAttribute<T>(definiteAttributeProcessor: DefiniteAttributeProcessor<T>): AttributeProcessor<T> {
     return (attribute, context) => {
         if (attribute === null) {
-            throw XmlProcessingError.withContext(context, 'A required attribute was not provided');
+            throw new Error('A required attribute was not provided');
         }
         return definiteAttributeProcessor(attribute, context);
     };
@@ -122,7 +105,7 @@ export function optionalOneChild<T>(childProcessor: Processor<HTMLElement, T>): 
         }
 
         if (children.length > 1) {
-            throw XmlProcessingError.withContext(context, `Expected 1 or no children but received ${children.length}`);
+            throw new Error(`Expected 1 or no children but received ${children.length}`);
         }
 
         return childProcessor(children[0], context);
@@ -132,26 +115,26 @@ export function optionalOneChild<T>(childProcessor: Processor<HTMLElement, T>): 
 export function requireOneChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T> {
     return (children, context) => {
         if (children.length != 1) {
-            throw XmlProcessingError.withContext(context, `Expected exactly 1 child but received ${children.length}`);
+            throw new Error(`Expected exactly 1 child but received ${children.length}`);
         }
         return childProcessor(children[0], context);
     };
 }
 
-export const processBooleanAttribute: DefiniteAttributeProcessor<boolean> = (attribute, context) => {
+export const processBooleanAttribute: DefiniteAttributeProcessor<boolean> = (attribute) => {
     if (attribute === 'true' || attribute === 'yes') {
         return true;
     } else if (attribute === 'false' || attribute === 'no') {
         return false;
     } else {
-        throw XmlProcessingError.withContext(context, `Expected boolean, got ${attribute}`);
+        throw new Error(`Expected boolean, got ${attribute}`);
     }
 };
 
-export const processNumberAttribute: DefiniteAttributeProcessor<number> = (attribute, context) => {
+export const processNumberAttribute: DefiniteAttributeProcessor<number> = (attribute) => {
     const number = +attribute;
     if (Number.isNaN(number)) {
-        throw XmlProcessingError.withContext(context, `Could not convert "${attribute}" to a numeric value`);
+        throw new Error(`Could not convert "${attribute}" to a numeric value`);
     }
     return number;
 };
