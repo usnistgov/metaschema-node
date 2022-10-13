@@ -24,9 +24,9 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
-
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default class UnsupportedOperationError extends Error {
+    constructor(msg: string) {
+        super(msg);
+        Object.setPrototypeOf(this, UnsupportedOperationError.prototype);
+    }
+}

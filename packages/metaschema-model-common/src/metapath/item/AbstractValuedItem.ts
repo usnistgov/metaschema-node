@@ -24,9 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import AbstractItem from './AbstractItem.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default abstract class AbstractValuedItem<T> extends AbstractItem {
+    /**
+     * Get the item's "wrapped" value. This "wrapped" value may be a type managed by a
+     * {@link IDatatypeAdapter} or a primitive type provided by the standard library.
+     *
+     * @return the value
+     */
+    abstract readonly value: T;
+}

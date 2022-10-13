@@ -24,9 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import IntegerItem from '../../metapath/item/IntegerItem.js';
 import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default class IntegerAdapter extends AbstractDatatypeAdapter<bigint, IntegerItem> {
+    name = 'integer';
+    toValue(value: unknown): bigint {
+        throw new Error('Method not implemented.');
+    }
+    asString(value: unknown): string {
+        throw new Error('Method not implemented.');
+    }
+}

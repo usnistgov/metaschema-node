@@ -25,8 +25,5 @@
  */
 
 import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default abstract class AbstractStringAdapter<T> extends AbstractDatatypeAdapter<string, T> {}

@@ -24,9 +24,10 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import { IDatatypeAdapter, StringAdapter } from './adapter/index.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export type DatatypeProvider = Record<string, IDatatypeAdapter<unknown>>;
+
+export const MetaschemaDatatypeProvider: DatatypeProvider = {
+    string: new StringAdapter(),
+};

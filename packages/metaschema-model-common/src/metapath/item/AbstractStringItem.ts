@@ -24,9 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import AbstractAnyAtomicItem from './AbstractAnyAtomicItem.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+// export default class AbstractStringItem extends AbstractAnyAtomicItem<string> {
+//     static valueOf(value: string) {}
+// }

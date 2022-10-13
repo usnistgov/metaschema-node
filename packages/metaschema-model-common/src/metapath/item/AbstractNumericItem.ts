@@ -24,9 +24,36 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import AbstractAnyAtomicItem from './AbstractAnyAtomicItem.js';
+import IntegerItem from './IntegerItem.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default abstract class AbstractNumericItem<T> extends AbstractAnyAtomicItem<T> {
+    abstract asDecimal(): number;
+    abstract asInteger(): bigint;
+    abstract asBoolean(): boolean;
+
+    /**
+     * Get the absolute value of the item.
+     *
+     * @return this item negated if this item is negative, or the item otherwise
+     */
+    abstract abs(): AbstractNumericItem<T>;
+
+    /**
+     * Round the value to the whole number closest to positive infinity.
+     *
+     * @return the rounded value
+     */
+    abstract ceiling(): IntegerItem;
+
+    /**
+     * Round the value to the whole number closest to negative infinity.
+     *
+     * @return the rounded value
+     */
+    abstract floor(): IntegerItem;
+
+    // round(precisionItem?: AbstractIntegerItem) {
+
+    // }
+}

@@ -24,9 +24,17 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
+import AbstractAnyAtomicItem from '../../metapath/item/AbstractAnyAtomicItem.js';
 import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default abstract class AbstractDatatypeAdapter<Native_T, Metapath_T extends AbstractAnyAtomicItem<unknown>>
+    implements IDatatypeAdapter<Native_T>
+{
+    abstract readonly name: string;
+    abstract toValue(value: unknown): Native_T;
+    abstract asString(value: unknown): string;
+    readonly atomic: boolean = true;
+    readonly defaultJsonValueKey = 'STRVALUE';
+    readonly isUnwrappedValueAllowedInXml = false;
+    readonly isXmlMixed = false;
+}

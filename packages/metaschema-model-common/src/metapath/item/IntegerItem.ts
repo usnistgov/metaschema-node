@@ -24,9 +24,37 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import { IDatatypeAdapter } from '../../datatype/index.js';
+import AbstractNumericItem from './AbstractNumericItem.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default class IntegerItem extends AbstractNumericItem<bigint> {
+    name = this.constructor.name;
+
+    asDecimal() {
+        return Number(this.value);
+    }
+
+    asInteger() {
+        return this.value;
+    }
+
+    asBoolean(): boolean {
+        return this.value != BigInt(0);
+    }
+
+    abs() {
+        return new IntegerItem(this.value < BigInt(0) ? -this.value : this.value);
+    }
+
+    ceiling() {
+        return this;
+    }
+
+    floor() {
+        return this;
+    }
+
+    getDatatypeAdaptor(): IDatatypeAdapter<bigint> {
+        throw new Error('Method not implemented.');
+    }
+}

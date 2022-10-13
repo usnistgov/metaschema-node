@@ -24,8 +24,6 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-// TODO: implement
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default interface IDatatypeAdapter<T> {
     /**
      * Get the metaschema type name associated with this adapter. This name must be unique with respect
@@ -34,10 +32,46 @@ export default interface IDatatypeAdapter<T> {
     readonly name: string;
 
     /**
-     * Get the class supported by this adapter.
+     * Casts the provided value to the type associated with this adapter.
      *
-     * @return the class
+     * @param value a value of the provided type
+     * @return the typed value
      */
-    // readonly class: unknown;
-    getDefaultJsonValueKey(): string;
+    toValue(value: unknown): T;
+
+    /**
+     * Gets the value as a string suitable for writing as text. This is intended for data types that
+     * have a simple string-based structure in XML and JSON, such as for XML attributes or JSON keys. An
+     * adapter for a complex data structures that consist of XML elements will throw an
+     * {@link UnsupportedOperationError} when this is called.
+     *
+     * @param value the data to format as a string
+     * @return the value formatted as a string
+     * @throws {@link UnsupportedOperationError} if the data type cannot be represented as a string
+     */
+    asString(value: unknown): string;
+
+    /**
+     * Determines if the data type is an atomic, scalar value. Complex structures such as Markup are not
+     * considered atomic.
+     * `true` if the data type is an atomic scalar value, or `false` otherwise
+     */
+    readonly atomic: boolean;
+
+    /**
+     * Gets the default value to use as the JSON/YAML field name for a Metaschema field value if no JSON
+     * value key flag or name is configured.
+     */
+    readonly defaultJsonValueKey: string;
+
+    /**
+     * Determines if the data type's value is allowed to be unwrapped in XML when the value is a field
+     * value.
+     */
+    readonly isUnwrappedValueAllowedInXml: boolean;
+
+    /**
+     * Determines if the datatype uses mixed text and element content in XML.
+     */
+    readonly isXmlMixed: boolean;
 }

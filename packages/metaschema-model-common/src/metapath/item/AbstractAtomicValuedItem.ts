@@ -24,9 +24,9 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
-import StringAdapter from './StringAdapter.js';
+import AbstractAnyAtomicItem from './AbstractAnyAtomicItem.js';
+import AbstractValuedItem from './AbstractValuedItem.js';
 
-export { AbstractDatatypeAdapter, AbstractStringAdapter, IDatatypeAdapter, StringAdapter };
+export default abstract class AbstractAtomicValuedItem<T> extends AbstractValuedItem<T> {
+    abstract toAtomicItem(): AbstractAnyAtomicItem<T>;
+}
