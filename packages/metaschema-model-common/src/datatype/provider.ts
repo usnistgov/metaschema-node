@@ -24,33 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { IDatatypeAdapter } from '../../datatype/index.js';
-import AbstractAtomicValuedItem from './AbstractAtomicValuedItem.js';
-import AbstractStringItem from './AbstractStringItem.js';
+import AbstractItem from '../metapath/item/AbstractItem.js';
+import AbstractDatatypeAdapter from './adapter/AbstractDatatypeAdapter.js';
+import StringAdapter from './adapter/StringAdapter.js';
 
-export default abstract class AbstractAnyAtomicItem<T> extends AbstractAtomicValuedItem<T> {
-    value: T;
+export type DatatypeProvider = Record<string, AbstractDatatypeAdapter<AbstractItem>>;
 
-    constructor(value: T) {
-        super();
-        this.value = value;
-    }
-
-    toAtomicItem() {
-        return this;
-    }
-
-    asString() {
-        return this.getDatatypeAdaptor().asString(this.value);
-    }
-
-    toString() {
-        return this.asString();
-    }
-
-    newStringItem() {
-        return AbstractStringItem.valueOf(this.asString());
-    }
-
-    abstract getDatatypeAdaptor(): IDatatypeAdapter<T>;
-}
+export const MetaschemaDatatypeProvider: DatatypeProvider = {
+    string: new StringAdapter(),
+};

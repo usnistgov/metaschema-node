@@ -153,7 +153,7 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
     getJsonValueKeyName() {
         return (
             this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key'] ??
-            this.getDatatypeAdapter().getDefaultJsonValueKey()
+            this.getDatatypeAdapter().defaultJsonValueKey
         );
     }
 

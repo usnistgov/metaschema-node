@@ -24,8 +24,6 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAnyAtomicItem from './AbstractAnyAtomicItem.js';
+import AbstractAtomicValuedItem from './AbstractAtomicValuedItem.js';
 
-// export default class AbstractStringItem extends AbstractAnyAtomicItem<string> {
-//     static valueOf(value: string) {}
-// }
+export default abstract class AbstractStringItem extends AbstractAtomicValuedItem<string> {}

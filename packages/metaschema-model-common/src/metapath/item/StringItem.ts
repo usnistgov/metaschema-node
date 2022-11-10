@@ -23,15 +23,9 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractDatatype from './AbstractDatatype.js';
 
-export default abstract class AbstractAmbiguousDateTime<
-    T extends AbstractAmbiguousDateTime<T>,
-> extends AbstractDatatype<T, Date> {
-    public readonly hasTimeZone: boolean;
+import AbstractStringItem from './AbstractStringItem.js';
 
-    public constructor(value: Date, hasTimeZone: boolean) {
-        super(value);
-        this.hasTimeZone = hasTimeZone;
-    }
+export default class StringItem extends AbstractStringItem {
+    name = 'string';
 }

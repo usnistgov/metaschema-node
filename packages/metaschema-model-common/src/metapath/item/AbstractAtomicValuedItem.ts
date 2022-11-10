@@ -24,9 +24,17 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAnyAtomicItem from './AbstractAnyAtomicItem.js';
 import AbstractValuedItem from './AbstractValuedItem.js';
 
 export default abstract class AbstractAtomicValuedItem<T> extends AbstractValuedItem<T> {
-    abstract toAtomicItem(): AbstractAnyAtomicItem<T>;
+    private readonly value: T;
+
+    getValue() {
+        return this.value;
+    }
+
+    constructor(value: T) {
+        super();
+        this.value = value;
+    }
 }

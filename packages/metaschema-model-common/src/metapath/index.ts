@@ -24,6 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+export * from './item/index.js';
+
 import MetapathExpression from './MetapathExpression.js';
 
 export { MetapathExpression };

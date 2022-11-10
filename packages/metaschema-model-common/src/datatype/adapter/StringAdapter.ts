@@ -24,4 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-export default class StringAdapter {}
+import StringItem from '../../metapath/item/StringItem.js';
+import AbstractStringAdapter from './AbstractStringAdapter.js';
+
+export default class StringAdapter extends AbstractStringAdapter<StringItem> {
+    name = 'string';
+    defaultJsonValueKey = '';
+
+    fromString(parsed: string): StringItem {
+        return new StringItem(parsed);
+    }
+}

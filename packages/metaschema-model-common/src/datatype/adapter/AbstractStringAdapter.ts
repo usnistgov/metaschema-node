@@ -24,6 +24,37 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractDatatypeAdapter from './AbstractDatatypeAdapter.js';
+import AbstractStringItem from '../../metapath/item/AbstractStringItem.js';
+import AbstractDatatypeAdapter, { JSONValue } from './AbstractDatatypeAdapter.js';
 
-export default abstract class AbstractStringAdapter<T> extends AbstractDatatypeAdapter<string, T> {}
+export default abstract class AbstractStringAdapter<T extends AbstractStringItem> extends AbstractDatatypeAdapter<T> {
+    isAtomic = true;
+    isXmlUnwrappedValueAllowed = false;
+    isXmlMixed = false;
+
+    abstract fromString(parsed: string): T;
+
+    readXml(raw: Node): T {
+        if (raw.textContent) {
+            return this.fromString(raw.textContent);
+        } else {
+            throw new Error('Could not parse JSON into string item');
+        }
+    }
+
+    readJson(raw: JSONValue) {
+        if (typeof raw === 'string') {
+            return this.fromString(raw);
+        } else {
+            throw new Error('Could not parse JSON into string item');
+        }
+    }
+
+    writeXml(item: T, document: Document): Node {
+        return document.createTextNode(item.getValue());
+    }
+
+    writeJson(item: T): JSONValue {
+        return item.getValue();
+    }
+}

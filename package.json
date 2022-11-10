@@ -21,7 +21,7 @@
     "lint": "eslint .",
     "lint-fix": "eslint --fix .",
     "build": "lerna run build",
-    "test": "jest",
+    "test": "jest --force-exit",
     "test-coverage": "jest --coverage"
   },
   "workspaces": [

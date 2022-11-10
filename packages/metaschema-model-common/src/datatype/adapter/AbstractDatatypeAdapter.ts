@@ -24,17 +24,40 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAnyAtomicItem from '../../metapath/item/AbstractAnyAtomicItem.js';
-import IDatatypeAdapter from './IDatatypeAdapter.js';
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-export default abstract class AbstractDatatypeAdapter<Native_T, Metapath_T extends AbstractAnyAtomicItem<unknown>>
-    implements IDatatypeAdapter<Native_T>
-{
+import AbstractItem from '../../metapath/item/AbstractItem.js';
+
+export default abstract class AbstractDatatypeAdapter<Item extends AbstractItem> {
     abstract readonly name: string;
-    abstract toValue(value: unknown): Native_T;
-    abstract asString(value: unknown): string;
-    readonly atomic: boolean = true;
-    readonly defaultJsonValueKey = 'STRVALUE';
-    readonly isUnwrappedValueAllowedInXml = false;
-    readonly isXmlMixed = false;
+
+    /**
+     * True if the datatype is an atomic, scalar value.
+     */
+    abstract readonly isAtomic: boolean;
+
+    /**
+     * The default field JSON/YAML field name to use if no key name is configured.
+     */
+    abstract readonly defaultJsonValueKey: string;
+
+    /**
+     * True if the datatype's value is allowed to be unwrapped in XML.
+     */
+    abstract readonly isXmlUnwrappedValueAllowed: boolean;
+
+    /**
+     * True if the datatype uses mixed text and elements contents in XML.
+     */
+    abstract readonly isXmlMixed: boolean;
+
+    abstract readXml(raw: Node): Item;
+    abstract readJson(raw: JSONValue): Item;
+
+    abstract writeXml(item: Item, document: Document): Node;
+    abstract writeJson(item: Item): JSONValue;
 }

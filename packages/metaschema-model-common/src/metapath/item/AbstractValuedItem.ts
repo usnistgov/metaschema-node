@@ -33,5 +33,5 @@ export default abstract class AbstractValuedItem<T> extends AbstractItem {
      *
      * @return the value
      */
-    abstract readonly value: T;
+    abstract getValue(): T;
 }
