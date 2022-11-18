@@ -28,7 +28,7 @@ import StringItem from '../../metapath/item/StringItem.js';
 import AbstractStringAdapter from './AbstractStringAdapter.js';
 
 export default class StringAdapter extends AbstractStringAdapter<StringItem> {
-    name = 'string';
+    name = StringItem.datatype;
     defaultJsonValueKey = '';
 
     fromString(parsed: string): StringItem {

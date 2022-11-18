@@ -24,24 +24,17 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractItem from './AbstractItem.js';
-import AbstractModelNodeItem from './AbstractModelNodeItem.js';
-
-import AssemblyItem from './AssemblyItem.js';
-import DocumentItem from './DocumentItem.js';
-import FieldItem from './FieldItem.js';
+import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
+import INamedModelInstance from '../../instance/INamedModelInstance.js';
+import AbstractChildNodeItem from './AbstractChildNodeItem.js';
 import FlagItem from './FlagItem.js';
 
-import StringItem from './StringItem.js';
-
-export {
-    AbstractAtomicItem,
-    AbstractItem,
-    AbstractModelNodeItem,
-    AssemblyItem,
-    DocumentItem,
-    FieldItem,
-    FlagItem,
-    StringItem,
+export type ModelNodeContainer = {
+    flags: Record<string, FlagItem<unknown>>;
 };
+
+export default class AbstractModelNodeItem<
+    T extends ModelNodeContainer,
+    Definition extends INamedModelDefinition,
+    Instance extends INamedModelInstance,
+> extends AbstractChildNodeItem<T, Definition, Instance> {}

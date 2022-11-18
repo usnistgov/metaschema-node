@@ -24,24 +24,19 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import AbstractFieldDefinition from '../../definition/AbstractFieldDefinition.js';
+import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
 import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractItem from './AbstractItem.js';
-import AbstractModelNodeItem from './AbstractModelNodeItem.js';
+import AbstractModelNodeItem, { ModelNodeContainer } from './AbstractModelNodeItem.js';
 
-import AssemblyItem from './AssemblyItem.js';
-import DocumentItem from './DocumentItem.js';
-import FieldItem from './FieldItem.js';
-import FlagItem from './FlagItem.js';
-
-import StringItem from './StringItem.js';
-
-export {
-    AbstractAtomicItem,
-    AbstractItem,
-    AbstractModelNodeItem,
-    AssemblyItem,
-    DocumentItem,
-    FieldItem,
-    FlagItem,
-    StringItem,
+type FieldContainer<T> = ModelNodeContainer & {
+    value: AbstractAtomicItem<T>;
 };
+
+export default class FieldItem<T> extends AbstractModelNodeItem<
+    FieldContainer<T>,
+    AbstractFieldDefinition,
+    AbstractAssemblyInstance
+> {
+    static readonly datatype = 'field';
+}

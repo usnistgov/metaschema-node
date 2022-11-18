@@ -24,6 +24,14 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAtomicValuedItem from './AbstractAtomicValuedItem.js';
+import INamedDefinition from '../../definition/INamedDefinition.js';
+import AbstractItem from './AbstractItem.js';
 
-export default abstract class AbstractStringItem extends AbstractAtomicValuedItem<string> {}
+export default abstract class AbstractNodeItem<T, Definition extends INamedDefinition> extends AbstractItem<T> {
+    readonly definition;
+
+    constructor(value: T, definition: Definition) {
+        super(value);
+        this.definition = definition;
+    }
+}

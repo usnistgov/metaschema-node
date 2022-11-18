@@ -32,7 +32,7 @@ export interface JSONArray extends Array<JSONValue> {}
 
 import AbstractItem from '../../metapath/item/AbstractItem.js';
 
-export default abstract class AbstractDatatypeAdapter<Item extends AbstractItem> {
+export default abstract class AbstractDatatypeAdapter<Item extends AbstractItem<unknown>> {
     abstract readonly name: string;
 
     /**

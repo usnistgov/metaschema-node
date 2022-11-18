@@ -24,24 +24,19 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAtomicItem from './AbstractAtomicItem.js';
 import AbstractItem from './AbstractItem.js';
-import AbstractModelNodeItem from './AbstractModelNodeItem.js';
-
 import AssemblyItem from './AssemblyItem.js';
-import DocumentItem from './DocumentItem.js';
-import FieldItem from './FieldItem.js';
-import FlagItem from './FlagItem.js';
 
-import StringItem from './StringItem.js';
+export default class DocumentItem<T> extends AbstractItem<AssemblyItem<T>> {
+    static readonly datatype: string = 'document';
 
-export {
-    AbstractAtomicItem,
-    AbstractItem,
-    AbstractModelNodeItem,
-    AssemblyItem,
-    DocumentItem,
-    FieldItem,
-    FlagItem,
-    StringItem,
-};
+    readonly documentUri;
+
+    constructor(value: AssemblyItem<T>, documentUri: string) {
+        if (!value.definition.isRoot()) {
+            throw new Error('Assembly must be a root');
+        }
+        super(value);
+        this.documentUri = documentUri;
+    }
+}

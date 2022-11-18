@@ -24,17 +24,20 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractValuedItem from './AbstractValuedItem.js';
+import AbstractAssemblyDefinition from '../../definition/AbstractAssemblyDefinition.js';
+import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
+import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
+import INamedModelInstance from '../../instance/INamedModelInstance.js';
+import AbstractModelNodeItem, { ModelNodeContainer } from './AbstractModelNodeItem.js';
 
-export default abstract class AbstractAtomicValuedItem<T> extends AbstractValuedItem<T> {
-    private readonly value: T;
+type AssemblyContainer<T> = ModelNodeContainer & {
+    models: Record<string, AbstractModelNodeItem<ModelNodeContainer, INamedModelDefinition, INamedModelInstance>>;
+};
 
-    getValue() {
-        return this.value;
-    }
-
-    constructor(value: T) {
-        super();
-        this.value = value;
-    }
+export default class AssemblyItem<T> extends AbstractModelNodeItem<
+    AssemblyContainer<T>,
+    AbstractAssemblyDefinition,
+    AbstractAssemblyInstance
+> {
+    static readonly datatype = 'assembly';
 }

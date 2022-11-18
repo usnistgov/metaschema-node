@@ -24,24 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
+import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
 import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractItem from './AbstractItem.js';
-import AbstractModelNodeItem from './AbstractModelNodeItem.js';
+import AbstractChildNodeItem from './AbstractChildNodeItem.js';
 
-import AssemblyItem from './AssemblyItem.js';
-import DocumentItem from './DocumentItem.js';
-import FieldItem from './FieldItem.js';
-import FlagItem from './FlagItem.js';
-
-import StringItem from './StringItem.js';
-
-export {
-    AbstractAtomicItem,
-    AbstractItem,
-    AbstractModelNodeItem,
-    AssemblyItem,
-    DocumentItem,
-    FieldItem,
-    FlagItem,
-    StringItem,
-};
+export default class FlagItem<T> extends AbstractChildNodeItem<
+    AbstractAtomicItem<T>,
+    AbstractFlagDefinition,
+    AbstractFlagInstance
+> {
+    static datatype = 'flag';
+}

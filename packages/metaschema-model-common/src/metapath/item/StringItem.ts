@@ -24,8 +24,8 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractStringItem from './AbstractStringItem.js';
+import AbstractAtomicItem from './AbstractAtomicItem.js';
 
-export default class StringItem extends AbstractStringItem {
+export default class StringItem extends AbstractAtomicItem<string> {
     name = 'string';
 }

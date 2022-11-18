@@ -24,14 +24,35 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractItem from './AbstractItem.js';
+import INamedDefinition from '../../definition/INamedDefinition.js';
+import INamedInstance from '../../instance/INamedInstance.js';
+import AbstractNodeItem from './AbstractNodeItem.js';
+import DocumentItem from './DocumentItem.js';
 
-export default abstract class AbstractValuedItem<T> extends AbstractItem {
-    /**
-     * Get the item's "wrapped" value. This "wrapped" value may be a type managed by a
-     * {@link IDatatypeAdapter} or a primitive type provided by the standard library.
-     *
-     * @return the value
-     */
-    abstract getValue(): T;
+type Parent = AbstractChildNodeItem<undefined, INamedDefinition, INamedInstance> | DocumentItem<undefined>;
+
+export default abstract class AbstractChildNodeItem<
+    T,
+    Definition extends INamedDefinition,
+    Instance extends INamedInstance,
+> extends AbstractNodeItem<T, Definition> {
+    private _parent: Parent | undefined;
+
+    public get parent() {
+        if (this._parent === undefined) {
+            throw new Error('Parent not registered');
+        }
+        return this._parent;
+    }
+
+    protected registerParent(parent: Parent) {
+        this._parent = parent;
+    }
+
+    readonly instance: INamedInstance | undefined;
+
+    constructor(value: T, definition: Definition, instance?: Instance) {
+        super(value, definition);
+        this.instance = instance;
+    }
 }

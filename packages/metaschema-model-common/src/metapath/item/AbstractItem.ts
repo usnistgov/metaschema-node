@@ -24,9 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-export default abstract class AbstractItem {
+export default abstract class AbstractItem<T> {
     /**
-     * Get a human readable name for the item.
+     * The human-readable name of this datatype
      */
-    abstract readonly name: string;
+    static readonly datatype: string = 'abstract';
+
+    readonly value: T;
+
+    constructor(value: T) {
+        this.value = value;
+    }
 }

@@ -51,10 +51,10 @@ export default abstract class AbstractStringAdapter<T extends AbstractStringItem
     }
 
     writeXml(item: T, document: Document): Node {
-        return document.createTextNode(item.getValue());
+        return document.createTextNode(item.value);
     }
 
     writeJson(item: T): JSONValue {
-        return item.getValue();
+        return item.value;
     }
 }
