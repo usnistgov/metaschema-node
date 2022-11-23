@@ -25,19 +25,24 @@
  */
 
 import AbstractAssemblyDefinition from '../../definition/AbstractAssemblyDefinition.js';
-import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
 import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
-import INamedModelInstance from '../../instance/INamedModelInstance.js';
-import AbstractModelNodeItem, { ModelNodeContainer } from './AbstractModelNodeItem.js';
+import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
+import FieldItem from './FieldItem.js';
 
-type AssemblyContainer<T> = ModelNodeContainer & {
-    models: Record<string, AbstractModelNodeItem<ModelNodeContainer, INamedModelDefinition, INamedModelInstance>>;
+export type AssemblyContainer<ModelType extends Record<string, [unknown, unknown]>> = {
+    // models: Record<string, UnconstrainedFlagsContainer>;
+    models: {
+        [Property in keyof ModelType]: FieldItem;
+    };
 };
 
-export default class AssemblyItem<T> extends AbstractModelNodeItem<
-    AssemblyContainer<T>,
-    AbstractAssemblyDefinition,
-    AbstractAssemblyInstance
-> {
+export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, unknown]>>;
+
+export default class AssemblyItem<
+    Flags extends UnconstrainedFlagsContainer,
+    Models extends UnconstrainedAssemblyContainer,
+> extends AbstractModelNodeItem<Models, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
     static readonly datatype = 'assembly';
 }
+
+export type UnconstrainedAssemblyItem = AssemblyItem<UnconstrainedFlagsContainer, UnconstrainedAssemblyContainer>;

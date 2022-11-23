@@ -25,14 +25,14 @@
  */
 
 import AbstractItem from './AbstractItem.js';
-import AssemblyItem from './AssemblyItem.js';
+import { UnconstrainedAssemblyItem } from './AssemblyItem.js';
 
-export default class DocumentItem<T> extends AbstractItem<AssemblyItem<T>> {
+export default class DocumentItem<RootAssembly extends UnconstrainedAssemblyItem> extends AbstractItem<RootAssembly> {
     static readonly datatype: string = 'document';
 
     readonly documentUri;
 
-    constructor(value: AssemblyItem<T>, documentUri: string) {
+    constructor(value: RootAssembly, documentUri: string) {
         if (!value.definition.isRoot()) {
             throw new Error('Assembly must be a root');
         }
@@ -40,3 +40,5 @@ export default class DocumentItem<T> extends AbstractItem<AssemblyItem<T>> {
         this.documentUri = documentUri;
     }
 }
+
+export type UnconstrainedDocument = DocumentItem<UnconstrainedAssemblyItem>;

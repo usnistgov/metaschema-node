@@ -29,10 +29,14 @@ import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
 import AbstractAtomicItem from './AbstractAtomicItem.js';
 import AbstractChildNodeItem from './AbstractChildNodeItem.js';
 
-export default class FlagItem<T> extends AbstractChildNodeItem<
-    AbstractAtomicItem<T>,
-    AbstractFlagDefinition,
-    AbstractFlagInstance
-> {
+export default class FlagItem<
+    Value,
+    Definition extends AbstractFlagDefinition,
+    Instance extends AbstractFlagInstance,
+> extends AbstractChildNodeItem<AbstractAtomicItem<Value>, Definition, Instance> {
     static datatype = 'flag';
 }
+
+export type UndefinedFlagItem<Value> = FlagItem<Value, AbstractFlagDefinition, AbstractFlagInstance>;
+
+export type UnconstrainedFlagItem = UndefinedFlagItem<undefined>;

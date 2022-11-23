@@ -27,14 +27,26 @@
 import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
 import INamedModelInstance from '../../instance/INamedModelInstance.js';
 import AbstractChildNodeItem from './AbstractChildNodeItem.js';
-import FlagItem from './FlagItem.js';
+import { UndefinedFlagItem } from './FlagItem.js';
 
-export type ModelNodeContainer = {
-    flags: Record<string, FlagItem<unknown>>;
+export type FlagsContainer<FlagValueType> = {
+    flags: {
+        [Property in keyof FlagValueType]: UndefinedFlagItem<Property>;
+    };
 };
 
+export type UnconstrainedFlagsContainer = FlagsContainer<Record<string, unknown>>;
+
 export default class AbstractModelNodeItem<
-    T extends ModelNodeContainer,
+    Value extends Record<string, unknown>,
+    Flags extends UnconstrainedFlagsContainer,
     Definition extends INamedModelDefinition,
     Instance extends INamedModelInstance,
-> extends AbstractChildNodeItem<T, Definition, Instance> {}
+> extends AbstractChildNodeItem<Value & Flags, Definition, Instance> {}
+
+export type UnconstrainedModelNodeItem = AbstractModelNodeItem<
+    Record<string, unknown>,
+    UnconstrainedFlagsContainer,
+    INamedModelDefinition,
+    INamedModelInstance
+>;

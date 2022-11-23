@@ -27,9 +27,9 @@
 import INamedDefinition from '../../definition/INamedDefinition.js';
 import INamedInstance from '../../instance/INamedInstance.js';
 import AbstractNodeItem from './AbstractNodeItem.js';
-import DocumentItem from './DocumentItem.js';
+import { UnconstrainedDocument } from './DocumentItem.js';
 
-type Parent = AbstractChildNodeItem<undefined, INamedDefinition, INamedInstance> | DocumentItem<undefined>;
+type Parent = UnconstrainedChildNodeItem | UnconstrainedDocument;
 
 export default abstract class AbstractChildNodeItem<
     T,
@@ -56,3 +56,5 @@ export default abstract class AbstractChildNodeItem<
         this.instance = instance;
     }
 }
+
+export type UnconstrainedChildNodeItem = AbstractChildNodeItem<undefined, INamedDefinition, INamedInstance>;
