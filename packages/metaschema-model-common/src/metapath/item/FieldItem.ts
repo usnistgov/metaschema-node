@@ -29,11 +29,13 @@ import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js
 import AbstractAtomicItem from './AbstractAtomicItem.js';
 import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
 
-type FieldContainer<T> = {
+export type FieldContainer<T> = {
     value: AbstractAtomicItem<T>;
 };
 
-export default class FieldItem<Flags extends UnconstrainedFlagsContainer, Field> extends AbstractModelNodeItem<
+export type UnconstrainedFieldContainer = FieldContainer<unknown>;
+
+export default class FieldItem<Field, Flags extends UnconstrainedFlagsContainer> extends AbstractModelNodeItem<
     FieldContainer<Field>,
     Flags,
     AbstractFieldDefinition,
@@ -41,3 +43,5 @@ export default class FieldItem<Flags extends UnconstrainedFlagsContainer, Field>
 > {
     static readonly datatype = 'field';
 }
+
+export type UnconstrainedFieldItem = FieldItem<UnconstrainedFieldContainer, UnconstrainedFlagsContainer>;

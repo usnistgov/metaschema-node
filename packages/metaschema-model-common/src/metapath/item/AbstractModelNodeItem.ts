@@ -27,11 +27,11 @@
 import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
 import INamedModelInstance from '../../instance/INamedModelInstance.js';
 import AbstractChildNodeItem from './AbstractChildNodeItem.js';
-import { UndefinedFlagItem } from './FlagItem.js';
+import FlagItem from './FlagItem.js';
 
-export type FlagsContainer<FlagValueType> = {
+export type FlagsContainer<FlagValueType extends Record<string, unknown>> = {
     flags: {
-        [Property in keyof FlagValueType]: UndefinedFlagItem<Property>;
+        [Property in keyof FlagValueType]: FlagItem<FlagValueType[Property]>;
     };
 };
 

@@ -29,20 +29,19 @@ import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js
 import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
 import FieldItem from './FieldItem.js';
 
-export type AssemblyContainer<ModelType extends Record<string, [unknown, unknown]>> = {
-    // models: Record<string, UnconstrainedFlagsContainer>;
+export type AssemblyContainer<ModelType extends Record<string, [unknown, UnconstrainedFlagsContainer]>> = {
     models: {
-        [Property in keyof ModelType]: FieldItem;
+        [Property in keyof ModelType]: FieldItem<ModelType[Property][0], ModelType[Property][1]>;
     };
 };
 
-export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, unknown]>>;
+export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, UnconstrainedFlagsContainer]>>;
 
 export default class AssemblyItem<
-    Flags extends UnconstrainedFlagsContainer,
     Models extends UnconstrainedAssemblyContainer,
+    Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItem<Models, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
     static readonly datatype = 'assembly';
 }
 
-export type UnconstrainedAssemblyItem = AssemblyItem<UnconstrainedFlagsContainer, UnconstrainedAssemblyContainer>;
+export type UnconstrainedAssemblyItem = AssemblyItem<UnconstrainedAssemblyContainer, UnconstrainedFlagsContainer>;
