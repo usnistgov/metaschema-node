@@ -41,7 +41,7 @@ export default class MatchesConstraint extends AbstractConstraint {
         remarks: MarkupMultiLine | undefined,
         target: MetapathExpression,
         pattern: RegExp | undefined,
-        adapter: AbstractDatatypeAdapter<AbstractItem>,
+        adapter: AbstractDatatypeAdapter<AbstractItem<unknown>>,
     ) {
         super(id, level, remarks, target);
         this.pattern = pattern;

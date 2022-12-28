@@ -38,7 +38,7 @@ import IDefinition, { definitionMixin } from './IDefinition.js';
  * field, flag).
  */
 export default interface IValuedDefinition extends IDefinition {
-    getDatatypeAdapter(): AbstractDatatypeAdapter<AbstractItem>;
+    getDatatypeAdapter(): AbstractDatatypeAdapter<AbstractItem<unknown>>;
 
     /**
      * Retrieve the list of allowed value constraints that apply to this definition's value.
@@ -71,7 +71,7 @@ export default interface IValuedDefinition extends IDefinition {
 
 export function valuedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class ValuedDefinition extends definitionMixin(Base) implements IValuedDefinition {
-        abstract getDatatypeAdapter(): AbstractDatatypeAdapter<AbstractItem>;
+        abstract getDatatypeAdapter(): AbstractDatatypeAdapter<AbstractItem<unknown>>;
         abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];
         abstract getIndexHasKeyConstraints(): IndexHasConstraint[];

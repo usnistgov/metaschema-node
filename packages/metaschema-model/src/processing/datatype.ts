@@ -28,7 +28,7 @@ import { DefiniteAttributeProcessor } from '@oscal/data-utils';
 import { AbstractDatatypeAdapter, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
 import { AbstractItem } from '@oscal/metaschema-model-common/metapath';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractDatatypeAdapter<AbstractItem>> = (
+export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractDatatypeAdapter<AbstractItem<unknown>>> = (
     child,
     _context,
 ) => MetaschemaDatatypeProvider[child];

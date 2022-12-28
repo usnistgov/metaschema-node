@@ -24,15 +24,18 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractStringItem from '../../metapath/item/AbstractStringItem.js';
+import AbstractAtomicItem from '../../metapath/item/AbstractAtomicItem.js';
 import AbstractDatatypeAdapter, { JSONValue } from './AbstractDatatypeAdapter.js';
 
-export default abstract class AbstractStringAdapter<T extends AbstractStringItem> extends AbstractDatatypeAdapter<T> {
+export default abstract class AbstractStringAdapter<
+    T extends AbstractAtomicItem<unknown>,
+> extends AbstractDatatypeAdapter<T> {
     isAtomic = true;
     isXmlUnwrappedValueAllowed = false;
     isXmlMixed = false;
 
     abstract fromString(parsed: string): T;
+    abstract toString(item: T): string;
 
     readXml(raw: Node): T {
         if (raw.textContent) {
@@ -51,10 +54,10 @@ export default abstract class AbstractStringAdapter<T extends AbstractStringItem
     }
 
     writeXml(item: T, document: Document): Node {
-        return document.createTextNode(item.value);
+        return document.createTextNode(this.toString(item));
     }
 
     writeJson(item: T): JSONValue {
-        return item.value;
+        return this.toString(item);
     }
 }

@@ -28,7 +28,7 @@ import AbstractItem from '../metapath/item/AbstractItem.js';
 import AbstractDatatypeAdapter from './adapter/AbstractDatatypeAdapter.js';
 import StringAdapter from './adapter/StringAdapter.js';
 
-export type DatatypeProvider = Record<string, AbstractDatatypeAdapter<AbstractItem>>;
+export type DatatypeProvider = Record<string, AbstractDatatypeAdapter<AbstractItem<unknown>>>;
 
 export const MetaschemaDatatypeProvider: DatatypeProvider = {
     string: new StringAdapter(),

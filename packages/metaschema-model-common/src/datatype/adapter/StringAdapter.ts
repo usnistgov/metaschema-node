@@ -34,4 +34,8 @@ export default class StringAdapter extends AbstractStringAdapter<StringItem> {
     fromString(parsed: string): StringItem {
         return new StringItem(parsed);
     }
+
+    toString(item: StringItem): string {
+        return item.value;
+    }
 }
