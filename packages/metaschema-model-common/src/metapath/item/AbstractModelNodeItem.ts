@@ -30,22 +30,20 @@ import AbstractChildNodeItem from './AbstractChildNodeItem.js';
 import FlagItem from './FlagItem.js';
 
 export type FlagsContainer<FlagValueType extends Record<string, unknown>> = {
-    flags: {
-        [Property in keyof FlagValueType]: FlagItem<FlagValueType[Property]>;
-    };
+    [Property in keyof FlagValueType]: FlagItem<FlagValueType[Property]>;
 };
 
 export type UnconstrainedFlagsContainer = FlagsContainer<Record<string, unknown>>;
 
 export default class AbstractModelNodeItem<
-    Value extends Record<string, unknown>,
+    Value,
     Flags extends UnconstrainedFlagsContainer,
     Definition extends INamedModelDefinition,
     Instance extends INamedModelInstance,
-> extends AbstractChildNodeItem<Value & Flags, Definition, Instance> {}
+> extends AbstractChildNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {}
 
 export type UnconstrainedModelNodeItem = AbstractModelNodeItem<
-    Record<string, unknown>,
+    unknown,
     UnconstrainedFlagsContainer,
     INamedModelDefinition,
     INamedModelInstance

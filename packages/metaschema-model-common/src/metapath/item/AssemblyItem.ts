@@ -30,17 +30,15 @@ import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractMo
 import FieldItem from './FieldItem.js';
 
 export type AssemblyContainer<ModelType extends Record<string, [unknown, UnconstrainedFlagsContainer]>> = {
-    models: {
-        [Property in keyof ModelType]: FieldItem<ModelType[Property][0], ModelType[Property][1]>;
-    };
+    [Property in keyof ModelType]: FieldItem<ModelType[Property][0], ModelType[Property][1]>;
 };
 
 export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, UnconstrainedFlagsContainer]>>;
 
 export default class AssemblyItem<
-    Models extends UnconstrainedAssemblyContainer,
+    Model extends UnconstrainedAssemblyContainer,
     Flags extends UnconstrainedFlagsContainer,
-> extends AbstractModelNodeItem<Models, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
+> extends AbstractModelNodeItem<Model, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
     static readonly datatype = 'assembly';
 }
 

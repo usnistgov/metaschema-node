@@ -26,6 +26,4 @@
 
 import AbstractAtomicItem from './AbstractAtomicItem.js';
 
-export default class StringItem extends AbstractAtomicItem<string> {
-    name = 'string';
-}
+export default class StringItem extends AbstractAtomicItem<string> {}

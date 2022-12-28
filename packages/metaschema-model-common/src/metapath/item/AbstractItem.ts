@@ -25,11 +25,6 @@
  */
 
 export default abstract class AbstractItem<T> {
-    /**
-     * The human-readable name of this datatype
-     */
-    static readonly datatype: string = 'abstract';
-
     readonly value: T;
 
     constructor(value: T) {

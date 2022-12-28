@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AssemblyItem, DocumentItem, FlagItem, StringItem } from '@oscal/metaschema-model-common/metapath';
+import { AssemblyItem, DocumentItem, FieldItem, FlagItem, StringItem } from '@oscal/metaschema-model-common/metapath';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Metapath Item', () => {
@@ -47,6 +47,11 @@ describe('Metapath Item', () => {
                     <formal-name>Computer Identifier</formal-name>
                     <description>An identifier for classifying a unique make and model of computer.</description>
                 </define-flag>
+
+                <define-field name="processor" as-type="string" required="yes">
+                    <formal-name>Processor Name</formal-name>
+                    <description>A field that represents the processor name</description>
+                </define-field>
               </define-assembly>
             </METASCHEMA>`,
         );
@@ -65,18 +70,36 @@ describe('Metapath Item', () => {
 
         const flagItem = new FlagItem(new StringItem('awesome_pc_1'), flagInstance.getDefinition(), flagInstance);
 
+        const fieldInstance = assemblyDef.getFieldInstances().get('processor');
+        expect(fieldInstance).toBeDefined();
+        if (fieldInstance === undefined) {
+            return;
+        }
+
+        const fieldItem = new FieldItem(
+            {
+                model: new StringItem('some shiny processor'),
+                flags: {},
+            },
+            fieldInstance.getDefinition(),
+            fieldInstance,
+        );
+
         const assemblyItem = new AssemblyItem(
             {
                 flags: {
                     id: flagItem,
                 },
-                models: {},
+                model: {
+                    processor: fieldItem,
+                },
             },
             assemblyDef,
         );
 
         const document = new DocumentItem(assemblyItem, metaschema.location);
 
-        expect(document.value.value.flags['id'].value.value).toBe('awesome_pc_1');
+        expect(document.value.value.flags.id.value.value).toBe('awesome_pc_1');
+        expect(document.value.value.model.processor.value).toBe('some shiny processor');
     });
 });
