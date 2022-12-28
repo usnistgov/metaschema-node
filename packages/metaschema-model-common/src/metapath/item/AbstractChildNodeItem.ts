@@ -45,16 +45,21 @@ export default abstract class AbstractChildNodeItem<
         return this._parent;
     }
 
-    protected registerParent(parent: Parent) {
+    public registerParent(parent: Parent) {
         this._parent = parent;
     }
 
     readonly instance: INamedInstance | undefined;
 
+    protected registerChildren() {
+        // Does nothing by default
+    }
+
     constructor(value: T, definition: Definition, instance?: Instance) {
         super(value, definition);
         this.instance = instance;
+        this.registerChildren();
     }
 }
 
-export type UnconstrainedChildNodeItem = AbstractChildNodeItem<undefined, INamedDefinition, INamedInstance>;
+export type UnconstrainedChildNodeItem = AbstractChildNodeItem<unknown, INamedDefinition, INamedInstance>;

@@ -40,6 +40,13 @@ export default class AssemblyItem<
     Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItem<Model, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
     static readonly datatype = 'assembly';
+
+    protected registerChildren() {
+        super.registerChildren();
+        for (const item of Object.values(this.value.model)) {
+            item.registerParent(this);
+        }
+    }
 }
 
 export type UnconstrainedAssemblyItem = AssemblyItem<UnconstrainedAssemblyContainer, UnconstrainedFlagsContainer>;

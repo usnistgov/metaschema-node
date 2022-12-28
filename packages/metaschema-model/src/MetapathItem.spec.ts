@@ -28,6 +28,7 @@ import { AssemblyItem, DocumentItem, FieldItem, FlagItem, StringItem } from '@os
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Metapath Item', () => {
+    // initialize metaschema def
     it('should be able to represent a basic metaschema', async () => {
         const metaschema = await XmlMetaschema.load(
             'file://not-real.xml',
@@ -47,11 +48,12 @@ describe('Metapath Item', () => {
                     <formal-name>Computer Identifier</formal-name>
                     <description>An identifier for classifying a unique make and model of computer.</description>
                 </define-flag>
-
-                <define-field name="processor" as-type="string" required="yes">
-                    <formal-name>Processor Name</formal-name>
-                    <description>A field that represents the processor name</description>
-                </define-field>
+                <model>
+                    <define-field name="processor" as-type="string" required="yes">
+                        <formal-name>Processor Name</formal-name>
+                        <description>A field that represents the processor name</description>
+                    </define-field>
+                </model>
               </define-assembly>
             </METASCHEMA>`,
         );
@@ -70,6 +72,9 @@ describe('Metapath Item', () => {
 
         const flagItem = new FlagItem(new StringItem('awesome_pc_1'), flagInstance.getDefinition(), flagInstance);
 
+        // should error if parent item hasn't been registered
+        expect(() => flagItem.parent).toThrow();
+
         const fieldInstance = assemblyDef.getFieldInstances().get('processor');
         expect(fieldInstance).toBeDefined();
         if (fieldInstance === undefined) {
@@ -85,6 +90,9 @@ describe('Metapath Item', () => {
             fieldInstance,
         );
 
+        // should error if parent item hasn't been registered
+        expect(() => fieldItem.parent).toThrow();
+
         const assemblyItem = new AssemblyItem(
             {
                 flags: {
@@ -97,9 +105,18 @@ describe('Metapath Item', () => {
             assemblyDef,
         );
 
-        const document = new DocumentItem(assemblyItem, metaschema.location);
+        // should error if parent item hasn't been registered
+        expect(() => assemblyItem.parent).toThrow();
 
-        expect(document.value.value.flags.id.value.value).toBe('awesome_pc_1');
-        expect(document.value.value.model.processor.value).toBe('some shiny processor');
+        const documentItem = new DocumentItem(assemblyItem, metaschema.location);
+
+        // now test all linkages have been made
+        expect(assemblyItem.parent).toBe(documentItem);
+        expect(fieldItem.parent).toBe(assemblyItem);
+        expect(flagItem.parent).toBe(assemblyItem);
+
+        // traverse downward to atomic items
+        expect(documentItem.value.value.flags.id.value.value).toBe('awesome_pc_1');
+        expect(documentItem.value.value.model.processor.value.model.value).toBe('some shiny processor');
     });
 });

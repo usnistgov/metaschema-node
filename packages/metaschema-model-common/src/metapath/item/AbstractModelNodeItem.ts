@@ -40,7 +40,13 @@ export default class AbstractModelNodeItem<
     Flags extends UnconstrainedFlagsContainer,
     Definition extends INamedModelDefinition,
     Instance extends INamedModelInstance,
-> extends AbstractChildNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {}
+> extends AbstractChildNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {
+    protected registerChildren(): void {
+        for (const flag of Object.values(this.value.flags)) {
+            flag.registerParent(this);
+        }
+    }
+}
 
 export type UnconstrainedModelNodeItem = AbstractModelNodeItem<
     unknown,

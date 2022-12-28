@@ -24,22 +24,31 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractItem from './AbstractItem.js';
-import { UnconstrainedAssemblyItem } from './AssemblyItem.js';
+import { StringItem } from '../../metapath/index.js';
+import StringAdapter from './StringAdapter.js';
 
-export default class DocumentItem<RootAssembly extends UnconstrainedAssemblyItem> extends AbstractItem<RootAssembly> {
-    static readonly datatype: string = 'document';
+describe('StringAdapter', () => {
+    const adapter = new StringAdapter();
+    it('should unmarshal JSON', () => {
+        const raw = JSON.parse('"Raw JSON string"');
+        expect(adapter.readJson(raw).value).toBe('Raw JSON string');
+    });
 
-    readonly documentUri;
+    it('should fail to unmarshal invalid JSON objects', () => {
+        const raw = JSON.parse('{ "test": "123" }');
+        expect(() => adapter.readJson(raw)).toThrow();
+    });
 
-    constructor(value: RootAssembly, documentUri: string) {
-        if (!value.definition.isRoot()) {
-            throw new Error('Assembly must be a root');
-        }
-        super(value);
-        value.registerParent(this);
-        this.documentUri = documentUri;
-    }
-}
+    it('should marshal JSON', () => {
+        const item = new StringItem('stored string item');
+        expect(adapter.writeJson(item)).toBe('stored string item');
+    });
 
-export type UnconstrainedDocument = DocumentItem<UnconstrainedAssemblyItem>;
+    // TODO: this fails due to a lack of Document implementations in Node
+    // it('should marshal XML', () => {
+    //     const item = new StringItem('stored string item');
+    //     const document = new Document();
+    //     const node = adapter.writeXml(item, document);
+    //     expect(node.textContent).toBe('stored string item');
+    // });
+});
