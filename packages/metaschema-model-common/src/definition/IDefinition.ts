@@ -31,7 +31,7 @@ import { ModuleScope } from '../util/types.js';
 
 export default interface IDefinition extends AbstractModelElement {
     /**
-     * Used by {@link AbstractChildNodeItem} to tell instances and definitions apart
+     * Used by {@link AbstractNodeItem} to tell instances and definitions apart
      */
     readonly discriminator: 'definition';
 

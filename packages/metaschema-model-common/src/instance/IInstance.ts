@@ -30,7 +30,7 @@ import { AbstractConstructor } from '../util/mixin.js';
 
 export default interface IInstance extends AbstractModelElement {
     /**
-     * Used by {@link AbstractChildNodeItem} to tell instances and definitions apart
+     * Used by {@link AbstractNodeItem} to tell instances and definitions apart
      */
     readonly discriminator: 'instance';
 

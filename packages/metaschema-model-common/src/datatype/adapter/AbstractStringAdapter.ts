@@ -30,9 +30,9 @@ import AbstractDatatypeAdapter, { JSONValue } from './AbstractDatatypeAdapter.js
 export default abstract class AbstractStringAdapter<
     T extends AbstractAtomicItem<unknown>,
 > extends AbstractDatatypeAdapter<T> {
-    isAtomic = true;
-    isXmlUnwrappedValueAllowed = false;
-    isXmlMixed = false;
+    readonly isAtomic = true;
+    readonly isXmlUnwrappedValueAllowed = false;
+    readonly isXmlMixed = false;
 
     abstract fromString(parsed: string): T;
     abstract toString(item: T): string;

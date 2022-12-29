@@ -25,13 +25,57 @@
  */
 
 import INamedDefinition from '../../definition/INamedDefinition.js';
+import INamedInstance from '../../instance/INamedInstance.js';
 import AbstractItem from './AbstractItem.js';
+import { UnconstrainedDocument } from './DocumentItem.js';
 
-export default abstract class AbstractNodeItem<T, Definition extends INamedDefinition> extends AbstractItem<T> {
-    readonly definition;
+/**
+ * Helper function to tell Instances and Definitions apart
+ */
+export function isInstance<Definition extends INamedDefinition, Instance extends INamedInstance>(
+    instanceOrDefinition: Instance | Definition,
+): instanceOrDefinition is Instance {
+    return instanceOrDefinition.discriminator === 'instance';
+}
 
-    constructor(value: T, definition: Definition) {
+type Parent = UnconstrainedChildNodeItem | UnconstrainedDocument;
+
+export default abstract class AbstractNodeItem<
+    T,
+    Definition extends INamedDefinition,
+    Instance extends INamedInstance,
+> extends AbstractItem<T> {
+    private _parent: Parent | undefined;
+
+    public get parent() {
+        if (this._parent === undefined) {
+            throw new Error('Parent not registered');
+        }
+        return this._parent;
+    }
+
+    public registerParent(parent: Parent) {
+        this._parent = parent;
+    }
+
+    readonly definition: Definition;
+    readonly instance: Instance | undefined;
+
+    protected registerChildren() {
+        // Does nothing by default
+    }
+
+    constructor(value: T, definitionOrInstance: Definition | Instance) {
         super(value);
-        this.definition = definition;
+        if (isInstance(definitionOrInstance)) {
+            this.instance = definitionOrInstance;
+            // Assure the TSC that an instance's definition is of the correct subtype
+            this.definition = definitionOrInstance.getDefinition() as Definition;
+        } else {
+            this.definition = definitionOrInstance;
+        }
+        this.registerChildren();
     }
 }
+
+export type UnconstrainedChildNodeItem = AbstractNodeItem<unknown, INamedDefinition, INamedInstance>;

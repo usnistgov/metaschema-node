@@ -28,8 +28,6 @@ import AbstractItem from './AbstractItem.js';
 import { UnconstrainedAssemblyItem } from './AssemblyItem.js';
 
 export default class DocumentItem<RootAssembly extends UnconstrainedAssemblyItem> extends AbstractItem<RootAssembly> {
-    static readonly datatype: string = 'document';
-
     readonly documentUri;
 
     constructor(value: RootAssembly, documentUri: string) {

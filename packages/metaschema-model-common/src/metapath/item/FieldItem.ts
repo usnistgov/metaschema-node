@@ -34,8 +34,6 @@ export default class FieldItem<Value, Flags extends UnconstrainedFlagsContainer>
     Flags,
     AbstractFieldDefinition,
     AbstractFieldInstance
-> {
-    static readonly datatype = 'field';
-}
+> {}
 
 export type UnconstrainedFieldItem = FieldItem<unknown, UnconstrainedFlagsContainer>;

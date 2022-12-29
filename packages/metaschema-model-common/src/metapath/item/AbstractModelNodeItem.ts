@@ -26,7 +26,7 @@
 
 import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
 import INamedModelInstance from '../../instance/INamedModelInstance.js';
-import AbstractChildNodeItem from './AbstractChildNodeItem.js';
+import AbstractNodeItem from './AbstractNodeItem.js';
 import FlagItem from './FlagItem.js';
 
 export type FlagsContainer<FlagValueType extends Record<string, unknown>> = {
@@ -40,7 +40,7 @@ export default class AbstractModelNodeItem<
     Flags extends UnconstrainedFlagsContainer,
     Definition extends INamedModelDefinition,
     Instance extends INamedModelInstance,
-> extends AbstractChildNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {
+> extends AbstractNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {
     protected registerChildren(): void {
         for (const flag of Object.values(this.value.flags)) {
             flag.registerParent(this);
