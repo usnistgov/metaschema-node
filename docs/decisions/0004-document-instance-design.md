@@ -37,11 +37,9 @@ The Node implementation will handle document instances using the following struc
             <<abstract>>
             value
         }
-        note for AtomicItem "All datatypes (strings, URIs, markup, etc.) are derived from this subtype"
         class AtomicItem{
             <<abstract>>
         }
-        note for NodeItem "Parents automatically register themselves on construction"
         class NodeItem{
             <<abstract>>
             NodeItem|DocumentItem parent
@@ -49,7 +47,6 @@ The Node implementation will handle document instances using the following struc
             Instance|undefined instance
             registerParent()
         }
-        note for ModelNodeItem "Flags are part of a ModelNodeItem's value"
         class ModelNodeItem{
             <<abstract>>
             flags
@@ -70,6 +67,9 @@ The Node implementation will handle document instances using the following struc
     ```
 
     `Items` within a document instance are constructed bottom up (start with the leafs of the document), however the `registerParent()` method of the `NodeItem` subclass allows children to have knowledge of their parent, which will be important for validation in the future.
+
+    All datatypes (strings, URIs, markup, etc.) are derived from the `AtomicItem` subclass.
+    Atomic items do not need knowledge of their parents, since constraints belong to the Fields, Flags, and Assemblies which contain them.
 
 -   `Serializer`: `Serializers` have a few jobs:
 
