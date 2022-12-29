@@ -24,12 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractItem from '../metapath/item/AbstractItem.js';
-import AbstractDatatypeAdapter from './adapter/AbstractDatatypeAdapter.js';
-import StringAdapter from './adapter/StringAdapter.js';
+import AbstractItem from './item/AbstractItem.js';
+import AbstractSerializer from './serializer/AbstractSerializer.js';
+import StringSerializer from './serializer/StringSerializer.js';
 
-export type DatatypeProvider = Record<string, AbstractDatatypeAdapter<AbstractItem<unknown>>>;
+export type DatatypeProvider = Record<string, AbstractSerializer<AbstractItem<unknown>>>;
 
 export const MetaschemaDatatypeProvider: DatatypeProvider = {
-    string: new StringAdapter(),
+    string: new StringSerializer(),
 };

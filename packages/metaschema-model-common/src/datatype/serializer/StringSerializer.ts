@@ -24,10 +24,10 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../../metapath/item/StringItem.js';
-import AbstractStringAdapter from './AbstractStringAdapter.js';
+import StringItem from '../item/StringItem.js';
+import AbstractStringSerializer from './AbstractStringSerializer.js';
 
-export default class StringAdapter extends AbstractStringAdapter<StringItem> {
+export default class StringSerializer extends AbstractStringSerializer<StringItem> {
     name = 'string';
     defaultJsonValueKey = '';
 

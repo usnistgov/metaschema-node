@@ -24,31 +24,40 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { StringItem } from '../../metapath/index.js';
-import StringAdapter from './StringAdapter.js';
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-describe('StringAdapter', () => {
-    const adapter = new StringAdapter();
-    it('should unmarshal JSON', () => {
-        const raw = JSON.parse('"Raw JSON string"');
-        expect(adapter.readJson(raw).value).toBe('Raw JSON string');
-    });
+import AbstractItem from '../item/AbstractItem.js';
 
-    it('should fail to unmarshal invalid JSON objects', () => {
-        const raw = JSON.parse('{ "test": "123" }');
-        expect(() => adapter.readJson(raw)).toThrow();
-    });
+export default abstract class AbstractSerializer<Item extends AbstractItem<unknown>> {
+    abstract readonly name: string;
 
-    it('should marshal JSON', () => {
-        const item = new StringItem('stored string item');
-        expect(adapter.writeJson(item)).toBe('stored string item');
-    });
+    /**
+     * True if the datatype is an atomic, scalar value.
+     */
+    abstract readonly isAtomic: boolean;
 
-    // TODO: this fails due to a lack of Document implementations in Node
-    // it('should marshal XML', () => {
-    //     const item = new StringItem('stored string item');
-    //     const document = new Document();
-    //     const node = adapter.writeXml(item, document);
-    //     expect(node.textContent).toBe('stored string item');
-    // });
-});
+    /**
+     * The default field JSON/YAML field name to use if no key name is configured.
+     */
+    abstract readonly defaultJsonValueKey: string;
+
+    /**
+     * True if the datatype's value is allowed to be unwrapped in XML.
+     */
+    abstract readonly isXmlUnwrappedValueAllowed: boolean;
+
+    /**
+     * True if the datatype uses mixed text and elements contents in XML.
+     */
+    abstract readonly isXmlMixed: boolean;
+
+    abstract readXml(raw: Node): Item;
+    abstract readJson(raw: JSONValue): Item;
+
+    abstract writeXml(item: Item, document: Document): Node;
+    abstract writeJson(item: Item): JSONValue;
+}

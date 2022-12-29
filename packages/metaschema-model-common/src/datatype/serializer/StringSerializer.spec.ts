@@ -24,40 +24,31 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractAtomicItem from '../../metapath/item/AbstractAtomicItem.js';
-import AbstractDatatypeAdapter, { JSONValue } from './AbstractDatatypeAdapter.js';
+import StringItem from '../item/StringItem.js';
+import StringSerializer from './StringSerializer.js';
 
-export default abstract class AbstractStringAdapter<
-    T extends AbstractAtomicItem<unknown>,
-> extends AbstractDatatypeAdapter<T> {
-    readonly isAtomic = true;
-    readonly isXmlUnwrappedValueAllowed = false;
-    readonly isXmlMixed = false;
+describe('StringSerializer', () => {
+    const adapter = new StringSerializer();
+    it('should unmarshal JSON', () => {
+        const raw = JSON.parse('"Raw JSON string"');
+        expect(adapter.readJson(raw).value).toBe('Raw JSON string');
+    });
 
-    abstract fromString(parsed: string): T;
-    abstract toString(item: T): string;
+    it('should fail to unmarshal invalid JSON objects', () => {
+        const raw = JSON.parse('{ "test": "123" }');
+        expect(() => adapter.readJson(raw)).toThrow();
+    });
 
-    readXml(raw: Node): T {
-        if (raw.textContent) {
-            return this.fromString(raw.textContent);
-        } else {
-            throw new Error('Could not parse JSON into string item');
-        }
-    }
+    it('should marshal JSON', () => {
+        const item = new StringItem('stored string item');
+        expect(adapter.writeJson(item)).toBe('stored string item');
+    });
 
-    readJson(raw: JSONValue) {
-        if (typeof raw === 'string') {
-            return this.fromString(raw);
-        } else {
-            throw new Error('Could not parse JSON into string item');
-        }
-    }
-
-    writeXml(item: T, document: Document): Node {
-        return document.createTextNode(this.toString(item));
-    }
-
-    writeJson(item: T): JSONValue {
-        return this.toString(item);
-    }
-}
+    // TODO: this fails due to a lack of Document implementations in Node
+    // it('should marshal XML', () => {
+    //     const item = new StringItem('stored string item');
+    //     const document = new Document();
+    //     const node = adapter.writeXml(item, document);
+    //     expect(node.textContent).toBe('stored string item');
+    // });
+});

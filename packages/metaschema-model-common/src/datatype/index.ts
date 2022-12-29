@@ -24,6 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-export * from './adapter/index.js';
+export * from './serializer/index.js';
 export * from './markup/index.js';
+export * from './item/index.js';
 export * from './provider.js';

@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AssemblyItem, DocumentItem, FieldItem, FlagItem, StringItem } from '@oscal/metaschema-model-common/metapath';
+import { AssemblyItem, DocumentItem, FieldItem, FlagItem, StringItem } from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Metapath Item', () => {
