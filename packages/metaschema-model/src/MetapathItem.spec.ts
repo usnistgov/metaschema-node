@@ -70,7 +70,7 @@ describe('Metapath Item', () => {
             return;
         }
 
-        const flagItem = new FlagItem(new StringItem('awesome_pc_1'), flagInstance.getDefinition(), flagInstance);
+        const flagItem = new FlagItem(new StringItem('awesome_pc_1'), flagInstance);
 
         // should error if parent item hasn't been registered
         expect(() => flagItem.parent).toThrow();
@@ -86,7 +86,6 @@ describe('Metapath Item', () => {
                 model: new StringItem('some shiny processor'),
                 flags: {},
             },
-            fieldInstance.getDefinition(),
             fieldInstance,
         );
 

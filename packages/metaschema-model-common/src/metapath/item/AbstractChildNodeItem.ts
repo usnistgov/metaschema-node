@@ -29,6 +29,15 @@ import INamedInstance from '../../instance/INamedInstance.js';
 import AbstractNodeItem from './AbstractNodeItem.js';
 import { UnconstrainedDocument } from './DocumentItem.js';
 
+/**
+ * Helper function to tell Instances and Definitions apart
+ */
+export function isInstance<Definition extends INamedDefinition, Instance extends INamedInstance>(
+    instanceOrDefinition: Instance | Definition,
+): instanceOrDefinition is Instance {
+    return instanceOrDefinition.discriminator === 'instance';
+}
+
 type Parent = UnconstrainedChildNodeItem | UnconstrainedDocument;
 
 export default abstract class AbstractChildNodeItem<
@@ -49,15 +58,20 @@ export default abstract class AbstractChildNodeItem<
         this._parent = parent;
     }
 
-    readonly instance: INamedInstance | undefined;
+    readonly instance: Instance | undefined;
 
     protected registerChildren() {
         // Does nothing by default
     }
 
-    constructor(value: T, definition: Definition, instance?: Instance) {
-        super(value, definition);
-        this.instance = instance;
+    constructor(value: T, definitionOrInstance: Definition | Instance) {
+        if (isInstance(definitionOrInstance)) {
+            // Assure the TSC that an instance's definition is of the correct subtype
+            super(value, definitionOrInstance.getDefinition() as Definition);
+            this.instance = definitionOrInstance;
+        } else {
+            super(value, definitionOrInstance);
+        }
         this.registerChildren();
     }
 }
