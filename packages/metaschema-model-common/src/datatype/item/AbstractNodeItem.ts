@@ -38,7 +38,7 @@ export function isInstance<Definition extends INamedDefinition, Instance extends
     return instanceOrDefinition.discriminator === 'instance';
 }
 
-type Parent = UnconstrainedChildNodeItem | UnconstrainedDocument;
+type Parent = UnconstrainedNodeItem | UnconstrainedDocument;
 
 export default abstract class AbstractNodeItem<
     T,
@@ -78,4 +78,4 @@ export default abstract class AbstractNodeItem<
     }
 }
 
-export type UnconstrainedChildNodeItem = AbstractNodeItem<unknown, INamedDefinition, INamedInstance>;
+export type UnconstrainedNodeItem = AbstractNodeItem<unknown, INamedDefinition, INamedInstance>;
