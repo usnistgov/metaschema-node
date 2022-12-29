@@ -104,6 +104,76 @@ The sequence for parsing a Metaschema Document Instance would be as follows:
 
 This design can be amended to pull items from the tree as requested.
 
+### Full Example
+
+Given a simple Metaschema definition (pulled from the Metaschema Tutorials):
+
+<!-- TODO: Add a link to the tutorial once it is published -->
+
+```xml
+<METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
+  <schema-name>Computer Model</schema-name>
+  <schema-version>0.0.2</schema-version>
+  <short-name>computer</short-name>
+  <namespace>http://example.com/ns/computer</namespace>
+  <json-base-uri>http://example.com/ns/computer</json-base-uri>
+  <define-assembly name="computer">
+    <formal-name>Computer Assembly</formal-name>
+    <description>A container object for a computer, its parts, and its sub-parts.</description>
+    <root-name>computer</root-name>
+    <define-flag name="id" as-type="string" required="yes">
+        <formal-name>Computer Identifier</formal-name>
+        <description>An identifier for classifying a unique make and model of computer.</description>
+    </define-flag>
+  </define-assembly>
+</METASCHEMA>
+```
+
+And a simple document instance of this Metaschema definition:
+
+```yaml
+---
+computer:
+    id: awesomepc1
+```
+
+The proposed design would load the document instance into the following rough structure:
+
+```mermaid
+graph
+    subgraph Document Instance
+        DocumentItem(DocumentItem)
+        AssemblyItem(AssemblyItem: computer)
+        FlagItem(FlagItem: id)
+        StringItem(StringItem)
+        String(String: awesomepc1)
+
+        DocumentItem-->|Has Value|AssemblyItem
+        AssemblyItem-->|Has Value|FlagItem
+        FlagItem-->|Has Value|StringItem
+        StringItem-->|Has Value|String
+
+        AssemblyItem-->|Child Of|DocumentItem
+        FlagItem-->|Child Of|AssemblyItem
+    end
+
+    subgraph Definition
+        Metaschema[Metaschema: Computer Model]
+        AssemblyDefinition[AssemblyDefinition: computer]
+        FlagDefinition[FlagDefinition: id]
+
+        Metaschema-->|Defines|AssemblyDefinition
+        AssemblyDefinition-->|Defines Inline|FlagDefinition
+
+        AssemblyDefinition-->|Child Of|Metaschema
+        FlagDefinition-->|Child Of|AssemblyDefinition
+    end
+
+    %% Relation
+    AssemblyItem-->|Instance of|AssemblyDefinition
+    FlagItem-->|Instance of|FlagDefinition
+```
+
 ## Consequences
 
 This design will inform the design of the metapath engine, constraint validation, and code generation pieces.
