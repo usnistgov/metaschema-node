@@ -158,7 +158,7 @@ class InternalFieldDefinition extends inlineNamedDefinitionMixin(AbstractFieldDe
     getJsonValueKeyName() {
         return (
             this.parsed.children['{http://csrc.nist.gov/ns/oscal/metaschema/1.0}json-value-key'] ??
-            this.getDatatypeAdapter().getDefaultJsonValueKey()
+            this.getDatatypeAdapter().defaultJsonValueKey
         );
     }
 

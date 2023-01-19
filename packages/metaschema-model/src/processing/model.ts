@@ -36,6 +36,7 @@ import { processDatatypeAdapter } from './datatype.js';
 import { processMarkupLine, processMarkupMultiLine } from './markup.js';
 import { processJsonGroupAsBehavior, processModuleScope, processXmlGroupAsBehavior } from './enums.js';
 import { JsonGroupAsBehavior, XmlGroupAsBehavior } from '@oscal/metaschema-model-common/util';
+import { MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
 
 export const METASCHEMA_NS = 'http://csrc.nist.gov/ns/oscal/metaschema/1.0';
 
@@ -86,7 +87,7 @@ export const NAMED_DEFINITION = {
 export const VALUED_DEFINITION = {
     ATTRIBUTES: {
         ...DEFINITION.ATTRIBUTES,
-        'as-type': processDatatypeAdapter,
+        'as-type': defaultibleAttribute(processDatatypeAdapter, MetaschemaDatatypeProvider['string']),
     },
     CHILDREN: {
         ...DEFINITION.CHILDREN,

@@ -23,6 +23,28 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-export default interface IDatatype<T extends IDatatype<T>> {
-    copy(): T;
+
+import AbstractAssemblyDefinition from '../../definition/AbstractAssemblyDefinition.js';
+import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
+import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
+import FieldItem from './FieldItem.js';
+
+export type AssemblyContainer<ModelType extends Record<string, [unknown, UnconstrainedFlagsContainer]>> = {
+    [Property in keyof ModelType]: FieldItem<ModelType[Property][0], ModelType[Property][1]>;
+};
+
+export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, UnconstrainedFlagsContainer]>>;
+
+export default class AssemblyItem<
+    Model extends UnconstrainedAssemblyContainer,
+    Flags extends UnconstrainedFlagsContainer,
+> extends AbstractModelNodeItem<Model, Flags, AbstractAssemblyDefinition, AbstractAssemblyInstance> {
+    protected registerChildren() {
+        super.registerChildren();
+        for (const item of Object.values(this.value.model)) {
+            item.registerParent(this);
+        }
+    }
 }
+
+export type UnconstrainedAssemblyItem = AssemblyItem<UnconstrainedAssemblyContainer, UnconstrainedFlagsContainer>;

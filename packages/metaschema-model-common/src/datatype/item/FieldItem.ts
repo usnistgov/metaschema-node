@@ -24,11 +24,16 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { AbstractSerializer, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
-import { AbstractItem } from '@oscal/metaschema-model-common/datatype';
+import AbstractFieldDefinition from '../../definition/AbstractFieldDefinition.js';
+import AbstractFieldInstance from '../../instance/AbstractFieldInstance.js';
+import AbstractAtomicItem from './AbstractAtomicItem.js';
+import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractSerializer<AbstractItem<unknown>>> = (
-    child,
-    _context,
-) => MetaschemaDatatypeProvider[child];
+export default class FieldItem<Value, Flags extends UnconstrainedFlagsContainer> extends AbstractModelNodeItem<
+    AbstractAtomicItem<Value>,
+    Flags,
+    AbstractFieldDefinition,
+    AbstractFieldInstance
+> {}
+
+export type UnconstrainedFieldItem = FieldItem<unknown, UnconstrainedFlagsContainer>;

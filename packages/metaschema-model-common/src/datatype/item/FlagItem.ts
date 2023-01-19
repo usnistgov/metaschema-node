@@ -24,6 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import IDatatypeAdapter from './IDatatypeAdapter.js';
+import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
+import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
+import AbstractAtomicItem from './AbstractAtomicItem.js';
+import AbstractNodeItem from './AbstractNodeItem.js';
 
-export { IDatatypeAdapter };
+export default class FlagItem<Value> extends AbstractNodeItem<
+    AbstractAtomicItem<Value>,
+    AbstractFlagDefinition,
+    AbstractFlagInstance
+> {}
+
+export type UnconstrainedFlagItem = FlagItem<undefined>;

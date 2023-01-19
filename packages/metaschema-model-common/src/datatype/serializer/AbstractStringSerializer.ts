@@ -24,11 +24,40 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { AbstractSerializer, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
-import { AbstractItem } from '@oscal/metaschema-model-common/datatype';
+import AbstractAtomicItem from '../item/AbstractAtomicItem.js';
+import AbstractSerializer, { JSONValue } from './AbstractSerializer.js';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractSerializer<AbstractItem<unknown>>> = (
-    child,
-    _context,
-) => MetaschemaDatatypeProvider[child];
+export default abstract class AbstractStringSerializer<
+    T extends AbstractAtomicItem<unknown>,
+> extends AbstractSerializer<T> {
+    readonly isAtomic = true;
+    readonly isXmlUnwrappedValueAllowed = false;
+    readonly isXmlMixed = false;
+
+    abstract fromString(parsed: string): T;
+    abstract toString(item: T): string;
+
+    readXml(raw: Node): T {
+        if (raw.textContent) {
+            return this.fromString(raw.textContent);
+        } else {
+            throw new Error('Could not parse JSON into string item');
+        }
+    }
+
+    readJson(raw: JSONValue) {
+        if (typeof raw === 'string') {
+            return this.fromString(raw);
+        } else {
+            throw new Error('Could not parse JSON into string item');
+        }
+    }
+
+    writeXml(item: T, document: Document): Node {
+        return document.createTextNode(this.toString(item));
+    }
+
+    writeJson(item: T): JSONValue {
+        return this.toString(item);
+    }
+}

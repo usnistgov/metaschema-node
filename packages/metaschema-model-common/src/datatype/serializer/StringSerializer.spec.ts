@@ -24,11 +24,31 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { AbstractSerializer, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
-import { AbstractItem } from '@oscal/metaschema-model-common/datatype';
+import StringItem from '../item/StringItem.js';
+import StringSerializer from './StringSerializer.js';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractSerializer<AbstractItem<unknown>>> = (
-    child,
-    _context,
-) => MetaschemaDatatypeProvider[child];
+describe('StringSerializer', () => {
+    const adapter = new StringSerializer();
+    it('should unmarshal JSON', () => {
+        const raw = JSON.parse('"Raw JSON string"');
+        expect(adapter.readJson(raw).value).toBe('Raw JSON string');
+    });
+
+    it('should fail to unmarshal invalid JSON objects', () => {
+        const raw = JSON.parse('{ "test": "123" }');
+        expect(() => adapter.readJson(raw)).toThrow();
+    });
+
+    it('should marshal JSON', () => {
+        const item = new StringItem('stored string item');
+        expect(adapter.writeJson(item)).toBe('stored string item');
+    });
+
+    // TODO: this fails due to a lack of Document implementations in Node
+    // it('should marshal XML', () => {
+    //     const item = new StringItem('stored string item');
+    //     const document = new Document();
+    //     const node = adapter.writeXml(item, document);
+    //     expect(node.textContent).toBe('stored string item');
+    // });
+});

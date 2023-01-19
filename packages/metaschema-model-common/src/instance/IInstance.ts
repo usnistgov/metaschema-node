@@ -30,6 +30,11 @@ import { AbstractConstructor } from '../util/mixin.js';
 
 export default interface IInstance extends AbstractModelElement {
     /**
+     * Used by {@link AbstractNodeItem} to tell instances and definitions apart
+     */
+    readonly discriminator: 'instance';
+
+    /**
      * Retrieve the Metaschema definition on which the instance was declared. This value will typically
      * not be `undefined`, except in the case that the instance represents a definition at the root.
      *
@@ -40,6 +45,7 @@ export default interface IInstance extends AbstractModelElement {
 
 export function instanceMixin<TBase extends AbstractConstructor<AbstractModelElement>>(Base: TBase) {
     abstract class Instance extends Base implements IInstance {
+        readonly discriminator = 'instance';
         abstract getContainingDefinition(): INamedModelDefinition;
         getContainingMetaschema(): AbstractMetaschema {
             return this.getContainingDefinition().getContainingMetaschema();

@@ -27,7 +27,7 @@ import AllowedValuesConstraint from '../constraint/AllowedValuesConstraint.js';
 import ExpectConstraint from '../constraint/ExpectConstraint.js';
 import IndexHasConstraint from '../constraint/IndexHasConstraint.js';
 import MatchesConstraint from '../constraint/MatchesConstraint.js';
-import IDatatypeAdapter from '../datatype/adapter/IDatatypeAdapter.js';
+import { AbstractItem, AbstractSerializer } from '../datatype/index.js';
 import AbstractNamedModelElement from '../element/AbstractNamedModelElement.js';
 import { AbstractConstructor } from '../util/mixin.js';
 import IDefinition, { definitionMixin } from './IDefinition.js';
@@ -37,7 +37,7 @@ import IDefinition, { definitionMixin } from './IDefinition.js';
  * field, flag).
  */
 export default interface IValuedDefinition extends IDefinition {
-    getDatatypeAdapter(): IDatatypeAdapter<never>;
+    getDatatypeAdapter(): AbstractSerializer<AbstractItem<unknown>>;
 
     /**
      * Retrieve the list of allowed value constraints that apply to this definition's value.
@@ -70,7 +70,7 @@ export default interface IValuedDefinition extends IDefinition {
 
 export function valuedDefinitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class ValuedDefinition extends definitionMixin(Base) implements IValuedDefinition {
-        abstract getDatatypeAdapter(): IDatatypeAdapter<never>;
+        abstract getDatatypeAdapter(): AbstractSerializer<AbstractItem<unknown>>;
         abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];
         abstract getIndexHasKeyConstraints(): IndexHasConstraint[];

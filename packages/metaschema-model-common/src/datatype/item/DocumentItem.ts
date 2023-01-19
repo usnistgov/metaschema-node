@@ -23,15 +23,21 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import AbstractDatatype from './AbstractDatatype.js';
 
-export default abstract class AbstractAmbiguousDateTime<
-    T extends AbstractAmbiguousDateTime<T>,
-> extends AbstractDatatype<T, Date> {
-    public readonly hasTimeZone: boolean;
+import AbstractItem from './AbstractItem.js';
+import { UnconstrainedAssemblyItem } from './AssemblyItem.js';
 
-    public constructor(value: Date, hasTimeZone: boolean) {
+export default class DocumentItem<RootAssembly extends UnconstrainedAssemblyItem> extends AbstractItem<RootAssembly> {
+    readonly documentUri;
+
+    constructor(value: RootAssembly, documentUri: string) {
+        if (!value.definition.isRoot()) {
+            throw new Error('Assembly must be a root');
+        }
         super(value);
-        this.hasTimeZone = hasTimeZone;
+        value.registerParent(this);
+        this.documentUri = documentUri;
     }
 }
+
+export type UnconstrainedDocument = DocumentItem<UnconstrainedAssemblyItem>;

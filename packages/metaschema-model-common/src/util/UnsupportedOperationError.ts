@@ -23,18 +23,10 @@
  * PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
-import IDatatype from './IDatatype.js';
 
-export default abstract class AbstractDatatype<T extends IDatatype<T>, V> implements IDatatype<T> {
-    abstract copy(): T;
-
-    private readonly _value: V;
-
-    protected constructor(value: V) {
-        this._value = value;
-    }
-
-    get value() {
-        return this._value;
+export default class UnsupportedOperationError extends Error {
+    constructor(msg: string) {
+        super(msg);
+        Object.setPrototypeOf(this, UnsupportedOperationError.prototype);
     }
 }

@@ -24,11 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { AbstractSerializer, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
-import { AbstractItem } from '@oscal/metaschema-model-common/datatype';
+import AbstractItem from './item/AbstractItem.js';
+import AbstractSerializer from './serializer/AbstractSerializer.js';
+import StringSerializer from './serializer/StringSerializer.js';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractSerializer<AbstractItem<unknown>>> = (
-    child,
-    _context,
-) => MetaschemaDatatypeProvider[child];
+export type DatatypeProvider = Record<string, AbstractSerializer<AbstractItem<unknown>>>;
+
+export const MetaschemaDatatypeProvider: DatatypeProvider = {
+    string: new StringSerializer(),
+};

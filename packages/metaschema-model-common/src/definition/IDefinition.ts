@@ -31,6 +31,11 @@ import { ModuleScope } from '../util/types.js';
 
 export default interface IDefinition extends AbstractModelElement {
     /**
+     * Used by {@link AbstractNodeItem} to tell instances and definitions apart
+     */
+    readonly discriminator: 'definition';
+
+    /**
      * Retrieve the list of constraints associated with this definition.
      * TODO implement constraints
      * @returns the list of constraints
@@ -46,6 +51,7 @@ export default interface IDefinition extends AbstractModelElement {
 
 export function definitionMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
     abstract class Definition extends Base implements IDefinition {
+        readonly discriminator = 'definition';
         abstract getConstraints(): AbstractConstraint[];
         abstract getModuleScope(): ModuleScope;
     }

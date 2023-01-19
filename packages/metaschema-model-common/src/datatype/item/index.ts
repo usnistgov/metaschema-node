@@ -24,20 +24,24 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-// TODO: implement
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default interface IDatatypeAdapter<T> {
-    /**
-     * Get the metaschema type name associated with this adapter. This name must be unique with respect
-     * to all other metaschema types.
-     */
-    readonly name: string;
+import AbstractAtomicItem from './AbstractAtomicItem.js';
+import AbstractItem from './AbstractItem.js';
+import AbstractModelNodeItem from './AbstractModelNodeItem.js';
 
-    /**
-     * Get the class supported by this adapter.
-     *
-     * @return the class
-     */
-    // readonly class: unknown;
-    getDefaultJsonValueKey(): string;
-}
+import AssemblyItem from './AssemblyItem.js';
+import DocumentItem from './DocumentItem.js';
+import FieldItem from './FieldItem.js';
+import FlagItem from './FlagItem.js';
+
+import StringItem from './StringItem.js';
+
+export {
+    AbstractAtomicItem,
+    AbstractItem,
+    AbstractModelNodeItem,
+    AssemblyItem,
+    DocumentItem,
+    FieldItem,
+    FlagItem,
+    StringItem,
+};

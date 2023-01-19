@@ -24,11 +24,33 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DefiniteAttributeProcessor } from '@oscal/data-utils';
-import { AbstractSerializer, MetaschemaDatatypeProvider } from '@oscal/metaschema-model-common/datatype';
-import { AbstractItem } from '@oscal/metaschema-model-common/datatype';
+import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
+import INamedModelInstance from '../../instance/INamedModelInstance.js';
+import AbstractNodeItem from './AbstractNodeItem.js';
+import FlagItem from './FlagItem.js';
 
-export const processDatatypeAdapter: DefiniteAttributeProcessor<AbstractSerializer<AbstractItem<unknown>>> = (
-    child,
-    _context,
-) => MetaschemaDatatypeProvider[child];
+export type FlagsContainer<FlagValueType extends Record<string, unknown>> = {
+    [Property in keyof FlagValueType]: FlagItem<FlagValueType[Property]>;
+};
+
+export type UnconstrainedFlagsContainer = FlagsContainer<Record<string, unknown>>;
+
+export default class AbstractModelNodeItem<
+    Value,
+    Flags extends UnconstrainedFlagsContainer,
+    Definition extends INamedModelDefinition,
+    Instance extends INamedModelInstance,
+> extends AbstractNodeItem<{ model: Value; flags: Flags }, Definition, Instance> {
+    protected registerChildren(): void {
+        for (const flag of Object.values(this.value.flags)) {
+            flag.registerParent(this);
+        }
+    }
+}
+
+export type UnconstrainedModelNodeItem = AbstractModelNodeItem<
+    unknown,
+    UnconstrainedFlagsContainer,
+    INamedModelDefinition,
+    INamedModelInstance
+>;

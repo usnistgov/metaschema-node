@@ -41,7 +41,7 @@ describe('Load OSCAL Metaschema', () => {
         expect(metaschema.exportedFlagDefinitions.get('control-id')?.getFormalName()).toBe(
             'Control Identifier Reference',
         );
-        expect(metaschema.exportedFieldDefinitions.get('remarks')?.getDatatypeAdapter().name).toBe('markup-multiline');
+        expect(metaschema.exportedFieldDefinitions.get('hash')?.getDatatypeAdapter().name).toBe('string');
         expect(metaschema.exportedAssemblyDefinitions.get('control')?.getEffectiveName()).toBe('control');
     });
 });

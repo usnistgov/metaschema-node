@@ -27,4 +27,6 @@ export default {
             tsconfig: '<rootDir>/tsconfig.json',
         },
     },
+    // Ignore transpiled JS to prevent tests from being run twice
+    modulePathIgnorePatterns: ['<rootDir>/lib'],
 } as Config;

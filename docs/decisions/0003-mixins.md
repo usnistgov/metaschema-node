@@ -8,13 +8,13 @@ Accepted
 
 ## Context
 
-The `metaschema-java` `metaschema-model-common` package makes heavy use of multiple-inheritence.
-For example, the `IAssemblyDefinition` interface inherites the `IModelContainer`, `INamedDefinition`, and `AbstractAssembly` interfaces.
-Typescript was not built to support multiple inheritence in abstract classes.
-_Note abstract classes are used here in lieu of interfaces (which do support multiple inheritence) because Typescript interfaces cannot have default implementations._
+The `metaschema-java` `metaschema-model-common` package makes heavy use of multiple-inheritance.
+For example, the `IAssemblyDefinition` interface inherits the `IModelContainer`, `INamedDefinition`, and `AbstractAssembly` interfaces.
+Typescript was not built to support multiple inheritance in abstract classes.
+_Note abstract classes are used here in lieu of interfaces (which do support multiple inheritance) because Typescript interfaces cannot have default implementations._
 There are two solutions that preserve the structure of classes:
 
--   Chain the inheritence with utility (unused) classes
+-   Chain the inheritance with utility (unused) classes
 -   Utilize the mixin pattern
 
 ## Decision
