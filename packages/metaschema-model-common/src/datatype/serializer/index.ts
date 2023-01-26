@@ -25,7 +25,8 @@
  */
 
 import AbstractSerializer from './AbstractSerializer.js';
+import AbstractAtomicItemSerializer from './AbstractAtomicItemSerializer.js';
 import AbstractStringSerializer from './AbstractStringSerializer.js';
 import StringSerializer from './StringSerializer.js';
 
-export { AbstractSerializer, AbstractStringSerializer, StringSerializer };
+export { AbstractSerializer, AbstractAtomicItemSerializer, AbstractStringSerializer, StringSerializer };

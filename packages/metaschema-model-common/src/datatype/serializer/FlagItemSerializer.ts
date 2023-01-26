@@ -24,15 +24,43 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../item/StringItem.js';
-import AbstractStringSerializer from './AbstractStringSerializer.js';
+import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
+import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
+import { AbstractAtomicItem } from '../index.js';
+import FlagItem from '../item/FlagItem.js';
+import AbstractNodeItemSerializer from './AbstractNodeItemSerializer.js';
+import { JSONValue } from './util.js';
 
-export default class StringSerializer extends AbstractStringSerializer<string> {
-    readString(parsed: string): StringItem {
-        return new StringItem(parsed);
+export default class FlagItemSerializer<Value> extends AbstractNodeItemSerializer<
+    FlagItem<Value>,
+    AbstractFlagDefinition,
+    AbstractFlagInstance
+> {
+    constructor(definitionOrInstance: AbstractFlagDefinition | AbstractFlagInstance) {
+        super(definitionOrInstance);
     }
 
-    writeString(item: StringItem): string {
-        return item.value;
+    readXml(attr: Attr): FlagItem<Value> {
+        const itemValue = this.definition.getDatatypeAdapter().readString(attr.value);
+        return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
+    }
+
+    readJson(attr: JSONValue): FlagItem<Value> {
+        const itemValue = this.definition.getDatatypeAdapter().readJson(attr);
+        return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
+    }
+
+    writeXml(item: FlagItem<Value>, document: Document): Attr {
+        const attr = document.createAttribute(this.definition.getEffectiveName());
+        attr.value = item.definition.getDatatypeAdapter().writeString(item.value);
+        return attr;
+    }
+
+    /**
+     * Returns the attribute value, without the name
+     */
+    writeJson(item: FlagItem<Value>): JSONValue {
+        const itemValue: AbstractAtomicItem<Value> = item.value;
+        return this.definition.getDatatypeAdapter().writeJson(itemValue);
     }
 }

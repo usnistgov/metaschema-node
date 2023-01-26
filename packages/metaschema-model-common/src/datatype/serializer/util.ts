@@ -24,15 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../item/StringItem.js';
-import AbstractStringSerializer from './AbstractStringSerializer.js';
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-export default class StringSerializer extends AbstractStringSerializer<string> {
-    readString(parsed: string): StringItem {
-        return new StringItem(parsed);
-    }
-
-    writeString(item: StringItem): string {
-        return item.value;
-    }
+/**
+ * Type guard for JSONObject from JSONValue
+ */
+export function isJSONObject(value: JSONValue): value is JSONObject {
+    return typeof value === 'object' && !Array.isArray(value) && value !== undefined;
 }

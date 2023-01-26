@@ -24,40 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-export type JSONPrimitive = string | number | boolean | null;
-export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
-export type JSONObject = { [member: string]: JSONValue };
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JSONArray extends Array<JSONValue> {}
-
 import AbstractItem from '../item/AbstractItem.js';
+import { JSONValue } from './util.js';
 
 export default abstract class AbstractSerializer<Item extends AbstractItem<unknown>> {
-    abstract readonly name: string;
-
-    /**
-     * True if the datatype is an atomic, scalar value.
-     */
-    abstract readonly isAtomic: boolean;
-
-    /**
-     * The default field JSON/YAML field name to use if no key name is configured.
-     */
-    abstract readonly defaultJsonValueKey: string;
-
-    /**
-     * True if the datatype's value is allowed to be unwrapped in XML.
-     */
-    abstract readonly isXmlUnwrappedValueAllowed: boolean;
-
-    /**
-     * True if the datatype uses mixed text and elements contents in XML.
-     */
-    abstract readonly isXmlMixed: boolean;
-
     abstract readXml(raw: Node): Item;
     abstract readJson(raw: JSONValue): Item;
-
     abstract writeXml(item: Item, document: Document): Node;
     abstract writeJson(item: Item): JSONValue;
 }

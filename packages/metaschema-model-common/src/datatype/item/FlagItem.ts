@@ -35,4 +35,4 @@ export default class FlagItem<Value> extends AbstractNodeItem<
     AbstractFlagInstance
 > {}
 
-export type UnconstrainedFlagItem = FlagItem<undefined>;
+export type UnconstrainedFlagItem = FlagItem<unknown>;

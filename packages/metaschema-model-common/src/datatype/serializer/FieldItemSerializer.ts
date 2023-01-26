@@ -24,15 +24,38 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../item/StringItem.js';
-import AbstractStringSerializer from './AbstractStringSerializer.js';
+import AbstractFieldDefinition from '../../definition/AbstractFieldDefinition.js';
+import AbstractFieldInstance from '../../instance/AbstractFieldInstance.js';
+import { FieldItem } from '../index.js';
+import { UnconstrainedFlagsContainer } from '../item/AbstractModelNodeItem.js';
+import AbstractModelNodeItemSerializer from './AbstractModelNodeItemSerializer.js';
+import { JSONObject } from './util.js';
 
-export default class StringSerializer extends AbstractStringSerializer<string> {
-    readString(parsed: string): StringItem {
-        return new StringItem(parsed);
+export default class FieldItemSerializer<
+    Value,
+    Flags extends UnconstrainedFlagsContainer,
+> extends AbstractModelNodeItemSerializer<
+    FieldItem<Value, UnconstrainedFlagsContainer>,
+    AbstractFieldDefinition,
+    AbstractFieldInstance
+> {
+    protected readXmlModel(node: Element, flags: Flags): FieldItem<Value, Flags> {
+        const model = this.definition.getDatatypeAdapter().readXml(node);
+        return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
     }
 
-    writeString(item: StringItem): string {
-        return item.value;
+    protected readJsonModel(object: JSONObject, flags: Flags): FieldItem<Value, Flags> {
+        const model = this.definition.getDatatypeAdapter().readJson(object);
+        return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
+    }
+
+    protected writeXmlModel(item: FieldItem<Value, Flags>, element: Element, document: Document): void {
+        const value = this.definition.getDatatypeAdapter().writeXml(item.value.model, document);
+        // TODO: Handle XML wrapping?
+        element.appendChild(value);
+    }
+
+    protected writeJsonModel(item: FieldItem<Value, Flags>, object: JSONObject): void {
+        object[this.getJsonValueKeyName(item)] = this.definition.getDatatypeAdapter().writeJson(item);
     }
 }

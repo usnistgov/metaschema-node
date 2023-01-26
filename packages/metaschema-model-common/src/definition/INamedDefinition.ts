@@ -31,7 +31,7 @@ import IDefinition, { definitionMixin } from './IDefinition.js';
 /**
  * This marker interface is used for some collections that contain various named definitions.
  */
-export default interface INamedDefinition extends IDefinition {
+export default interface INamedDefinition extends IDefinition, AbstractNamedModelElement {
     /**
      * Determine if the definition is defined inline, meaning the definition is declared where it is
      * used.

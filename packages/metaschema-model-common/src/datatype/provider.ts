@@ -24,11 +24,10 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractItem from './item/AbstractItem.js';
-import AbstractSerializer from './serializer/AbstractSerializer.js';
+import AbstractAtomicItemSerializer from './serializer/AbstractAtomicItemSerializer.js';
 import StringSerializer from './serializer/StringSerializer.js';
 
-export type DatatypeProvider = Record<string, AbstractSerializer<AbstractItem<unknown>>>;
+export type DatatypeProvider = Record<string, AbstractAtomicItemSerializer<unknown>>;
 
 export const MetaschemaDatatypeProvider: DatatypeProvider = {
     string: new StringSerializer(),

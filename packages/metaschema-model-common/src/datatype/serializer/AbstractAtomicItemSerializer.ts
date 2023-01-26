@@ -24,15 +24,19 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../item/StringItem.js';
-import AbstractStringSerializer from './AbstractStringSerializer.js';
+import { AbstractAtomicItem } from '../index.js';
+import AbstractSerializer from './AbstractSerializer.js';
 
-export default class StringSerializer extends AbstractStringSerializer<string> {
-    readString(parsed: string): StringItem {
-        return new StringItem(parsed);
-    }
+export default abstract class AbstractAtomicItemSerializer<Value> extends AbstractSerializer<
+    AbstractAtomicItem<Value>
+> {
+    abstract readString(raw: string): AbstractAtomicItem<Value>;
+    abstract writeString(item: AbstractAtomicItem<Value>): string;
 
-    writeString(item: StringItem): string {
-        return item.value;
+    readonly defaultJsonValueKey;
+
+    constructor(defaultJsonValueKey = 'STRVALUE') {
+        super();
+        this.defaultJsonValueKey = defaultJsonValueKey;
     }
 }

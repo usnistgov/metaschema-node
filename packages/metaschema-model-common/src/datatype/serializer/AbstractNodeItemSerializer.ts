@@ -24,15 +24,26 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import StringItem from '../item/StringItem.js';
-import AbstractStringSerializer from './AbstractStringSerializer.js';
+import INamedDefinition from '../../definition/INamedDefinition.js';
+import INamedInstance from '../../instance/INamedInstance.js';
+import { isInstance, UnconstrainedNodeItem } from '../item/AbstractNodeItem.js';
+import AbstractSerializer from './AbstractSerializer.js';
 
-export default class StringSerializer extends AbstractStringSerializer<string> {
-    readString(parsed: string): StringItem {
-        return new StringItem(parsed);
-    }
+export default abstract class AbstractNodeItemSerializer<
+    NodeItem extends UnconstrainedNodeItem,
+    Definition extends INamedDefinition,
+    Instance extends INamedInstance,
+> extends AbstractSerializer<NodeItem> {
+    protected readonly definition: Definition;
+    protected readonly instance: Instance | undefined;
 
-    writeString(item: StringItem): string {
-        return item.value;
+    constructor(definitionOrInstance: Definition | Instance) {
+        super();
+        if (isInstance(definitionOrInstance)) {
+            this.instance = definitionOrInstance;
+            this.definition = definitionOrInstance.getDefinition() as Definition;
+        } else {
+            this.definition = definitionOrInstance;
+        }
     }
 }
