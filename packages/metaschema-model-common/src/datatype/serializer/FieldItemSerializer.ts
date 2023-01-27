@@ -34,18 +34,14 @@ import { JSONObject } from './util.js';
 export default class FieldItemSerializer<
     Value,
     Flags extends UnconstrainedFlagsContainer,
-> extends AbstractModelNodeItemSerializer<
-    FieldItem<Value, UnconstrainedFlagsContainer>,
-    AbstractFieldDefinition,
-    AbstractFieldInstance
-> {
+> extends AbstractModelNodeItemSerializer<FieldItem<Value, Flags>, AbstractFieldDefinition, AbstractFieldInstance> {
     protected readXmlModel(node: Element, flags: Flags): FieldItem<Value, Flags> {
         const model = this.definition.getDatatypeAdapter().readXml(node);
         return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
     }
 
     protected readJsonModel(object: JSONObject, flags: Flags): FieldItem<Value, Flags> {
-        const model = this.definition.getDatatypeAdapter().readJson(object);
+        const model = this.definition.getDatatypeAdapter().readJson(object[this.getJsonValueKeyName(flags)]);
         return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
     }
 
@@ -56,6 +52,6 @@ export default class FieldItemSerializer<
     }
 
     protected writeJsonModel(item: FieldItem<Value, Flags>, object: JSONObject): void {
-        object[this.getJsonValueKeyName(item)] = this.definition.getDatatypeAdapter().writeJson(item);
+        object[this.getJsonValueKeyName(item.value.flags)] = this.definition.getDatatypeAdapter().writeJson(item);
     }
 }

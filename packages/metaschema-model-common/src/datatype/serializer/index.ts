@@ -25,8 +25,25 @@
  */
 
 import AbstractSerializer from './AbstractSerializer.js';
+import AbstractNodeItemSerializer from './AbstractNodeItemSerializer.js';
+import AbstractModelNodeItemSerializer from './AbstractModelNodeItemSerializer.js';
+import AssemblyItemSerializer from './AssemblyItemSerializer.js';
+import FieldItemSerializer from './FieldItemSerializer.js';
+import FlagItemSerializer from './FlagItemSerializer.js';
+import DocumentItemSerializer from './DocumentItemSerializer.js';
 import AbstractAtomicItemSerializer from './AbstractAtomicItemSerializer.js';
 import AbstractStringSerializer from './AbstractStringSerializer.js';
 import StringSerializer from './StringSerializer.js';
 
-export { AbstractSerializer, AbstractAtomicItemSerializer, AbstractStringSerializer, StringSerializer };
+export {
+    AbstractSerializer,
+    AbstractNodeItemSerializer,
+    AbstractModelNodeItemSerializer,
+    AssemblyItemSerializer,
+    FieldItemSerializer,
+    FlagItemSerializer,
+    DocumentItemSerializer,
+    AbstractAtomicItemSerializer,
+    AbstractStringSerializer,
+    StringSerializer,
+};

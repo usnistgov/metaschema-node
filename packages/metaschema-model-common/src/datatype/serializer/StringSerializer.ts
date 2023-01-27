@@ -35,4 +35,8 @@ export default class StringSerializer extends AbstractStringSerializer<string> {
     writeString(item: StringItem): string {
         return item.value;
     }
+
+    constructor() {
+        super('string');
+    }
 }

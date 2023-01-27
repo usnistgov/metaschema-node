@@ -33,10 +33,12 @@ export default abstract class AbstractAtomicItemSerializer<Value> extends Abstra
     abstract readString(raw: string): AbstractAtomicItem<Value>;
     abstract writeString(item: AbstractAtomicItem<Value>): string;
 
+    readonly name;
     readonly defaultJsonValueKey;
 
-    constructor(defaultJsonValueKey = 'STRVALUE') {
+    constructor(name: string, defaultJsonValueKey = 'STRVALUE') {
         super();
+        this.name = name;
         this.defaultJsonValueKey = defaultJsonValueKey;
     }
 }

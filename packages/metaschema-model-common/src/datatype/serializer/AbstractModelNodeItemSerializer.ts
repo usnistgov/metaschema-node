@@ -41,10 +41,10 @@ export default abstract class AbstractModelNodeItemSerializer<
 
     protected readXmlFlags(element: Element): ModelNodeItem['value']['flags'] {
         const flagItems: Record<string, UnconstrainedFlagItem> = {};
-        for (const [name, flagInstance] of this.definition.getFlagInstances()) {
+        for (const flagInstance of this.definition.getFlagInstances().values()) {
             const flagItemSerializer = new FlagItemSerializer(flagInstance);
 
-            const attr = element.getAttributeNode(this.definition.getEffectiveName());
+            const attr = element.getAttributeNode(flagInstance.getJsonName());
             if (attr === null) {
                 if (flagInstance.isRequired()) {
                     throw new Error('Flag attribute marked as required');
@@ -52,7 +52,7 @@ export default abstract class AbstractModelNodeItemSerializer<
                     continue;
                 }
             }
-            flagItems[name] = flagItemSerializer.readXml(attr);
+            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readXml(attr);
         }
 
         return flagItems;
@@ -60,10 +60,10 @@ export default abstract class AbstractModelNodeItemSerializer<
 
     protected readJsonFlags(object: JSONObject): ModelNodeItem['value']['flags'] {
         const flagItems: Record<string, UnconstrainedFlagItem> = {};
-        for (const [name, flagInstance] of this.definition.getFlagInstances()) {
+        for (const flagInstance of this.definition.getFlagInstances().values()) {
             const flagItemSerializer = new FlagItemSerializer(flagInstance);
 
-            const attr = object[flagInstance.getEffectiveName()];
+            const attr = object[flagInstance.getJsonName()];
             if (attr === null) {
                 if (flagInstance.isRequired()) {
                     throw new Error('Flag attribute marked as required');
@@ -71,7 +71,7 @@ export default abstract class AbstractModelNodeItemSerializer<
                     continue;
                 }
             }
-            flagItems[name] = flagItemSerializer.readJson(attr);
+            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readJson(attr);
         }
 
         return flagItems;
@@ -95,11 +95,11 @@ export default abstract class AbstractModelNodeItemSerializer<
         }
     }
 
-    protected getJsonValueKeyName(item: ModelNodeItem): string {
+    protected getJsonValueKeyName(flags: ModelNodeItem['value']['flags']): string {
         const jsonKeyFlagName = (this.instance ?? this.definition).getJsonKeyFlagInstance()?.getEffectiveName();
         if (jsonKeyFlagName) {
             // TODO: Cache serializers?
-            const flag = item.value.flags[jsonKeyFlagName];
+            const flag = flags[jsonKeyFlagName];
             if (flag) {
                 return flag.definition.getDatatypeAdapter().writeString(flag);
             }

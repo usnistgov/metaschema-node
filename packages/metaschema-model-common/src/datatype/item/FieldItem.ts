@@ -29,11 +29,11 @@ import AbstractFieldInstance from '../../instance/AbstractFieldInstance.js';
 import AbstractAtomicItem from './AbstractAtomicItem.js';
 import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
 
-export default class FieldItem<Value, Flags extends UnconstrainedFlagsContainer> extends AbstractModelNodeItem<
-    AbstractAtomicItem<Value>,
-    Flags,
-    AbstractFieldDefinition,
-    AbstractFieldInstance
-> {}
+export type UnconstrainedFieldContainer = unknown;
+
+export default class FieldItem<
+    Value extends UnconstrainedFieldContainer,
+    Flags extends UnconstrainedFlagsContainer,
+> extends AbstractModelNodeItem<AbstractAtomicItem<Value>, Flags, AbstractFieldDefinition, AbstractFieldInstance> {}
 
 export type UnconstrainedFieldItem = FieldItem<unknown, UnconstrainedFlagsContainer>;
