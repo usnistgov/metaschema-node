@@ -29,29 +29,66 @@ import AbstractFieldInstance from '../../instance/AbstractFieldInstance.js';
 import { FieldItem } from '../index.js';
 import { UnconstrainedFlagsContainer } from '../item/AbstractModelNodeItem.js';
 import AbstractModelNodeItemSerializer from './AbstractModelNodeItemSerializer.js';
-import { JSONObject } from './util.js';
+import { isJSONObject, JSONObject, JSONValue } from './util.js';
 
 export default class FieldItemSerializer<
     Value,
     Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItemSerializer<FieldItem<Value, Flags>, AbstractFieldDefinition, AbstractFieldInstance> {
-    protected readXmlModel(node: Element, flags: Flags): FieldItem<Value, Flags> {
-        const model = this.definition.getDatatypeAdapter().readXml(node);
-        return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
+    readXml(raw: Node): FieldItem<Value, Flags> {
+        if (!(raw instanceof Element)) {
+            throw new Error('Node must be of type element');
+        }
+
+        return new FieldItem(
+            {
+                model: this.definition.getDatatypeAdapter().readXml(raw),
+                flags: this.readXmlFlags(raw),
+            },
+            this.instance ?? this.definition,
+        ) as FieldItem<Value, Flags>;
     }
 
-    protected readJsonModel(object: JSONObject, flags: Flags): FieldItem<Value, Flags> {
-        const model = this.definition.getDatatypeAdapter().readJson(object[this.getJsonValueKeyName(flags)]);
-        return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
+    readJson(raw: JSONValue): FieldItem<Value, Flags> {
+        if (this.definition.getFlagInstances().size !== 0) {
+            if (!isJSONObject(raw)) {
+                throw new Error('Could not parse field flags, expected JSON object, got JSON primitive or list');
+            }
+            const flags = this.readJsonFlags(raw);
+            const model = this.definition.getDatatypeAdapter().readJson(raw[this.getJsonValueKeyName(flags)]);
+            return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
+        } else {
+            return new FieldItem(
+                {
+                    model: this.definition.getDatatypeAdapter().readString(raw?.toString() ?? ''),
+                    flags: {},
+                },
+                this.instance ?? this.definition,
+            ) as FieldItem<Value, Flags>;
+        }
     }
 
-    protected writeXmlModel(item: FieldItem<Value, Flags>, element: Element, document: Document): void {
-        const value = this.definition.getDatatypeAdapter().writeXml(item.value.model, document);
+    writeXml(item: FieldItem<Value, Flags>, document: Document): Node {
+        const element = document.createElementNS(
+            item.instance?.getXmlNamespace() ?? item.definition.getContainingMetaschema().xmlNamespace,
+            this.definition.getEffectiveName(),
+        );
+        this.writeXmlFlags(item, element, document);
         // TODO: Handle XML wrapping?
-        element.appendChild(value);
+        element.appendChild(this.definition.getDatatypeAdapter().writeXml(item.value.model, document));
+        return element;
     }
 
-    protected writeJsonModel(item: FieldItem<Value, Flags>, object: JSONObject): void {
-        object[this.getJsonValueKeyName(item.value.flags)] = this.definition.getDatatypeAdapter().writeJson(item);
+    writeJson(item: FieldItem<Value, Flags>): JSONValue {
+        if (this.definition.getFlagInstances().size !== 0) {
+            const object: JSONObject = {};
+            this.writeJsonFlags(item, object);
+            object[this.getJsonValueKeyName(item.value.flags)] = this.definition
+                .getDatatypeAdapter()
+                .writeJson(item.model);
+            return object;
+        } else {
+            return this.definition.getDatatypeAdapter().writeString(item.model);
+        }
     }
 }

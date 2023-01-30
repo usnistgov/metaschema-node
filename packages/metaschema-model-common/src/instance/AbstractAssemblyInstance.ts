@@ -49,6 +49,7 @@ abstract class AbstractAssemblyInstance extends namedModelInstanceMixin(Abstract
 
     getJsonName(): string {
         if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
+            // TODO: this is not right
             return this.getGroupAsName() ?? 'null group-as name';
         }
         return this.getEffectiveName();

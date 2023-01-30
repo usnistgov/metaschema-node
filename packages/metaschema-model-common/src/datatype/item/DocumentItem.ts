@@ -38,6 +38,10 @@ export default class DocumentItem<RootAssembly extends UnconstrainedAssemblyItem
         value.registerParent(this);
         this.documentUri = documentUri;
     }
+
+    get root() {
+        return this.value;
+    }
 }
 
 export type UnconstrainedDocument = DocumentItem<UnconstrainedAssemblyItem>;

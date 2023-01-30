@@ -26,4 +26,8 @@
 
 import AbstractItem from './AbstractItem.js';
 
-export default abstract class AbstractAtomicItem<T> extends AbstractItem<T> {}
+export default abstract class AbstractAtomicItem<T> extends AbstractItem<T> {
+    get raw() {
+        return this.value;
+    }
+}

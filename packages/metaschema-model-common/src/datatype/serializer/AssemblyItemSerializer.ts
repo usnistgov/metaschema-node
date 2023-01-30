@@ -31,7 +31,7 @@ import AssemblyItem, { UnconstrainedAssemblyContainer, UnconstrainedAssemblyItem
 import { UnconstrainedFieldItem } from '../item/FieldItem.js';
 import AbstractModelNodeItemSerializer from './AbstractModelNodeItemSerializer.js';
 import FieldItemSerializer from './FieldItemSerializer.js';
-import { JSONObject } from './util.js';
+import { isJSONObject, JSONValue } from './util.js';
 
 export default class AssemblyItemSerializer<
     Value extends UnconstrainedAssemblyContainer,
@@ -43,17 +43,21 @@ export default class AssemblyItemSerializer<
 > {
     // TODO: Cache child serializers? Maybe in a parent "document serializer"
 
-    protected readXmlModel(node: Element, flags: Flags): AssemblyItem<Value, Flags> {
+    readXml(raw: Node): AssemblyItem<Value, Flags> {
         throw new Error('Method not implemented.');
     }
 
-    protected readJsonModel(object: JSONObject, flags: Flags): AssemblyItem<Value, Flags> {
-        // const model: UnconstrainedAssemblyContainer = {};
+    readJson(raw: JSONValue): AssemblyItem<Value, Flags> {
+        if (!isJSONObject(raw)) {
+            throw new Error('Could not parse assembly, expected JSON object, got JSON primitive or list');
+        }
+
+        const flags = this.readJsonFlags(raw);
         const model: Record<string, UnconstrainedAssemblyItem | UnconstrainedFieldItem> = {};
 
         for (const assemblyInstance of this.definition.getAssemblyInstances().values()) {
             const assemblyItemSerializer = new AssemblyItemSerializer(assemblyInstance);
-            const assembly = object[assemblyInstance.getJsonName()];
+            const assembly = raw[assemblyInstance.getJsonName()];
             if (assembly === null) {
                 // TODO: can an assembly be required?
                 continue;
@@ -63,7 +67,7 @@ export default class AssemblyItemSerializer<
 
         for (const fieldInstance of this.definition.getFieldInstances().values()) {
             const fieldItemSerializer = new FieldItemSerializer(fieldInstance);
-            const field = object[fieldInstance.getJsonName()];
+            const field = raw[fieldInstance.getJsonName()];
             if (field === null) {
                 // TODO: can a field be required?
                 continue;
@@ -85,11 +89,11 @@ export default class AssemblyItemSerializer<
         ) as AssemblyItem<Value, Flags>;
     }
 
-    protected writeXmlModel(item: AssemblyItem<Value, Flags>, element: Element, document: Document): void {
+    writeXml(item: AssemblyItem<Value, Flags>, document: Document): Node {
         throw new Error('Method not implemented.');
     }
 
-    protected writeJsonModel(item: AssemblyItem<Value, Flags>, object: JSONObject): void {
+    writeJson(item: AssemblyItem<Value, Flags>): JSONValue {
         throw new Error('Method not implemented.');
     }
 }

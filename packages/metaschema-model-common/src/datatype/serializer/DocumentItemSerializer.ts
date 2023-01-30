@@ -49,7 +49,7 @@ export default class DocumentItemSerializer<
 
     readJson(raw: JSONValue): DocumentItem<AssemblyItem<Value, Flags>> {
         if (!isJSONObject(raw)) {
-            throw new Error('JSON value must be of type JSONObject');
+            throw new Error('Could not parse document, expected JSON Object, got JSON value');
         }
 
         if (Object.keys(raw).length !== 1) {

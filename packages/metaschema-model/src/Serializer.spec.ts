@@ -24,7 +24,12 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AbstractAtomicItem, DocumentItemSerializer, FlagItem } from '@oscal/metaschema-model-common/datatype';
+import {
+    AbstractAtomicItem,
+    DocumentItemSerializer,
+    FieldItem,
+    FlagItem,
+} from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Serializer', () => {
@@ -48,22 +53,52 @@ describe('Serializer', () => {
                     <description>An identifier for classifying a unique make and model of computer.</description>
                 </define-flag>
                 <model>
+                    <define-field name="vendor" as-type="string" required="yes" max-occurs="1">
+                        <formal-name>Vendor</formal-name>
+                        <description>The organization responsible for distributing this computer</description>
+                    </define-field>
+                    <define-field name="processor" as-type="string" max-occurs="1">
+                        <formal-name>Processor</formal-name>
+                        <description>The name given to the processor of this computer</description>
+                        <model>
+                            <define-flag name="manufacturer" as-type="string" required="yes">
+                                <formal-name>Manufacturer</forma-name>
+                                <description>The manufacturer of the processor</description>
+                            </define-flag>
+                        </model>
+                    </define-field>
                 </model>
               </define-assembly>
             </METASCHEMA>`,
         );
 
         const documentItemSerializer = new DocumentItemSerializer<
-            Record<string, never>,
+            {
+                vendor: FieldItem<string, Record<string, never>>;
+                processor: FieldItem<
+                    string,
+                    {
+                        manufacturer: FlagItem<AbstractAtomicItem<string>>;
+                    }
+                >;
+            },
             // TODO: redundant FlagItem wrapper, this is wrong!
             { id: FlagItem<AbstractAtomicItem<string>> }
         >(metaschema, 'file://not-real.xml');
         const serialized = documentItemSerializer.readJson({
             computer: {
                 id: 'computer1',
+                vendor: 'Test Vendor 1',
+                processor: {
+                    manufacturer: 'Manufacturer 1',
+                    STRVALUE: 'Processor 1',
+                },
             },
         });
 
-        expect(serialized.value.value.flags.id.value.value).toBe('computer1');
+        expect(serialized.root.flags.id.value.raw).toBe('computer1');
+        expect(serialized.root.model.vendor.model.raw).toBe('Test Vendor 1');
+        expect(serialized.root.model.processor.model.raw).toBe('Processor 1');
+        expect(serialized.root.model.processor.flags.manufacturer.value.raw).toBe('Manufacturer 1');
     });
 });

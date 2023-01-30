@@ -30,7 +30,7 @@ import { UnconstrainedModelNodeItem } from '../item/AbstractModelNodeItem.js';
 import { UnconstrainedFlagItem } from '../item/FlagItem.js';
 import AbstractNodeItemSerializer from './AbstractNodeItemSerializer.js';
 import FlagItemSerializer from './FlagItemSerializer.js';
-import { isJSONObject, JSONObject, JSONValue } from './util.js';
+import { JSONObject } from './util.js';
 
 export default abstract class AbstractModelNodeItemSerializer<
     ModelNodeItem extends UnconstrainedModelNodeItem,
@@ -106,43 +106,5 @@ export default abstract class AbstractModelNodeItemSerializer<
         }
 
         return this.definition.getJsonName();
-    }
-
-    protected abstract readXmlModel(node: Element, flags: ModelNodeItem['value']['flags']): ModelNodeItem;
-    protected abstract readJsonModel(object: JSONObject, flags: ModelNodeItem['value']['flags']): ModelNodeItem;
-    protected abstract writeXmlModel(item: ModelNodeItem, element: Element, document: Document): void;
-    protected abstract writeJsonModel(item: ModelNodeItem, object: JSONObject): void;
-
-    readXml(raw: Node): ModelNodeItem {
-        if (!(raw instanceof Element)) {
-            throw new Error('Node must be of type element');
-        }
-
-        return this.readXmlModel(raw, this.readXmlFlags(raw));
-    }
-
-    readJson(raw: JSONValue): ModelNodeItem {
-        if (!isJSONObject(raw)) {
-            throw new Error('JSON value must be of type JSONObject');
-        }
-
-        return this.readJsonModel(raw, this.readJsonFlags(raw));
-    }
-
-    writeXml(item: ModelNodeItem, document: Document): Element {
-        const element = document.createElementNS(
-            item.instance?.getXmlNamespace() ?? item.definition.getContainingMetaschema().xmlNamespace,
-            this.definition.getEffectiveName(),
-        );
-        this.writeXmlFlags(item, element, document);
-        this.writeXmlModel(item, element, document);
-        return element;
-    }
-
-    writeJson(item: ModelNodeItem): JSONObject {
-        const object: JSONObject = {};
-        this.writeJsonFlags(item, object);
-        this.writeJsonModel(item, object);
-        return object;
     }
 }

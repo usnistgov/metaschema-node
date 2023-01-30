@@ -30,6 +30,7 @@ import AbstractSerializer from './AbstractSerializer.js';
 export default abstract class AbstractAtomicItemSerializer<Value> extends AbstractSerializer<
     AbstractAtomicItem<Value>
 > {
+    // TODO: should this be read/write flag more accurately?
     abstract readString(raw: string): AbstractAtomicItem<Value>;
     abstract writeString(item: AbstractAtomicItem<Value>): string;
 
