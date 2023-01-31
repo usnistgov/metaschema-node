@@ -31,7 +31,7 @@ export function processElement<
     AttributeProcessors extends Record<string, AttributeProcessor<unknown>>,
     ChildProcessors extends Record<string, ChildListProcessor<unknown>>,
 >(
-    element: HTMLElement,
+    element: Element,
     attributeProcessors: AttributeProcessors,
     childProcessors: ChildProcessors,
     throwErrorOnUnexpected = false,
@@ -58,7 +58,7 @@ export function processElement<
  * @returns The record of processed attributes
  */
 export function processAttributes<AttributeProcessors extends Record<string, AttributeProcessor<unknown>>>(
-    element: HTMLElement,
+    element: Element,
     attributeProcessors: AttributeProcessors,
     throwErrorOnUnexpected = false,
 ) {
@@ -116,11 +116,11 @@ export function processAttributes<AttributeProcessors extends Record<string, Att
  * @returns The record of processed children + the extracted body
  */
 export function processChildren<ChildProcessors extends Record<string, ChildListProcessor<unknown>>>(
-    element: HTMLElement,
+    element: Element,
     childProcessors: ChildProcessors,
     throwErrorOnUnexpected = false,
 ) {
-    const childElements: Record<string, Array<HTMLElement>> = {};
+    const childElements: Record<string, Array<Element>> = {};
     const rawBody: string[] = [];
     const children: Record<string, unknown> = {};
 
@@ -130,7 +130,7 @@ export function processChildren<ChildProcessors extends Record<string, ChildList
         for (let i = 0; i < element.childNodes.length; i++) {
             const rawChild = element.childNodes[i];
             if (rawChild.nodeType === rawChild.ELEMENT_NODE) {
-                const child = rawChild as HTMLElement;
+                const child = rawChild as Element;
                 const nsKey = `{${child.namespaceURI ?? ''}}${child.localName}`;
                 if (!(nsKey in childElements)) {
                     childElements[nsKey] = [];

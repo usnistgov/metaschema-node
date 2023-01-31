@@ -66,7 +66,7 @@ export default class XmlModelContainerSupport {
         return new Map<string, INamedModelInstance>([...this.assemblyInstances, ...this.fieldInstances]);
     }
 
-    constructor(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    constructor(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
         this._fieldInstances = new Map();
         this._assemblyInstances = new Map();
         this._choiceInstances = [];
@@ -99,11 +99,11 @@ export default class XmlModelContainerSupport {
         };
     }
 
-    private parseChoice(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    private parseChoice(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
         processElement(xmlContent, {}, this.processChoiceChildren(containingAssembly));
     }
 
-    private parseModel(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    private parseModel(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
         processElement(
             xmlContent,
             {},

@@ -161,7 +161,7 @@ export default class XmlGlobalFieldDefinition extends AbstractFieldDefinition {
         return this.getFlagInstances().get(this.getJsonValueKeyName());
     }
 
-    constructor(fieldDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(fieldDefinitionXml: Element, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
         this.xml = fieldDefinitionXml;

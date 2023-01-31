@@ -175,7 +175,7 @@ class InternalAssemblyDefinition extends inlineNamedDefinitionMixin(AbstractAsse
         return this.getInlineInstance().getContainingMetaschema();
     }
 
-    constructor(assemblyDefinitionXml: HTMLElement, parent: XmlInlineAssemblyDefinition) {
+    constructor(assemblyDefinitionXml: Element, parent: XmlInlineAssemblyDefinition) {
         super();
         this.parent = parent;
         this.xml = assemblyDefinitionXml;
@@ -238,7 +238,7 @@ export default class XmlInlineAssemblyDefinition extends AbstractAssemblyInstanc
         return this.parsed.attributes['in-xml'];
     }
 
-    constructor(assemblyDefinitionXml: HTMLElement, parent: AbstractAssemblyDefinition) {
+    constructor(assemblyDefinitionXml: Element, parent: AbstractAssemblyDefinition) {
         super(parent);
         this.internalAssemblyDefinition = new InternalAssemblyDefinition(assemblyDefinitionXml, this);
         this.parsed = processElement(assemblyDefinitionXml, MODEL_INSTANCE.ATTRIBUTES, MODEL_INSTANCE.CHILDREN);

@@ -85,7 +85,7 @@ export default class XmlFieldInstance extends AbstractFieldInstance {
         throw new Error('Method not implemented');
     }
 
-    constructor(xml: HTMLElement, parent: AbstractAssemblyDefinition) {
+    constructor(xml: Element, parent: AbstractAssemblyDefinition) {
         super(parent);
         this.parsed = processElement(
             xml,

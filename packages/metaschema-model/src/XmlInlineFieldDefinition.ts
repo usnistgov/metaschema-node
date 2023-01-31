@@ -166,7 +166,7 @@ class InternalFieldDefinition extends inlineNamedDefinitionMixin(AbstractFieldDe
         return this.getFlagInstances().get(this.getJsonValueKeyName());
     }
 
-    constructor(fieldDefinitionXml: HTMLElement, parent: XmlInlineFieldDefinition) {
+    constructor(fieldDefinitionXml: Element, parent: XmlInlineFieldDefinition) {
         super();
         this.parent = parent;
         this.xml = fieldDefinitionXml;
@@ -252,7 +252,7 @@ export default class XmlInlineFieldDefinition extends AbstractFieldInstance {
         }
     }
 
-    constructor(fieldDefinitionXml: HTMLElement, parent: AbstractAssemblyDefinition) {
+    constructor(fieldDefinitionXml: Element, parent: AbstractAssemblyDefinition) {
         super(parent);
         this.xml = fieldDefinitionXml;
         this.internalFieldDefinition = new InternalFieldDefinition(fieldDefinitionXml, this);

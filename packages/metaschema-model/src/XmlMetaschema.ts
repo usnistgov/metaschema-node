@@ -42,7 +42,7 @@ import XmlGlobalFieldDefinition from './XmlGlobalFieldDefinition.js';
 import XmlGlobalAssemblyDefinition from './XmlGlobalAssemblyDefinition.js';
 
 export default class XmlMetaschema extends AbstractMetaschema {
-    protected xml: HTMLElement;
+    protected xml: Element;
     private readonly parsed;
 
     get name() {
@@ -82,7 +82,7 @@ export default class XmlMetaschema extends AbstractMetaschema {
 
     readonly location;
 
-    constructor(location: string, metaschemaXml: HTMLElement, importedMetaschemas: AbstractMetaschema[]) {
+    constructor(location: string, metaschemaXml: Element, importedMetaschemas: AbstractMetaschema[]) {
         super(importedMetaschemas);
         this.location = location;
 
@@ -204,7 +204,7 @@ export default class XmlMetaschema extends AbstractMetaschema {
      * @param metaschemaXml The parsed METASCHEMA XML tag parsed into JSON
      * @returns A list of relative or absolute import URIs that must be provided to a given metaschema
      */
-    private static parseImports(metaschemaXml: HTMLElement): string[] {
+    private static parseImports(metaschemaXml: Element): string[] {
         return processElement(
             metaschemaXml,
             {},

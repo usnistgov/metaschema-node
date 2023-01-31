@@ -29,7 +29,7 @@ import { Context, processElement } from '@oscal/data-utils';
 
 // This is a PLACEHOLDER for any real functionality
 
-export function processMarkupLine(child: HTMLElement, _context: Context) {
+export function processMarkupLine(child: Element, _context: Context) {
     // TODO this is very wrong
     return new MarkupLine(processElement(child, {}, {}).body);
 }

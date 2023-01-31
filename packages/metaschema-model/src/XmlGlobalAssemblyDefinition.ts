@@ -172,7 +172,7 @@ export default class XmlGlobalAssemblyDefinition extends AbstractAssemblyDefinit
         return this.metaschema;
     }
 
-    constructor(assemblyDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(assemblyDefinitionXml: Element, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
         this.xml = assemblyDefinitionXml;

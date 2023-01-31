@@ -80,7 +80,7 @@ export default class XmlAssemblyInstance extends AbstractAssemblyInstance {
         return this.parsed.attributes['in-xml'];
     }
 
-    constructor(xml: HTMLElement, parent: AbstractAssemblyDefinition) {
+    constructor(xml: Element, parent: AbstractAssemblyDefinition) {
         super(parent);
         this.parsed = processElement(
             xml,
