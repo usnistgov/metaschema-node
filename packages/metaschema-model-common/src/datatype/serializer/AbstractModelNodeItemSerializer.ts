@@ -24,14 +24,21 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
+import AbstractFieldDefinition from '../../definition/AbstractFieldDefinition.js';
 import INamedModelDefinition from '../../definition/INamedModelDefinition.js';
 import INamedModelInstance from '../../instance/INamedModelInstance.js';
 import { UnconstrainedModelNodeItem } from '../item/AbstractModelNodeItem.js';
 import { UnconstrainedFlagItem } from '../item/FlagItem.js';
 import AbstractNodeItemSerializer from './AbstractNodeItemSerializer.js';
 import FlagItemSerializer from './FlagItemSerializer.js';
-import { JSONObject } from './util.js';
+import { isJSONObject, JSONObject, JSONValue } from './util.js';
 
+/**
+ * This abstract class provides helpers for serializers designed for children
+ * of {@link AbstractModelNodeItem}.
+ *
+ * This class provides helpers for reading and writing flag values.
+ */
 export default abstract class AbstractModelNodeItemSerializer<
     ModelNodeItem extends UnconstrainedModelNodeItem,
     Definition extends INamedModelDefinition,
@@ -39,7 +46,29 @@ export default abstract class AbstractModelNodeItemSerializer<
 > extends AbstractNodeItemSerializer<ModelNodeItem, Definition, Instance> {
     // TODO: Cache child serializers? Maybe in a parent "document serializer"
 
-    protected readXmlFlags(element: Element): ModelNodeItem['value']['flags'] {
+    /**
+     * For JSON object, return the key to be used by a parent model serializer
+     * to set the key of the current model node item.
+     */
+    public getJsonKeyName(flags: ModelNodeItem['flags']): string | undefined {
+        const keyFlag = this.definition.getJsonKeyFlagInstance();
+        if (keyFlag) {
+            const flag = flags[keyFlag.getEffectiveName()];
+            if (flag) {
+                return flag.definition.getDatatypeAdapter().writeString(flag.value);
+            } else {
+                // TODO: come up with a better error here
+                throw new Error('JSON key name in definition, but not in flags');
+            }
+        }
+
+        return this.definition.getJsonName();
+    }
+
+    /**
+     * Given an {@link Element}, reads all flags in the definition
+     */
+    protected readXmlFlags(element: Element): ModelNodeItem['flags'] {
         const flagItems: Record<string, UnconstrainedFlagItem> = {};
         for (const flagInstance of this.definition.getFlagInstances().values()) {
             const flagItemSerializer = new FlagItemSerializer(flagInstance);
@@ -58,25 +87,72 @@ export default abstract class AbstractModelNodeItemSerializer<
         return flagItems;
     }
 
-    protected readJsonFlags(object: JSONObject): ModelNodeItem['value']['flags'] {
+    /**
+     * Given a {@link JSONValue}, reads all flags in the definition.
+     *
+     * Note: the parent key must be passed in in order to parse a flag marked as a json key.
+     */
+    protected readJsonFlags(raw: JSONValue, parentKey: string): ModelNodeItem['flags'] {
         const flagItems: Record<string, UnconstrainedFlagItem> = {};
         for (const flagInstance of this.definition.getFlagInstances().values()) {
-            const flagItemSerializer = new FlagItemSerializer(flagInstance);
-
-            const attr = object[flagInstance.getJsonName()];
-            if (attr === null) {
-                if (flagInstance.isRequired()) {
-                    throw new Error('Flag attribute marked as required');
-                } else {
-                    continue;
+            let rawFlagValue: JSONValue;
+            if (flagInstance === this.definition.getJsonKeyFlagInstance()) {
+                rawFlagValue = parentKey;
+            } else if (
+                this.definition instanceof AbstractFieldDefinition &&
+                flagInstance === this.definition.getJsonValueKeyFlagInstance()
+            ) {
+                if (!isJSONObject(raw)) {
+                    // Special case, fields can be "promoted" to their child value in json
+                    throw new Error(
+                        'JSON value key flag could not be determined, field is erroneously promoted or malformed',
+                    );
                 }
+
+                // TODO: align this to Dave's formal specification (TBA)
+
+                // find all relevant flag names
+                const flagKeys = [...this.definition.getFlagInstances().values()]
+                    // json key flag and json value key flag are not represented in the json document
+                    .filter((f) => {
+                        return f !== flagInstance && f !== this.definition.getJsonKeyFlagInstance();
+                    })
+                    .map((f) => f.getJsonName());
+                // find properties in the json object that aren't flags
+                const candidates = Object.getOwnPropertyNames(raw).filter((key) => !flagKeys.includes(key));
+                // TODO: determine behavior if >1 property exists
+                if (candidates.length !== 1) {
+                    throw new Error('Extraneous JSON keys makes JSON value key indeterminate');
+                }
+
+                rawFlagValue = raw[candidates[0]];
+            } else {
+                if (!isJSONObject(raw)) {
+                    throw new Error('Regular flags can only be extracted from JSON objects');
+                }
+
+                const attr = raw[flagInstance.getJsonName()];
+                if (attr === null) {
+                    if (flagInstance.isRequired()) {
+                        throw new Error('Flag attribute marked as required');
+                    } else {
+                        continue;
+                    }
+                }
+                rawFlagValue = attr;
             }
-            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readJson(attr);
+
+            const flagItemSerializer = new FlagItemSerializer(flagInstance);
+            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readJson(rawFlagValue);
         }
 
         return flagItems;
     }
 
+    /**
+     * Given a {@link ModelNodeItem}, append all flags as attributes of the
+     * passed in {@link Element}.
+     */
     protected writeXmlFlags(item: ModelNodeItem, element: Element, document: Document): void {
         for (const flagItem of Object.values(item.value.flags)) {
             const flagItemSerializer = new FlagItemSerializer(flagItem.instance ?? flagItem.definition);
@@ -84,27 +160,23 @@ export default abstract class AbstractModelNodeItemSerializer<
         }
     }
 
+    /**
+     * Given a {@link ModelNodeItem}, append all flags excluding json key and
+     * json value key flags to the passed in {@link JSONObject}.
+     */
     protected writeJsonFlags(item: ModelNodeItem, object: JSONObject): void {
         for (const flagItem of Object.values(item.value.flags)) {
-            if (this.definition.getJsonKeyFlagInstance() === flagItem.instance && flagItem.instance !== undefined) {
-                // TODO: do JSON Key values get excluded from written flags? Assuming yes
+            // json key flag and json value key flag are not expressed in JSON object
+            if (
+                (flagItem.instance && this.definition.getJsonKeyFlagInstance() === flagItem.instance) ||
+                (this.definition instanceof AbstractFieldDefinition &&
+                    flagItem.instance &&
+                    this.definition.getJsonValueKeyFlagInstance() === flagItem.instance)
+            ) {
                 continue;
             }
             const flagItemSerializer = new FlagItemSerializer(flagItem.instance ?? flagItem.definition);
             object[(flagItem.instance ?? flagItem.definition).getJsonName()] = flagItemSerializer.writeJson(flagItem);
         }
-    }
-
-    protected getJsonValueKeyName(flags: ModelNodeItem['value']['flags']): string {
-        const jsonKeyFlagName = (this.instance ?? this.definition).getJsonKeyFlagInstance()?.getEffectiveName();
-        if (jsonKeyFlagName) {
-            // TODO: Cache serializers?
-            const flag = flags[jsonKeyFlagName];
-            if (flag) {
-                return flag.definition.getDatatypeAdapter().writeString(flag);
-            }
-        }
-
-        return this.definition.getJsonName();
     }
 }

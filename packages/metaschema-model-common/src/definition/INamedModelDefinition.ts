@@ -65,6 +65,8 @@ export default interface INamedModelDefinition extends INamedDefinition {
      */
     hasJsonKey(): boolean;
 
+    hasJsonKeyFlagInstance(): boolean;
+
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
     /**
@@ -127,6 +129,9 @@ export function namedModelDefinitionMixin<TBase extends AbstractConstructor<Abst
 
         abstract hasJsonKey(): boolean;
         abstract getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
+        hasJsonKeyFlagInstance() {
+            return this.getJsonKeyFlagInstance() !== undefined;
+        }
 
         abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];

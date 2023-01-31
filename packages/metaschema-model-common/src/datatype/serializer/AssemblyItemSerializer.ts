@@ -43,36 +43,47 @@ export default class AssemblyItemSerializer<
 > {
     // TODO: Cache child serializers? Maybe in a parent "document serializer"
 
+    // TODO: Handle collapsing
+
     readXml(raw: Node): AssemblyItem<Value, Flags> {
         throw new Error('Method not implemented.');
     }
 
-    readJson(raw: JSONValue): AssemblyItem<Value, Flags> {
+    readJson(raw: JSONValue, parentKey?: string): AssemblyItem<Value, Flags> {
+        // TODO: this design is misleading, should we move to tracked JSON?
+        if (!parentKey) {
+            throw new Error('Parent key must be specified');
+        }
+
         if (!isJSONObject(raw)) {
             throw new Error('Could not parse assembly, expected JSON object, got JSON primitive or list');
         }
 
-        const flags = this.readJsonFlags(raw);
+        const flags = this.readJsonFlags(raw, parentKey);
         const model: Record<string, UnconstrainedAssemblyItem | UnconstrainedFieldItem> = {};
 
+        // TODO: handle json-key and json-key flag
+
         for (const assemblyInstance of this.definition.getAssemblyInstances().values()) {
+            const key = assemblyInstance.getJsonName();
             const assemblyItemSerializer = new AssemblyItemSerializer(assemblyInstance);
-            const assembly = raw[assemblyInstance.getJsonName()];
+            const assembly = raw[key];
             if (assembly === null) {
                 // TODO: can an assembly be required?
                 continue;
             }
-            model[assemblyInstance.getEffectiveName()] = assemblyItemSerializer.readJson(assembly);
+            model[assemblyInstance.getEffectiveName()] = assemblyItemSerializer.readJson(assembly, key);
         }
 
         for (const fieldInstance of this.definition.getFieldInstances().values()) {
+            const key = fieldInstance.getJsonName();
             const fieldItemSerializer = new FieldItemSerializer(fieldInstance);
-            const field = raw[fieldInstance.getJsonName()];
+            const field = raw[key];
             if (field === null) {
                 // TODO: can a field be required?
                 continue;
             }
-            model[fieldInstance.getEffectiveName()] = fieldItemSerializer.readJson(field);
+            model[fieldInstance.getEffectiveName()] = fieldItemSerializer.readJson(field, key);
         }
 
         // TODO: figure out what to do with choices?

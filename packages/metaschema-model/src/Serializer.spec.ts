@@ -24,12 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import {
-    AbstractAtomicItem,
-    DocumentItemSerializer,
-    FieldItem,
-    FlagItem,
-} from '@oscal/metaschema-model-common/datatype';
+import { DocumentItemSerializer, FieldItem, FlagItem } from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Serializer', () => {
@@ -60,12 +55,10 @@ describe('Serializer', () => {
                     <define-field name="processor" as-type="string" max-occurs="1">
                         <formal-name>Processor</formal-name>
                         <description>The name given to the processor of this computer</description>
-                        <model>
-                            <define-flag name="manufacturer" as-type="string" required="yes">
-                                <formal-name>Manufacturer</forma-name>
-                                <description>The manufacturer of the processor</description>
-                            </define-flag>
-                        </model>
+                        <define-flag name="manufacturer" as-type="string" required="yes">
+                            <formal-name>Manufacturer</forma-name>
+                            <description>The manufacturer of the processor</description>
+                        </define-flag>
                     </define-field>
                 </model>
               </define-assembly>
@@ -78,13 +71,13 @@ describe('Serializer', () => {
                 processor: FieldItem<
                     string,
                     {
-                        manufacturer: FlagItem<AbstractAtomicItem<string>>;
+                        manufacturer: FlagItem<string>;
                     }
                 >;
             },
-            // TODO: redundant FlagItem wrapper, this is wrong!
-            { id: FlagItem<AbstractAtomicItem<string>> }
+            { id: FlagItem<string> }
         >(metaschema, 'file://not-real.xml');
+
         const serialized = documentItemSerializer.readJson({
             computer: {
                 id: 'computer1',

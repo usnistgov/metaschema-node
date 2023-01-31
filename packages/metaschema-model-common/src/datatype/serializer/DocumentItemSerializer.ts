@@ -65,7 +65,7 @@ export default class DocumentItemSerializer<
 
         const rootAssemblyItemSerializer = new AssemblyItemSerializer(rootAssemblyDef);
 
-        const rootAssemblyItem = rootAssemblyItemSerializer.readJson(raw[rootAssemblyName]);
+        const rootAssemblyItem = rootAssemblyItemSerializer.readJson(raw[rootAssemblyName], rootAssemblyName);
 
         return new DocumentItem(rootAssemblyItem, this.documentUri) as DocumentItem<AssemblyItem<Value, Flags>>;
     }

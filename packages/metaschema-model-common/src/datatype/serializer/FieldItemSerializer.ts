@@ -35,6 +35,52 @@ export default class FieldItemSerializer<
     Value,
     Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItemSerializer<FieldItem<Value, Flags>, AbstractFieldDefinition, AbstractFieldInstance> {
+    /**
+     * Memoized result of doPromoteValue
+     */
+    private _doPromoteJsonValue: boolean | undefined;
+
+    /**
+     * Determines if any extraneous flags exist.
+     *
+     * If true, the field's JSON value rests in a JSON value key
+     */
+    protected get doPromoteJsonValue(): boolean {
+        if (this._doPromoteJsonValue === undefined) {
+            const expectedFlags =
+                0 +
+                (this.definition.hasJsonKeyFlagInstance() ? 1 : 0) +
+                (this.definition.hasJsonValueKeyFlagInstance() ? 1 : 0);
+            const doPromoteJsonValue = this.definition.getFlagInstances().size <= expectedFlags;
+            this._doPromoteJsonValue = doPromoteJsonValue;
+        }
+
+        return this._doPromoteJsonValue;
+    }
+
+    /**
+     * For JSON objects, return the value key to be used by the model
+     * serializer or undefined if the object has been promoted.
+     */
+    protected getJsonValueKeyName(flags: Flags): string | undefined {
+        if (this.doPromoteJsonValue) {
+            return undefined;
+        }
+
+        const valueKey = this.definition.getJsonValueKey();
+        if (typeof valueKey === 'string') {
+            return valueKey;
+        }
+
+        const flag = flags[valueKey.getEffectiveName()];
+        if (flag) {
+            return flag.definition.getDatatypeAdapter().writeString(flag.value);
+        } else {
+            // TODO: come up with a better error here
+            throw new Error('JSON value key name in definition, but not in flags');
+        }
+    }
+
     readXml(raw: Node): FieldItem<Value, Flags> {
         if (!(raw instanceof Element)) {
             throw new Error('Node must be of type element');
@@ -49,23 +95,35 @@ export default class FieldItemSerializer<
         ) as FieldItem<Value, Flags>;
     }
 
-    readJson(raw: JSONValue): FieldItem<Value, Flags> {
-        if (this.definition.getFlagInstances().size !== 0) {
+    readJson(raw: JSONValue, parentKey?: string): FieldItem<Value, Flags> {
+        // TODO: this design is misleading, should we move to tracked JSON?
+        if (!parentKey) {
+            throw new Error('Parent key must be specified');
+        }
+
+        const flags = this.readJsonFlags(raw, parentKey);
+        let model: FieldItem<Value, Flags>['model'];
+
+        const valueKey = this.getJsonValueKeyName(flags);
+        if (valueKey) {
             if (!isJSONObject(raw)) {
                 throw new Error('Could not parse field flags, expected JSON object, got JSON primitive or list');
             }
-            const flags = this.readJsonFlags(raw);
-            const model = this.definition.getDatatypeAdapter().readJson(raw[this.getJsonValueKeyName(flags)]);
-            return new FieldItem({ model, flags }, this.instance ?? this.definition) as FieldItem<Value, Flags>;
+            model = this.definition.getDatatypeAdapter().readJson(raw[valueKey]) as FieldItem<Value, Flags>['model'];
         } else {
-            return new FieldItem(
-                {
-                    model: this.definition.getDatatypeAdapter().readString(raw?.toString() ?? ''),
-                    flags: {},
-                },
-                this.instance ?? this.definition,
-            ) as FieldItem<Value, Flags>;
+            model = this.definition.getDatatypeAdapter().readString(raw?.toString() ?? '') as FieldItem<
+                Value,
+                Flags
+            >['model'];
         }
+
+        return new FieldItem(
+            {
+                model,
+                flags,
+            },
+            this.instance ?? this.definition,
+        ) as FieldItem<Value, Flags>;
     }
 
     writeXml(item: FieldItem<Value, Flags>, document: Document): Node {
@@ -80,12 +138,11 @@ export default class FieldItemSerializer<
     }
 
     writeJson(item: FieldItem<Value, Flags>): JSONValue {
-        if (this.definition.getFlagInstances().size !== 0) {
+        const valueKey = this.getJsonValueKeyName(item.value.flags);
+        if (valueKey) {
             const object: JSONObject = {};
             this.writeJsonFlags(item, object);
-            object[this.getJsonValueKeyName(item.value.flags)] = this.definition
-                .getDatatypeAdapter()
-                .writeJson(item.model);
+            object[valueKey] = this.definition.getDatatypeAdapter().writeJson(item.model);
             return object;
         } else {
             return this.definition.getDatatypeAdapter().writeString(item.model);

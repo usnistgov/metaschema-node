@@ -27,7 +27,7 @@
 import { AssemblyItem, DocumentItem, FieldItem, FlagItem, StringItem } from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
-describe('Metapath Item', () => {
+describe('Item', () => {
     // initialize metaschema def
     it('should be able to represent a basic metaschema', async () => {
         const metaschema = await XmlMetaschema.load(

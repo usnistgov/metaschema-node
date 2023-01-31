@@ -36,4 +36,4 @@ export default class FieldItem<
     Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItem<AbstractAtomicItem<Value>, Flags, AbstractFieldDefinition, AbstractFieldInstance> {}
 
-export type UnconstrainedFieldItem = FieldItem<unknown, UnconstrainedFlagsContainer>;
+export type UnconstrainedFieldItem = FieldItem<UnconstrainedFieldContainer, UnconstrainedFlagsContainer>;
