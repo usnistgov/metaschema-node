@@ -46,6 +46,8 @@ export default class AssemblyItemSerializer<
 > {
     // TODO: Cache child serializers? Maybe in a parent "document serializer"
 
+    // TODO: align JSON value flag handling with formal specification
+
     // TODO: Handle collapsing
 
     readXml(raw: Node): AssemblyItem<Value, Flags> {
@@ -56,6 +58,7 @@ export default class AssemblyItemSerializer<
         raw: JSONObject,
         pointer: string,
         instance: INamedModelInstance,
+        candidateKeys: string[],
     ): UnconstrainedAssemblyItem | UnconstrainedFieldItem | undefined {
         let serializer;
         if (instance instanceof AbstractAssemblyInstance) {
@@ -66,30 +69,47 @@ export default class AssemblyItemSerializer<
             throw new Error('Child model must be instance of assembly or field');
         }
 
-        const key = instance.getJsonName();
-
-        const rawChildPointer = pointer + '/' + key;
-        const rawChild = raw[key];
-        if (rawChild === undefined) {
-            if (instance.getMinOccurs() !== 0) {
-                // TODO: is the correct way to do this
-                throw new Error('Required item not found');
+        const keyFlagInstance = instance.getJsonKeyFlagInstance();
+        if (keyFlagInstance) {
+            for (const [i, candidateKey] of candidateKeys.entries()) {
+                let item = undefined;
+                try {
+                    item = serializer.readJson(raw[candidateKey], pointer + '/' + candidateKey);
+                } catch {
+                    // Candidate was not a match
+                    // TODO: only disregard parsing related errors
+                }
+                candidateKeys.splice(i, 1);
+                return item;
             }
-            return undefined;
-        }
+        } else {
+            const key = instance.getJsonName();
+            if (!(key in raw)) {
+                if (instance.getMinOccurs() !== 0) {
+                    // TODO: is the correct way to do this
+                    throw new Error('Required item not found');
+                }
+                return undefined;
+            }
 
-        return serializer.readJson(rawChild, rawChildPointer);
+            const rawChildPointer = pointer + '/' + key;
+            const rawChild = raw[key];
+
+            return serializer.readJson(rawChild, rawChildPointer);
+        }
     }
 
     protected readJsonChoice(
         raw: JSONObject,
         pointer: string,
         choiceInstance: AbstractChoiceInstance,
+        candidateKeys: string[],
     ): { item: UnconstrainedAssemblyItem | UnconstrainedFieldItem; effectiveName: string } | undefined {
         // TODO: definitively, we do not handle choices of choices?
         for (const candidateInstance of choiceInstance.getNamedModelInstances().values()) {
             try {
-                const item = this.readJsonChildModel(raw, pointer, candidateInstance);
+                // TODO: do we make a copy of candidateKeys and roll back?
+                const item = this.readJsonChildModel(raw, pointer, candidateInstance, candidateKeys);
                 if (item) {
                     return {
                         item,
@@ -98,11 +118,29 @@ export default class AssemblyItemSerializer<
                 }
             } catch {
                 // Not actually existing is a feature of choices
+                // TODO: only disregard parsing related errors
             }
         }
 
         // No choices were valid
         return undefined;
+    }
+
+    /**
+     * Builds the list of properties from the given JSON object that could
+     * belong to a field or assembly with a JSON value flag.
+     */
+    protected buildJsonCandidateKeys(raw: JSONObject): string[] {
+        // get all child assemblies, fields, and choice assemblies and fields
+        const knownKeys = [
+            ...this.definition.getNamedModelInstances().values(),
+            ...this.definition.getChoiceInstances().flatMap((choice) => [...choice.getNamedModelInstances().values()]),
+        ]
+            // filter out models that have a json key flag (their key is unknown)
+            .filter((namedModel) => !namedModel.hasJsonKeyFlagInstance())
+            .map((namedModel) => namedModel.getJsonName());
+        // return only properties of the object that are not accounted for
+        return Object.getOwnPropertyNames(raw).filter((property) => !knownKeys.includes(property));
     }
 
     readJson(raw: JSONValue, pointer: string): AssemblyItem<Value, Flags> {
@@ -113,17 +151,18 @@ export default class AssemblyItemSerializer<
         const flags = this.readJsonFlags(raw, pointer);
         const model: Record<string, UnconstrainedAssemblyItem | UnconstrainedFieldItem> = {};
 
-        // TODO: handle json-key flag
+        // used to match json-value flags
+        const candidateKeys = this.buildJsonCandidateKeys(raw);
 
         for (const childInstance of this.definition.getNamedModelInstances().values()) {
-            const childItem = this.readJsonChildModel(raw, pointer, childInstance);
+            const childItem = this.readJsonChildModel(raw, pointer, childInstance, candidateKeys);
             if (childItem) {
                 model[childInstance.getEffectiveName()] = childItem;
             }
         }
 
         for (const choiceInstance of this.definition.getChoiceInstances().values()) {
-            const child = this.readJsonChoice(raw, pointer, choiceInstance);
+            const child = this.readJsonChoice(raw, pointer, choiceInstance, candidateKeys);
             if (child) {
                 model[child.effectiveName] = child.item;
             }
