@@ -46,6 +46,17 @@ export default abstract class AbstractModelNodeItemSerializer<
 > extends AbstractNodeItemSerializer<ModelNodeItem, Definition, Instance> {
     // TODO: Cache child serializers? Maybe in a parent "document serializer"
 
+    protected parentKeyFromPointer(pointer: string): string | undefined {
+        if (!pointer.startsWith('/') && pointer !== '') {
+            throw new Error(`Invalid path '${pointer}', must start with a '/'`);
+        }
+
+        return pointer
+            .split('/')
+            .reverse()
+            .find((key) => key !== '' && Number.isNaN(key));
+    }
+
     /**
      * For JSON object, return the key to be used by a parent model serializer
      * to set the key of the current model node item.
@@ -92,12 +103,18 @@ export default abstract class AbstractModelNodeItemSerializer<
      *
      * Note: the parent key must be passed in in order to parse a flag marked as a json key.
      */
-    protected readJsonFlags(raw: JSONValue, parentKey: string): ModelNodeItem['flags'] {
+    protected readJsonFlags(raw: JSONValue, pointer: string): ModelNodeItem['flags'] {
         const flagItems: Record<string, UnconstrainedFlagItem> = {};
         for (const flagInstance of this.definition.getFlagInstances().values()) {
             let rawFlagValue: JSONValue;
+            let rawFlagPointer: string;
             if (flagInstance === this.definition.getJsonKeyFlagInstance()) {
+                const parentKey = this.parentKeyFromPointer(pointer);
+                if (parentKey === undefined) {
+                    throw new Error('json key flag cannot be used at root of document');
+                }
                 rawFlagValue = parentKey;
+                rawFlagPointer = pointer;
             } else if (
                 this.definition instanceof AbstractFieldDefinition &&
                 flagInstance === this.definition.getJsonValueKeyFlagInstance()
@@ -126,11 +143,13 @@ export default abstract class AbstractModelNodeItemSerializer<
                 }
 
                 rawFlagValue = raw[candidates[0]];
+                rawFlagPointer = pointer + '/' + candidates[0];
             } else {
                 if (!isJSONObject(raw)) {
                     throw new Error('Regular flags can only be extracted from JSON objects');
                 }
 
+                rawFlagPointer = pointer + '/' + flagInstance.getJsonName();
                 const attr = raw[flagInstance.getJsonName()];
                 if (attr === null) {
                     if (flagInstance.isRequired()) {
@@ -143,7 +162,7 @@ export default abstract class AbstractModelNodeItemSerializer<
             }
 
             const flagItemSerializer = new FlagItemSerializer(flagInstance);
-            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readJson(rawFlagValue);
+            flagItems[flagInstance.getEffectiveName()] = flagItemSerializer.readJson(rawFlagValue, rawFlagPointer);
         }
 
         return flagItems;

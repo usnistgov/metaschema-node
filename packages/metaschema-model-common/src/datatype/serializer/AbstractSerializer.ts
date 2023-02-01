@@ -29,7 +29,12 @@ import { JSONValue } from './util.js';
 
 export default abstract class AbstractSerializer<Item extends AbstractItem<unknown>> {
     abstract readXml(raw: Node): Item;
-    abstract readJson(raw: JSONValue): Item;
+
+    /**
+     * @param pointer Used to track parent properties and provide additional context when an error occurs.
+     */
+    abstract readJson(raw: JSONValue, pointer: string): Item;
+
     abstract writeXml(item: Item, document: Document): Node;
     abstract writeJson(item: Item): JSONValue;
 }

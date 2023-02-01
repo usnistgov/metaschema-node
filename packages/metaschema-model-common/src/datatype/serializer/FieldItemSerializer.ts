@@ -95,13 +95,8 @@ export default class FieldItemSerializer<
         ) as FieldItem<Value, Flags>;
     }
 
-    readJson(raw: JSONValue, parentKey?: string): FieldItem<Value, Flags> {
-        // TODO: this design is misleading, should we move to tracked JSON?
-        if (!parentKey) {
-            throw new Error('Parent key must be specified');
-        }
-
-        const flags = this.readJsonFlags(raw, parentKey);
+    readJson(raw: JSONValue, pointer: string): FieldItem<Value, Flags> {
+        const flags = this.readJsonFlags(raw, pointer);
         let model: FieldItem<Value, Flags>['model'];
 
         const valueKey = this.getJsonValueKeyName(flags);
@@ -109,7 +104,10 @@ export default class FieldItemSerializer<
             if (!isJSONObject(raw)) {
                 throw new Error('Could not parse field flags, expected JSON object, got JSON primitive or list');
             }
-            model = this.definition.getDatatypeAdapter().readJson(raw[valueKey]) as FieldItem<Value, Flags>['model'];
+            model = this.definition.getDatatypeAdapter().readJson(raw[valueKey], pointer + '/' + valueKey) as FieldItem<
+                Value,
+                Flags
+            >['model'];
         } else {
             model = this.definition.getDatatypeAdapter().readString(raw?.toString() ?? '') as FieldItem<
                 Value,

@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { DocumentItemSerializer, FieldItem, FlagItem } from '@oscal/metaschema-model-common/datatype';
+import { AssemblyItem, DocumentItemSerializer, FieldItem, FlagItem } from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Serializer', () => {
@@ -66,17 +66,19 @@ describe('Serializer', () => {
         );
 
         const documentItemSerializer = new DocumentItemSerializer<
-            {
-                vendor: FieldItem<string, Record<string, never>>;
-                processor: FieldItem<
-                    string,
-                    {
-                        manufacturer: FlagItem<string>;
-                    }
-                >;
-            },
-            { id: FlagItem<string> }
-        >(metaschema, 'file://not-real.xml');
+            AssemblyItem<
+                {
+                    vendor: FieldItem<string, Record<string, never>>;
+                    processor: FieldItem<
+                        string,
+                        {
+                            manufacturer: FlagItem<string>;
+                        }
+                    >;
+                },
+                { id: FlagItem<string> }
+            >
+        >(metaschema);
 
         const serialized = documentItemSerializer.readJson({
             computer: {

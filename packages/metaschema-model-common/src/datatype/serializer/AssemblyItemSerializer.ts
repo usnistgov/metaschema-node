@@ -49,17 +49,12 @@ export default class AssemblyItemSerializer<
         throw new Error('Method not implemented.');
     }
 
-    readJson(raw: JSONValue, parentKey?: string): AssemblyItem<Value, Flags> {
-        // TODO: this design is misleading, should we move to tracked JSON?
-        if (!parentKey) {
-            throw new Error('Parent key must be specified');
-        }
-
+    readJson(raw: JSONValue, pointer: string): AssemblyItem<Value, Flags> {
         if (!isJSONObject(raw)) {
             throw new Error('Could not parse assembly, expected JSON object, got JSON primitive or list');
         }
 
-        const flags = this.readJsonFlags(raw, parentKey);
+        const flags = this.readJsonFlags(raw, pointer);
         const model: Record<string, UnconstrainedAssemblyItem | UnconstrainedFieldItem> = {};
 
         // TODO: handle json-key and json-key flag
@@ -72,7 +67,7 @@ export default class AssemblyItemSerializer<
                 // TODO: can an assembly be required?
                 continue;
             }
-            model[assemblyInstance.getEffectiveName()] = assemblyItemSerializer.readJson(assembly, key);
+            model[assemblyInstance.getEffectiveName()] = assemblyItemSerializer.readJson(assembly, pointer + '/' + key);
         }
 
         for (const fieldInstance of this.definition.getFieldInstances().values()) {
@@ -83,7 +78,7 @@ export default class AssemblyItemSerializer<
                 // TODO: can a field be required?
                 continue;
             }
-            model[fieldInstance.getEffectiveName()] = fieldItemSerializer.readJson(field, key);
+            model[fieldInstance.getEffectiveName()] = fieldItemSerializer.readJson(field, pointer + '/' + key);
         }
 
         // TODO: figure out what to do with choices?
@@ -93,11 +88,11 @@ export default class AssemblyItemSerializer<
         return new AssemblyItem(
             {
                 // TODO: the type definitions are definitely not correct
-                model: model as UnconstrainedAssemblyContainer,
+                model: model as AssemblyItem<Value, Flags>['model'],
                 flags,
             },
             this.instance ?? this.definition,
-        ) as AssemblyItem<Value, Flags>;
+        );
     }
 
     writeXml(item: AssemblyItem<Value, Flags>, document: Document): Node {

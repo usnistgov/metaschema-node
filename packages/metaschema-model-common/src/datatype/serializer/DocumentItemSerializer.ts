@@ -25,29 +25,27 @@
  */
 
 import AbstractMetaschema from '../../AbstractMetaschema.js';
-import { AssemblyItem, DocumentItem } from '../index.js';
-import { UnconstrainedFlagsContainer } from '../item/AbstractModelNodeItem.js';
-import { UnconstrainedAssemblyContainer } from '../item/AssemblyItem.js';
+import { DocumentItem } from '../index.js';
+import { UnconstrainedAssemblyItem } from '../item/AssemblyItem.js';
 import AbstractSerializer from './AbstractSerializer.js';
 import AssemblyItemSerializer from './AssemblyItemSerializer.js';
 import { isJSONObject, JSONValue } from './util.js';
 
-export default class DocumentItemSerializer<
-    Value extends UnconstrainedAssemblyContainer,
-    Flags extends UnconstrainedFlagsContainer,
-> extends AbstractSerializer<DocumentItem<AssemblyItem<Value, Flags>>> {
-    // TODO: how to accurately enforce type signatures here?
+export default class DocumentItemSerializer<Assembly extends UnconstrainedAssemblyItem> extends AbstractSerializer<
+    DocumentItem<Assembly>
+> {
     // TODO: caching (do we implement caching top down here?)
 
     protected readonly metaschema;
-    // TODO: remove this
-    protected readonly documentUri;
 
-    readXml(raw: Node): DocumentItem<AssemblyItem<Value, Flags>> {
+    readXml(raw: Node): DocumentItem<Assembly> {
         throw new Error('Method not implemented.');
     }
 
-    readJson(raw: JSONValue): DocumentItem<AssemblyItem<Value, Flags>> {
+    /**
+     * @param pointer is ignored.
+     */
+    readJson(raw: JSONValue): DocumentItem<Assembly> {
         if (!isJSONObject(raw)) {
             throw new Error('Could not parse document, expected JSON Object, got JSON value');
         }
@@ -65,22 +63,21 @@ export default class DocumentItemSerializer<
 
         const rootAssemblyItemSerializer = new AssemblyItemSerializer(rootAssemblyDef);
 
-        const rootAssemblyItem = rootAssemblyItemSerializer.readJson(raw[rootAssemblyName], rootAssemblyName);
+        const rootAssemblyItem = rootAssemblyItemSerializer.readJson(raw[rootAssemblyName], '/' + rootAssemblyName);
 
-        return new DocumentItem(rootAssemblyItem, this.documentUri) as DocumentItem<AssemblyItem<Value, Flags>>;
+        return new DocumentItem(rootAssemblyItem, this.metaschema.location) as DocumentItem<Assembly>;
     }
 
-    writeXml(item: DocumentItem<AssemblyItem<Value, Flags>>, document: Document): Node {
+    writeXml(item: DocumentItem<Assembly>, document: Document): Node {
         throw new Error('Method not implemented.');
     }
 
-    writeJson(item: DocumentItem<AssemblyItem<Value, Flags>>): JSONValue {
+    writeJson(item: DocumentItem<Assembly>): JSONValue {
         throw new Error('Method not implemented.');
     }
 
-    constructor(metaschema: AbstractMetaschema, documentUri: string) {
+    constructor(metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
-        this.documentUri = documentUri;
     }
 }

@@ -45,8 +45,8 @@ export default class FlagItemSerializer<Value> extends AbstractNodeItemSerialize
         return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
     }
 
-    readJson(attr: JSONValue): FlagItem<Value> {
-        const itemValue = this.definition.getDatatypeAdapter().readJson(attr);
+    readJson(attr: JSONValue, pointer: string): FlagItem<Value> {
+        const itemValue = this.definition.getDatatypeAdapter().readJson(attr, pointer);
         return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
     }
 
