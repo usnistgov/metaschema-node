@@ -29,7 +29,7 @@ import { DocumentItem } from '../index.js';
 import { UnconstrainedAssemblyItem } from '../item/AssemblyItem.js';
 import AbstractSerializer from './AbstractSerializer.js';
 import AssemblyItemSerializer from './AssemblyItemSerializer.js';
-import { isJSONObject, JSONValue } from './util.js';
+import { isJSONObject, JSONObject, JSONValue } from './util.js';
 
 export default class DocumentItemSerializer<Assembly extends UnconstrainedAssemblyItem> extends AbstractSerializer<
     DocumentItem<Assembly>
@@ -39,13 +39,29 @@ export default class DocumentItemSerializer<Assembly extends UnconstrainedAssemb
     protected readonly metaschema;
 
     readXml(raw: Node): DocumentItem<Assembly> {
-        throw new Error('Method not implemented.');
+        if (!(raw instanceof Document)) {
+            throw new Error('Node must be of type document');
+        }
+
+        const documentElement = raw.documentElement;
+        if (documentElement.namespaceURI !== this.metaschema.xmlNamespace) {
+            throw new Error('Document element is not in correct namespace');
+        }
+
+        const rootAssemblyDefinition = this.metaschema.rootAssemblyDefinitions.get(documentElement.tagName);
+        if (rootAssemblyDefinition === undefined) {
+            throw new Error('Root assembly definition not found');
+        }
+
+        const rootAssemblyItemSerializer = new AssemblyItemSerializer(rootAssemblyDefinition);
+        const rootAssemblyItem = rootAssemblyItemSerializer.readXml(documentElement);
+        return new DocumentItem(rootAssemblyItem, this.metaschema.location) as DocumentItem<Assembly>;
     }
 
     /**
      * @param pointer is ignored.
      */
-    readJson(raw: JSONValue): DocumentItem<Assembly> {
+    readJson(raw: JSONValue, pointer?: string): DocumentItem<Assembly> {
         if (!isJSONObject(raw)) {
             throw new Error('Could not parse document, expected JSON Object, got JSON value');
         }
@@ -54,26 +70,48 @@ export default class DocumentItemSerializer<Assembly extends UnconstrainedAssemb
             throw new Error('Document object must have exactly one child');
         }
 
-        const rootAssemblyName = Object.keys(raw)[0];
+        if (pointer && pointer !== '/') {
+            console.warn('Pointer value is ignored on document item serializers');
+        }
 
-        const rootAssemblyDef = this.metaschema.rootAssemblyDefinitions.get(rootAssemblyName);
-        if (rootAssemblyDef === undefined) {
+        const rootAssemblyName = Object.keys(raw)[0];
+        const rootAssemblyDefinition = [...this.metaschema.rootAssemblyDefinitions.values()].find(
+            (definition) => definition.getRootJsonName() === rootAssemblyName,
+        );
+
+        if (rootAssemblyDefinition === undefined) {
             throw new Error('Root assembly definition not found');
         }
 
-        const rootAssemblyItemSerializer = new AssemblyItemSerializer(rootAssemblyDef);
-
+        const rootAssemblyItemSerializer = new AssemblyItemSerializer(rootAssemblyDefinition);
         const rootAssemblyItem = rootAssemblyItemSerializer.readJson(raw[rootAssemblyName], '/' + rootAssemblyName);
-
         return new DocumentItem(rootAssemblyItem, this.metaschema.location) as DocumentItem<Assembly>;
     }
 
-    writeXml(item: DocumentItem<Assembly>, document: Document): Node {
-        throw new Error('Method not implemented.');
+    /**
+     * Writes an XML document or replaces the document element of an existing document.
+     *
+     * Passing in an existing document allows you to override the DOM implementation.
+     *
+     * @param document If not specified, a new document is created
+     */
+    writeXml(item: DocumentItem<Assembly>, document?: Document): Document {
+        const rootAssemblyItemSerializer = new AssemblyItemSerializer(item.root.instance ?? item.root.definition);
+
+        if (document === undefined) {
+            document = new DOMImplementation().createDocument(this.metaschema.xmlNamespace, 'temp');
+        }
+
+        document.replaceChild(document.documentElement, rootAssemblyItemSerializer.writeXml(item.root, document));
+        return document;
     }
 
-    writeJson(item: DocumentItem<Assembly>): JSONValue {
-        throw new Error('Method not implemented.');
+    writeJson(item: DocumentItem<Assembly>): JSONObject {
+        const rootAssemblyItemSerializer = new AssemblyItemSerializer(item.root.instance ?? item.root.definition);
+        const rootAssemblyItem = rootAssemblyItemSerializer.writeJson(item.root);
+        const raw: JSONObject = {};
+        raw[(item.root.instance ?? item.root.definition).getJsonName()] = rootAssemblyItem;
+        return raw;
     }
 
     constructor(metaschema: AbstractMetaschema) {

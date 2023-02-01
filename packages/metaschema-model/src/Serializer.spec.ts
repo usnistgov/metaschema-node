@@ -34,33 +34,44 @@ describe('Serializer', () => {
             // fake the resolver to always return our target xml
             async (_) => `<?xml version="1.0" encoding="UTF-8"?>
             <METASCHEMA xmlns="http://csrc.nist.gov/ns/oscal/metaschema/1.0">
-              <schema-name>Computer Model</schema-name>
-              <schema-version>0.0.2</schema-version>
-              <short-name>computer</short-name>
-              <namespace>http://example.com/ns/computer</namespace>
-              <json-base-uri>http://example.com/ns/computer</json-base-uri>
-              <define-assembly name="computer">
-                <formal-name>Computer Assembly</formal-name>
-                <description>A container object for a computer, its parts, and its sub-parts.</description>
-                <root-name>computer</root-name>
-                <define-flag name="id" as-type="string" required="yes">
-                    <formal-name>Computer Identifier</formal-name>
-                    <description>An identifier for classifying a unique make and model of computer.</description>
-                </define-flag>
-                <model>
-                    <define-field name="vendor" as-type="string" required="yes" max-occurs="1">
-                        <formal-name>Vendor</formal-name>
-                        <description>The organization responsible for distributing this computer</description>
-                    </define-field>
-                    <define-field name="processor" as-type="string" max-occurs="1">
-                        <formal-name>Processor</formal-name>
-                        <description>The name given to the processor of this computer</description>
-                        <define-flag name="manufacturer" as-type="string" required="yes">
-                            <formal-name>Manufacturer</forma-name>
-                            <description>The manufacturer of the processor</description>
-                        </define-flag>
-                    </define-field>
-                </model>
+                <schema-name>Computer Model</schema-name>
+                <schema-version>0.0.2</schema-version>
+                <short-name>computer</short-name>
+                <namespace>http://example.com/ns/computer</namespace>
+                <json-base-uri>http://example.com/ns/computer</json-base-uri>
+
+                <define-assembly name="computer">
+                    <formal-name>Computer Assembly</formal-name>
+                    <description>A container object for a computer, its parts, and its sub-parts.</description>
+                    <root-name>computer</root-name>
+                    <define-flag name="id" as-type="string" required="yes">
+                        <formal-name>Computer Identifier</formal-name>
+                        <description>An identifier for classifying a unique make and model of computer.</description>
+                    </define-flag>
+                    <model>
+                        <define-field name="vendor" as-type="string" max-occurs="1">
+                            <formal-name>Vendor</formal-name>
+                            <description>The organization responsible for distributing this computer</description>
+                        </define-field>
+                        <define-field name="processor" as-type="string" max-occurs="1">
+                            <formal-name>Processor</formal-name>
+                            <description>The name given to the processor of this computer</description>
+                            <define-flag name="manufacturer" as-type="string" required="yes">
+                                <formal-name>Manufacturer</formal-name>
+                                <description>The manufacturer of the processor</description>
+                            </define-flag>
+                        </define-field>
+                        <choice>
+                            <define-field name="igpu" as-type="string" required="yes" max-occurs="1">
+                                <formal-name>Integrated Graphics Processing Unit</formal-name>
+                                <description>The integrated GPU attached to this system</description>
+                            </define-field>
+                            <define-field name="gpu" as-type="string" max-occurs="1">
+                                <formal-name>Discrete Graphics Processing Unit</formal-name>
+                                <description>The discrete GPU attached to this system</description>
+                            </define-field>
+                        </choice>
+                    </model>
               </define-assembly>
             </METASCHEMA>`,
         );
@@ -75,7 +86,10 @@ describe('Serializer', () => {
                             manufacturer: FlagItem<string>;
                         }
                     >;
-                },
+                } & (
+                    | { gpu: FieldItem<string, Record<string, never>> }
+                    | { igpu: FieldItem<string, Record<string, never>> }
+                ),
                 { id: FlagItem<string> }
             >
         >(metaschema);
@@ -88,6 +102,7 @@ describe('Serializer', () => {
                     manufacturer: 'Manufacturer 1',
                     STRVALUE: 'Processor 1',
                 },
+                gpu: 'Fancy GPU',
             },
         });
 
@@ -95,5 +110,11 @@ describe('Serializer', () => {
         expect(serialized.root.model.vendor.model.raw).toBe('Test Vendor 1');
         expect(serialized.root.model.processor.model.raw).toBe('Processor 1');
         expect(serialized.root.model.processor.flags.manufacturer.value.raw).toBe('Manufacturer 1');
+
+        if (!('gpu' in serialized.root.model)) {
+            throw new Error('"gpu" expected in assembly');
+        }
+
+        expect(serialized.root.model.gpu.model.raw).toBe('Fancy GPU');
     });
 });

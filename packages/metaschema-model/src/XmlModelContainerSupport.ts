@@ -78,7 +78,7 @@ export default class XmlModelContainerSupport {
         }
     }
 
-    private processChoiceChildren(containingAssembly: AbstractAssemblyDefinition) {
+    private parseModelContainer(containingAssembly: AbstractAssemblyDefinition) {
         return {
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}assembly': forEachChild((child) => {
                 const assembly = new XmlAssemblyInstance(child, containingAssembly);
@@ -100,7 +100,7 @@ export default class XmlModelContainerSupport {
     }
 
     private parseChoice(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
-        processElement(xmlContent, {}, this.processChoiceChildren(containingAssembly));
+        processElement(xmlContent, {}, this.parseModelContainer(containingAssembly));
     }
 
     private parseModel(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
@@ -114,7 +114,7 @@ export default class XmlModelContainerSupport {
                         {},
                         {
                             // Model parsing shares most items with Choice parsing
-                            ...this.processChoiceChildren(containingAssembly),
+                            ...this.parseModelContainer(containingAssembly),
                             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}choice': forEachChild((child) =>
                                 this._choiceInstances.push(new XmlChoiceInstance(child, containingAssembly)),
                             ),

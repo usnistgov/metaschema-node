@@ -73,7 +73,7 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceMi
      * Determines if the instance is a simple field value without flags, or if it has a complex
      * structure (i.e, flags, model).
      *
-     * @return `true` if the instance contains only a value, or `false` otherwise
+     * @return `true` if the instance contains no flags (excluding a json-key flag), or `false` otherwise
      */
     isSimple(): boolean {
         return this.getDefinition().isSimple();

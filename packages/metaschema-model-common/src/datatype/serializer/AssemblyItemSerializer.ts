@@ -26,12 +26,15 @@
 
 import AbstractAssemblyDefinition from '../../definition/AbstractAssemblyDefinition.js';
 import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
+import AbstractChoiceInstance from '../../instance/AbstractChoiceInstance.js';
+import AbstractFieldInstance from '../../instance/AbstractFieldInstance.js';
+import INamedModelInstance from '../../instance/INamedModelInstance.js';
 import { UnconstrainedFlagsContainer } from '../item/AbstractModelNodeItem.js';
 import AssemblyItem, { UnconstrainedAssemblyContainer, UnconstrainedAssemblyItem } from '../item/AssemblyItem.js';
 import { UnconstrainedFieldItem } from '../item/FieldItem.js';
 import AbstractModelNodeItemSerializer from './AbstractModelNodeItemSerializer.js';
 import FieldItemSerializer from './FieldItemSerializer.js';
-import { isJSONObject, JSONValue } from './util.js';
+import { isJSONObject, JSONObject, JSONValue } from './util.js';
 
 export default class AssemblyItemSerializer<
     Value extends UnconstrainedAssemblyContainer,
@@ -49,6 +52,59 @@ export default class AssemblyItemSerializer<
         throw new Error('Method not implemented.');
     }
 
+    protected readJsonChildModel(
+        raw: JSONObject,
+        pointer: string,
+        instance: INamedModelInstance,
+    ): UnconstrainedAssemblyItem | UnconstrainedFieldItem | undefined {
+        let serializer;
+        if (instance instanceof AbstractAssemblyInstance) {
+            serializer = new AssemblyItemSerializer(instance);
+        } else if (instance instanceof AbstractFieldInstance) {
+            serializer = new FieldItemSerializer(instance);
+        } else {
+            throw new Error('Child model must be instance of assembly or field');
+        }
+
+        const key = instance.getJsonName();
+
+        const rawChildPointer = pointer + '/' + key;
+        const rawChild = raw[key];
+        if (rawChild === undefined) {
+            if (instance.getMinOccurs() !== 0) {
+                // TODO: is the correct way to do this
+                throw new Error('Required item not found');
+            }
+            return undefined;
+        }
+
+        return serializer.readJson(rawChild, rawChildPointer);
+    }
+
+    protected readJsonChoice(
+        raw: JSONObject,
+        pointer: string,
+        choiceInstance: AbstractChoiceInstance,
+    ): { item: UnconstrainedAssemblyItem | UnconstrainedFieldItem; effectiveName: string } | undefined {
+        // TODO: definitively, we do not handle choices of choices?
+        for (const candidateInstance of choiceInstance.getNamedModelInstances().values()) {
+            try {
+                const item = this.readJsonChildModel(raw, pointer, candidateInstance);
+                if (item) {
+                    return {
+                        item,
+                        effectiveName: candidateInstance.getEffectiveName(),
+                    };
+                }
+            } catch {
+                // Not actually existing is a feature of choices
+            }
+        }
+
+        // No choices were valid
+        return undefined;
+    }
+
     readJson(raw: JSONValue, pointer: string): AssemblyItem<Value, Flags> {
         if (!isJSONObject(raw)) {
             throw new Error('Could not parse assembly, expected JSON object, got JSON primitive or list');
@@ -57,37 +113,24 @@ export default class AssemblyItemSerializer<
         const flags = this.readJsonFlags(raw, pointer);
         const model: Record<string, UnconstrainedAssemblyItem | UnconstrainedFieldItem> = {};
 
-        // TODO: handle json-key and json-key flag
+        // TODO: handle json-key flag
 
-        for (const assemblyInstance of this.definition.getAssemblyInstances().values()) {
-            const key = assemblyInstance.getJsonName();
-            const assemblyItemSerializer = new AssemblyItemSerializer(assemblyInstance);
-            const assembly = raw[key];
-            if (assembly === null) {
-                // TODO: can an assembly be required?
-                continue;
+        for (const childInstance of this.definition.getNamedModelInstances().values()) {
+            const childItem = this.readJsonChildModel(raw, pointer, childInstance);
+            if (childItem) {
+                model[childInstance.getEffectiveName()] = childItem;
             }
-            model[assemblyInstance.getEffectiveName()] = assemblyItemSerializer.readJson(assembly, pointer + '/' + key);
         }
 
-        for (const fieldInstance of this.definition.getFieldInstances().values()) {
-            const key = fieldInstance.getJsonName();
-            const fieldItemSerializer = new FieldItemSerializer(fieldInstance);
-            const field = raw[key];
-            if (field === null) {
-                // TODO: can a field be required?
-                continue;
+        for (const choiceInstance of this.definition.getChoiceInstances().values()) {
+            const child = this.readJsonChoice(raw, pointer, choiceInstance);
+            if (child) {
+                model[child.effectiveName] = child.item;
             }
-            model[fieldInstance.getEffectiveName()] = fieldItemSerializer.readJson(field, pointer + '/' + key);
         }
-
-        // TODO: figure out what to do with choices?
-        // for (const choiceInstance of this.definition.getChoiceInstances().values()) {
-        // }
 
         return new AssemblyItem(
             {
-                // TODO: the type definitions are definitely not correct
                 model: model as AssemblyItem<Value, Flags>['model'],
                 flags,
             },

@@ -9,6 +9,9 @@
     "scripts": {
         "build": "tsc -p tsconfig.build.json"
     },
+    "dependencies": {
+        "@xmldom/xmldom": "^0.8.2"
+    },
     "exports": {
         "./lib": null,
         "./src": null,

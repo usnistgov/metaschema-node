@@ -36,34 +36,11 @@ export default class FieldItemSerializer<
     Flags extends UnconstrainedFlagsContainer,
 > extends AbstractModelNodeItemSerializer<FieldItem<Value, Flags>, AbstractFieldDefinition, AbstractFieldInstance> {
     /**
-     * Memoized result of doPromoteValue
-     */
-    private _doPromoteJsonValue: boolean | undefined;
-
-    /**
-     * Determines if any extraneous flags exist.
-     *
-     * If true, the field's JSON value rests in a JSON value key
-     */
-    protected get doPromoteJsonValue(): boolean {
-        if (this._doPromoteJsonValue === undefined) {
-            const expectedFlags =
-                0 +
-                (this.definition.hasJsonKeyFlagInstance() ? 1 : 0) +
-                (this.definition.hasJsonValueKeyFlagInstance() ? 1 : 0);
-            const doPromoteJsonValue = this.definition.getFlagInstances().size <= expectedFlags;
-            this._doPromoteJsonValue = doPromoteJsonValue;
-        }
-
-        return this._doPromoteJsonValue;
-    }
-
-    /**
      * For JSON objects, return the value key to be used by the model
      * serializer or undefined if the object has been promoted.
      */
     protected getJsonValueKeyName(flags: Flags): string | undefined {
-        if (this.doPromoteJsonValue) {
+        if ((this.instance ?? this.definition).isSimple()) {
             return undefined;
         }
 

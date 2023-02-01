@@ -45,7 +45,7 @@ export default interface INamedModelDefinition extends INamedDefinition {
     /**
      * Identifies if the field has flags or not.
      *
-     * @returns `true` if the field has not flags, or false otherwise
+     * @returns `true` if the field has no flags (excluding a json-key flag), or false otherwise
      */
     isSimple(): boolean;
     /**
@@ -124,7 +124,7 @@ export function namedModelDefinitionMixin<TBase extends AbstractConstructor<Abst
         abstract getFlagInstances(): Map<string, AbstractFlagInstance>;
 
         isSimple(): boolean {
-            return this.getFlagInstances().size === 0;
+            return this.getFlagInstances().size <= (this.hasJsonKeyFlagInstance() ? 1 : 0);
         }
 
         abstract hasJsonKey(): boolean;
