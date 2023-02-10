@@ -11,7 +11,7 @@
     "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^28.1.1",
-    "lerna": "^5.4.3",
+    "lerna": "^6.4.0",
     "prettier": "^2.6.2",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
@@ -22,7 +22,8 @@
     "lint-fix": "eslint --fix .",
     "build": "lerna run build",
     "test": "jest --force-exit",
-    "test-coverage": "jest --coverage"
+    "test-coverage": "jest --coverage",
+    "watch": "lerna watch -- lerna run build --since"
   },
   "workspaces": [
     "packages/*"

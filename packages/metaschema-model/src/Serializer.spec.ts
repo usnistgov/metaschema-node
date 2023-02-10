@@ -24,7 +24,13 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AssemblyItem, DocumentItemSerializer, FieldItem, FlagItem } from '@oscal/metaschema-model-common/datatype';
+import {
+    AssemblyItem,
+    DocumentItemSerializer,
+    FieldItem,
+    FlagItem,
+    SimpleFieldItem,
+} from '@oscal/metaschema-model-common/datatype';
 import XmlMetaschema from './XmlMetaschema.js';
 
 describe('Serializer', () => {
@@ -79,17 +85,14 @@ describe('Serializer', () => {
         const documentItemSerializer = new DocumentItemSerializer<
             AssemblyItem<
                 {
-                    vendor: FieldItem<string, Record<string, never>>;
+                    vendor: SimpleFieldItem<string>;
                     processor: FieldItem<
                         string,
                         {
                             manufacturer: FlagItem<string>;
                         }
                     >;
-                } & (
-                    | { gpu: FieldItem<string, Record<string, never>> }
-                    | { igpu: FieldItem<string, Record<string, never>> }
-                ),
+                } & ({ gpu: SimpleFieldItem<string> } | { igpu: SimpleFieldItem<string> }),
                 { id: FlagItem<string> }
             >
         >(metaschema);

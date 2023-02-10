@@ -74,6 +74,17 @@ export function namedModelInstanceMixin<TBase extends AbstractConstructor<Abstra
         hasJsonKeyFlagInstance() {
             return this.getJsonKeyFlagInstance() !== undefined;
         }
+
+        getJsonName(): string {
+            if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
+                const groupAsName = this.getGroupAsName();
+                if (groupAsName === undefined) {
+                    throw new Error('group-as undefined');
+                }
+                return groupAsName;
+            }
+            return this.getEffectiveName();
+        }
     }
     return NamedModelInstance;
 }

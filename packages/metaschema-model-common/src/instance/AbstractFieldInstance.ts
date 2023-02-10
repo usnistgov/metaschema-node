@@ -49,13 +49,6 @@ export default abstract class AbstractFieldInstance extends namedModelInstanceMi
         return this.isInXmlWrapped() ? super.getXmlQName() : undefined;
     }
 
-    getJsonName(): string {
-        if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
-            return this.getGroupAsName() ?? 'null group-as name.js';
-        }
-        return this.getEffectiveName();
-    }
-
     getGroupAsXmlNamespace(): string | undefined {
         return this.isInXmlWrapped() ? this.getContainingMetaschema().xmlNamespace : undefined;
     }
