@@ -47,13 +47,6 @@ abstract class AbstractAssemblyInstance extends namedModelInstanceMixin(Abstract
         return this.getContainingMetaschema().xmlNamespace;
     }
 
-    getJsonName(): string {
-        if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
-            return this.getGroupAsName() ?? 'null group-as name';
-        }
-        return this.getEffectiveName();
-    }
-
     abstract getDefinition(): AbstractAssemblyDefinition;
 }
 

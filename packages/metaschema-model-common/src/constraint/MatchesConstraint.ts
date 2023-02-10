@@ -24,7 +24,7 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import { AbstractItem, AbstractSerializer } from '../datatype/index.js';
+import { AbstractAtomicItemSerializer } from '../datatype/index.js';
 import MarkupMultiLine from '../datatype/markup/MarkupMultiLine.js';
 import MetapathExpression from '../metapath/MetapathExpression.js';
 import { Level } from '../util/types.js';
@@ -40,7 +40,7 @@ export default class MatchesConstraint extends AbstractConstraint {
         remarks: MarkupMultiLine | undefined,
         target: MetapathExpression,
         pattern: RegExp | undefined,
-        adapter: AbstractSerializer<AbstractItem<unknown>>,
+        adapter: AbstractAtomicItemSerializer<unknown>,
     ) {
         super(id, level, remarks, target);
         this.pattern = pattern;

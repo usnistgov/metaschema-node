@@ -104,7 +104,7 @@ export default class XmlGlobalFlagDefinition extends AbstractFlagDefinition {
         return undefined;
     }
 
-    constructor(flagDefinitionXml: HTMLElement, metaschema: AbstractMetaschema) {
+    constructor(flagDefinitionXml: Element, metaschema: AbstractMetaschema) {
         super();
         this.metaschema = metaschema;
         this.xml = flagDefinitionXml;

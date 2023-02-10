@@ -45,7 +45,7 @@ export default interface INamedModelDefinition extends INamedDefinition {
     /**
      * Identifies if the field has flags or not.
      *
-     * @returns `true` if the field has not flags, or false otherwise
+     * @returns `true` if the field has no flags (excluding a json-key flag), or false otherwise
      */
     isSimple(): boolean;
     /**
@@ -64,6 +64,8 @@ export default interface INamedModelDefinition extends INamedDefinition {
      * @return `true` if the flag's value can be used as a property name, or `false` otherwise
      */
     hasJsonKey(): boolean;
+
+    hasJsonKeyFlagInstance(): boolean;
 
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
 
@@ -122,11 +124,14 @@ export function namedModelDefinitionMixin<TBase extends AbstractConstructor<Abst
         abstract getFlagInstances(): Map<string, AbstractFlagInstance>;
 
         isSimple(): boolean {
-            return this.getFlagInstances().size === 0;
+            return this.getFlagInstances().size <= (this.hasJsonKeyFlagInstance() ? 1 : 0);
         }
 
         abstract hasJsonKey(): boolean;
         abstract getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
+        hasJsonKeyFlagInstance() {
+            return this.getJsonKeyFlagInstance() !== undefined;
+        }
 
         abstract getAllowedValuesConstraints(): AllowedValuesConstraint[];
         abstract getMatchesConstraints(): MatchesConstraint[];

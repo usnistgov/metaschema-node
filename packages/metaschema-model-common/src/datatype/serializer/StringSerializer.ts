@@ -27,15 +27,16 @@
 import StringItem from '../item/StringItem.js';
 import AbstractStringSerializer from './AbstractStringSerializer.js';
 
-export default class StringSerializer extends AbstractStringSerializer<StringItem> {
-    name = 'string';
-    defaultJsonValueKey = '';
-
-    fromString(parsed: string): StringItem {
+export default class StringSerializer extends AbstractStringSerializer<string> {
+    readString(parsed: string): StringItem {
         return new StringItem(parsed);
     }
 
-    toString(item: StringItem): string {
+    writeString(item: StringItem): string {
         return item.value;
+    }
+
+    constructor() {
+        super('string');
     }
 }

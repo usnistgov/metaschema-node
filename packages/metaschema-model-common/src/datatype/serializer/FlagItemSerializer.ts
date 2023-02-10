@@ -26,15 +26,41 @@
 
 import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
 import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
-import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractNodeItem from './AbstractNodeItem.js';
+import { AbstractAtomicItem } from '../index.js';
+import FlagItem from '../item/FlagItem.js';
+import AbstractNodeItemSerializer from './AbstractNodeItemSerializer.js';
+import { JSONValue } from './util.js';
 
-export type UnconstrainedFlagContainer = unknown;
-
-export default class FlagItem<Value extends UnconstrainedFlagContainer> extends AbstractNodeItem<
-    AbstractAtomicItem<Value>,
+export default class FlagItemSerializer<Value> extends AbstractNodeItemSerializer<
+    FlagItem<Value>,
     AbstractFlagDefinition,
     AbstractFlagInstance
-> {}
+> {
+    constructor(definitionOrInstance: AbstractFlagDefinition | AbstractFlagInstance) {
+        super(definitionOrInstance);
+    }
 
-export type UnconstrainedFlagItem = FlagItem<UnconstrainedFlagContainer>;
+    readXml(attr: Attr): FlagItem<Value> {
+        const itemValue = this.definition.getDatatypeAdapter().readString(attr.value);
+        return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
+    }
+
+    readJson(attr: JSONValue, pointer: string): FlagItem<Value> {
+        const itemValue = this.definition.getDatatypeAdapter().readJson(attr, pointer);
+        return new FlagItem(itemValue as AbstractAtomicItem<Value>, this.instance ?? this.definition);
+    }
+
+    writeXml(item: FlagItem<Value>, document: Document): Attr {
+        const attr = document.createAttribute(this.definition.getEffectiveName());
+        attr.value = item.definition.getDatatypeAdapter().writeString(item.value);
+        return attr;
+    }
+
+    /**
+     * Returns the attribute value, without the name
+     */
+    writeJson(item: FlagItem<Value>): JSONValue {
+        const itemValue: AbstractAtomicItem<Value> = item.value;
+        return this.definition.getDatatypeAdapter().writeJson(itemValue);
+    }
+}

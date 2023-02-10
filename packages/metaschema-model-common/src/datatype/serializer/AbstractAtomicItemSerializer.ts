@@ -24,17 +24,22 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
-import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
-import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractNodeItem from './AbstractNodeItem.js';
+import { AbstractAtomicItem } from '../index.js';
+import AbstractSerializer from './AbstractSerializer.js';
 
-export type UnconstrainedFlagContainer = unknown;
+export default abstract class AbstractAtomicItemSerializer<Value> extends AbstractSerializer<
+    AbstractAtomicItem<Value>
+> {
+    // TODO: should this be read/write flag more accurately?
+    abstract readString(raw: string): AbstractAtomicItem<Value>;
+    abstract writeString(item: AbstractAtomicItem<Value>): string;
 
-export default class FlagItem<Value extends UnconstrainedFlagContainer> extends AbstractNodeItem<
-    AbstractAtomicItem<Value>,
-    AbstractFlagDefinition,
-    AbstractFlagInstance
-> {}
+    readonly name;
+    readonly defaultJsonValueKey;
 
-export type UnconstrainedFlagItem = FlagItem<UnconstrainedFlagContainer>;
+    constructor(name: string, defaultJsonValueKey = 'STRVALUE') {
+        super();
+        this.name = name;
+        this.defaultJsonValueKey = defaultJsonValueKey;
+    }
+}

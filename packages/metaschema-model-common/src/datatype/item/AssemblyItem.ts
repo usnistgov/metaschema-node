@@ -27,13 +27,40 @@
 import AbstractAssemblyDefinition from '../../definition/AbstractAssemblyDefinition.js';
 import AbstractAssemblyInstance from '../../instance/AbstractAssemblyInstance.js';
 import AbstractModelNodeItem, { UnconstrainedFlagsContainer } from './AbstractModelNodeItem.js';
-import FieldItem from './FieldItem.js';
+import FieldItem, { UnconstrainedFieldContainer } from './FieldItem.js';
 
-export type AssemblyContainer<ModelType extends Record<string, [unknown, UnconstrainedFlagsContainer]>> = {
-    [Property in keyof ModelType]: FieldItem<ModelType[Property][0], ModelType[Property][1]>;
+/**
+ * An assembly container defines the contents of an assembly, which is
+ * represented here as key-value pairs where the **key** is the
+ * *effective name* of the child model and the *value* is a tuple of the
+ * model's contents (some atomic type in the case of a field, or another
+ * assembly container in the case of an assembly) and the model's flags.
+ */
+export type AssemblyContainer<
+    ModelType extends Record<
+        string,
+        {
+            model: UnconstrainedFieldContainer | UnconstrainedAssemblyContainer;
+            flags: UnconstrainedFlagsContainer;
+        }
+    >,
+> = {
+    [Property in keyof ModelType]: ModelType[Property]['model'] extends UnconstrainedAssemblyContainer
+        ? // If an assembly container was passed in, the model must be an assembly
+          AssemblyItem<ModelType[Property]['model'], ModelType[Property]['flags']>
+        : // Otherwise its a field
+          FieldItem<ModelType[Property]['model'], ModelType[Property]['flags']>;
 };
 
-export type UnconstrainedAssemblyContainer = AssemblyContainer<Record<string, [unknown, UnconstrainedFlagsContainer]>>;
+export type UnconstrainedAssemblyContainer = AssemblyContainer<
+    Record<
+        string,
+        {
+            model: UnconstrainedFieldContainer | UnconstrainedAssemblyContainer;
+            flags: UnconstrainedFlagsContainer;
+        }
+    >
+>;
 
 export default class AssemblyItem<
     Model extends UnconstrainedAssemblyContainer,

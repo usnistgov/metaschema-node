@@ -30,17 +30,17 @@ export function parseXml(raw: string | Buffer) {
 }
 
 export type Context = {
-    parent: HTMLElement;
+    parent: Element;
     name: string;
 };
 
-type AttributeValue = ReturnType<HTMLElement['getAttributeNS']>;
+type AttributeValue = ReturnType<Element['getAttributeNS']>;
 
 type Processor<InputT, ReturnT> = (input: InputT, context: Context) => ReturnT;
 export type AttributeProcessor<T> = Processor<AttributeValue, T>;
 export type DefiniteAttributeProcessor<T> = Processor<NonNullable<AttributeValue>, T>;
-export type ChildListProcessor<T> = Processor<HTMLElement[], T>;
-export type ChildProcessor<T> = Processor<HTMLElement, T>;
+export type ChildListProcessor<T> = Processor<Element[], T>;
+export type ChildProcessor<T> = Processor<Element, T>;
 
 /**
  * Canned utility XML processors
@@ -94,11 +94,11 @@ export function undefineableAttribute<T>(
  * @param childProcessor A function designed to process a single element
  * @returns The list of transformed children
  */
-export function forEachChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T[]> {
+export function forEachChild<T>(childProcessor: Processor<Element, T>): ChildListProcessor<T[]> {
     return (children, context) => children.map((child) => childProcessor(child, context));
 }
 
-export function optionalOneChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T | undefined> {
+export function optionalOneChild<T>(childProcessor: Processor<Element, T>): ChildListProcessor<T | undefined> {
     return (children, context) => {
         if (children.length === 0) {
             return undefined;
@@ -112,7 +112,7 @@ export function optionalOneChild<T>(childProcessor: Processor<HTMLElement, T>): 
     };
 }
 
-export function requireOneChild<T>(childProcessor: Processor<HTMLElement, T>): ChildListProcessor<T> {
+export function requireOneChild<T>(childProcessor: Processor<Element, T>): ChildListProcessor<T> {
     return (children, context) => {
         if (children.length != 1) {
             throw new Error(`Expected exactly 1 child but received ${children.length}`);

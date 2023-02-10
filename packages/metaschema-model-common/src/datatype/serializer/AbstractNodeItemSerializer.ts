@@ -24,17 +24,26 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
-import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
-import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractNodeItem from './AbstractNodeItem.js';
+import INamedDefinition from '../../definition/INamedDefinition.js';
+import INamedInstance from '../../instance/INamedInstance.js';
+import { isInstance, UnconstrainedNodeItem } from '../item/AbstractNodeItem.js';
+import AbstractSerializer from './AbstractSerializer.js';
 
-export type UnconstrainedFlagContainer = unknown;
+export default abstract class AbstractNodeItemSerializer<
+    NodeItem extends UnconstrainedNodeItem,
+    Definition extends INamedDefinition,
+    Instance extends INamedInstance,
+> extends AbstractSerializer<NodeItem> {
+    protected readonly definition: Definition;
+    protected readonly instance: Instance | undefined;
 
-export default class FlagItem<Value extends UnconstrainedFlagContainer> extends AbstractNodeItem<
-    AbstractAtomicItem<Value>,
-    AbstractFlagDefinition,
-    AbstractFlagInstance
-> {}
-
-export type UnconstrainedFlagItem = FlagItem<UnconstrainedFlagContainer>;
+    constructor(definitionOrInstance: Definition | Instance) {
+        super();
+        if (isInstance(definitionOrInstance)) {
+            this.instance = definitionOrInstance;
+            this.definition = definitionOrInstance.getDefinition() as Definition;
+        } else {
+            this.definition = definitionOrInstance;
+        }
+    }
+}

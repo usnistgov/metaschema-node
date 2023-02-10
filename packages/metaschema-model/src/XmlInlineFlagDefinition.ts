@@ -108,7 +108,7 @@ class InternalFlagDefinition extends inlineNamedDefinitionMixin(AbstractFlagDefi
         return this.parent;
     }
 
-    constructor(flagDefinitionXml: HTMLElement, parent: XmlInlineFlagDefinition) {
+    constructor(flagDefinitionXml: Element, parent: XmlInlineFlagDefinition) {
         super();
         this.parent = parent;
         this.parsed = processElement(
@@ -150,7 +150,7 @@ export default class XmlInlineFlagDefinition extends AbstractFlagInstance {
         return undefined;
     }
 
-    constructor(flagDefinitionXml: HTMLElement, parent: INamedModelDefinition) {
+    constructor(flagDefinitionXml: Element, parent: INamedModelDefinition) {
         super(parent);
         this.xml = flagDefinitionXml;
         this.internalFlagDefinition = new InternalFlagDefinition(flagDefinitionXml, this);

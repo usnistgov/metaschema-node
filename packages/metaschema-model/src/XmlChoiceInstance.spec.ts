@@ -68,8 +68,6 @@ describe('XmlChoiceInstance', () => {
             throw new Error('choice was undefined');
         }
 
-        choice.getFieldInstances();
-
         expect(choice.getFieldInstances().get('title')?.getDefinition().getFormalName()).toBe('Title');
         expect(choice.getFieldInstances().get('id')?.getDefinition().getFormalName()).toBe('Identifier');
 

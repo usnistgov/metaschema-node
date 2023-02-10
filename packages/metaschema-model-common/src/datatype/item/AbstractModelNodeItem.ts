@@ -46,6 +46,14 @@ export default class AbstractModelNodeItem<
             flag.registerParent(this);
         }
     }
+
+    get flags() {
+        return this.value.flags;
+    }
+
+    get model() {
+        return this.value.model;
+    }
 }
 
 export type UnconstrainedModelNodeItem = AbstractModelNodeItem<

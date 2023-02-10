@@ -33,7 +33,7 @@ import XmlFlagInstance from './XmlFlagInstance.js';
 export default class XmlFlagContainerSupport {
     readonly flagInstances: Map<string, AbstractFlagInstance>;
 
-    constructor(xml: HTMLElement, container: INamedModelDefinition) {
+    constructor(xml: Element, container: INamedModelDefinition) {
         this.flagInstances = new Map();
         processElement(
             xml,

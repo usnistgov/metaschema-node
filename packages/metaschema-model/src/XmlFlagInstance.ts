@@ -61,7 +61,7 @@ export default class XmlFlagInstance extends AbstractFlagInstance {
         throw new Error('Definition not found');
     }
 
-    constructor(xml: HTMLElement, parent: INamedModelDefinition) {
+    constructor(xml: Element, parent: INamedModelDefinition) {
         super(parent);
         this.parsed = processElement(
             xml,

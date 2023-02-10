@@ -54,6 +54,8 @@ export default interface INamedModelInstance extends INamedInstance, IModelInsta
      * @returns the flag instance if a JSON key is configured, or `undefined` otherwise
      */
     getJsonKeyFlagInstance(): AbstractFlagInstance | undefined;
+
+    hasJsonKeyFlagInstance(): boolean;
 }
 
 export function namedModelInstanceMixin<TBase extends AbstractConstructor<AbstractNamedModelElement>>(Base: TBase) {
@@ -68,6 +70,20 @@ export function namedModelInstanceMixin<TBase extends AbstractConstructor<Abstra
         }
         getJsonKeyFlagInstance(): AbstractFlagInstance | undefined {
             return this.getDefinition().getJsonKeyFlagInstance();
+        }
+        hasJsonKeyFlagInstance() {
+            return this.getJsonKeyFlagInstance() !== undefined;
+        }
+
+        getJsonName(): string {
+            if (this.getMaxOccurs() == -1 || this.getMaxOccurs() > 1) {
+                const groupAsName = this.getGroupAsName();
+                if (groupAsName === undefined) {
+                    throw new Error('group-as undefined');
+                }
+                return groupAsName;
+            }
+            return this.getEffectiveName();
         }
     }
     return NamedModelInstance;

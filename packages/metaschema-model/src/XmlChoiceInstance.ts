@@ -69,7 +69,7 @@ export default class XmlChoiceInstance extends AbstractChoiceInstance {
         return this._modelContainer;
     }
 
-    constructor(choiceInstanceXml: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    constructor(choiceInstanceXml: Element, containingAssembly: AbstractAssemblyDefinition) {
         super(containingAssembly);
         this.choiceInstanceXml = choiceInstanceXml;
         this.containingAssembly = containingAssembly;

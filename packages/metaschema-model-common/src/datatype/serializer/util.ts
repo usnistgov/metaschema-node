@@ -24,17 +24,15 @@
  * OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
  */
 
-import AbstractFlagDefinition from '../../definition/AbstractFlagDefinition.js';
-import AbstractFlagInstance from '../../instance/AbstractFlagInstance.js';
-import AbstractAtomicItem from './AbstractAtomicItem.js';
-import AbstractNodeItem from './AbstractNodeItem.js';
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-export type UnconstrainedFlagContainer = unknown;
-
-export default class FlagItem<Value extends UnconstrainedFlagContainer> extends AbstractNodeItem<
-    AbstractAtomicItem<Value>,
-    AbstractFlagDefinition,
-    AbstractFlagInstance
-> {}
-
-export type UnconstrainedFlagItem = FlagItem<UnconstrainedFlagContainer>;
+/**
+ * Type guard for JSONObject from JSONValue
+ */
+export function isJSONObject(value: JSONValue): value is JSONObject {
+    return typeof value === 'object' && !Array.isArray(value) && value !== undefined;
+}

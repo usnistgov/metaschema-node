@@ -33,6 +33,8 @@ import DocumentItem from './DocumentItem.js';
 import FieldItem from './FieldItem.js';
 import FlagItem from './FlagItem.js';
 
+export { SimpleFieldItem } from './FieldItem.js';
+
 import StringItem from './StringItem.js';
 
 export {

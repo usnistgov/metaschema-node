@@ -25,21 +25,13 @@
  */
 
 import AbstractAtomicItem from '../item/AbstractAtomicItem.js';
-import AbstractSerializer, { JSONValue } from './AbstractSerializer.js';
+import AbstractAtomicItemSerializer from './AbstractAtomicItemSerializer.js';
+import { JSONValue } from './util.js';
 
-export default abstract class AbstractStringSerializer<
-    T extends AbstractAtomicItem<unknown>,
-> extends AbstractSerializer<T> {
-    readonly isAtomic = true;
-    readonly isXmlUnwrappedValueAllowed = false;
-    readonly isXmlMixed = false;
-
-    abstract fromString(parsed: string): T;
-    abstract toString(item: T): string;
-
-    readXml(raw: Node): T {
+export default abstract class AbstractStringSerializer<T> extends AbstractAtomicItemSerializer<T> {
+    readXml(raw: Node): AbstractAtomicItem<T> {
         if (raw.textContent) {
-            return this.fromString(raw.textContent);
+            return this.readString(raw.textContent);
         } else {
             throw new Error('Could not parse JSON into string item');
         }
@@ -47,17 +39,17 @@ export default abstract class AbstractStringSerializer<
 
     readJson(raw: JSONValue) {
         if (typeof raw === 'string') {
-            return this.fromString(raw);
+            return this.readString(raw);
         } else {
             throw new Error('Could not parse JSON into string item');
         }
     }
 
-    writeXml(item: T, document: Document): Node {
-        return document.createTextNode(this.toString(item));
+    writeXml(item: AbstractAtomicItem<T>, document: Document): Node {
+        return document.createTextNode(this.writeString(item));
     }
 
-    writeJson(item: T): JSONValue {
-        return this.toString(item);
+    writeJson(item: AbstractAtomicItem<T>): JSONValue {
+        return this.writeString(item);
     }
 }

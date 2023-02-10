@@ -66,7 +66,7 @@ export default class XmlModelContainerSupport {
         return new Map<string, INamedModelInstance>([...this.assemblyInstances, ...this.fieldInstances]);
     }
 
-    constructor(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    constructor(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
         this._fieldInstances = new Map();
         this._assemblyInstances = new Map();
         this._choiceInstances = [];
@@ -78,7 +78,7 @@ export default class XmlModelContainerSupport {
         }
     }
 
-    private processChoiceChildren(containingAssembly: AbstractAssemblyDefinition) {
+    private parseModelContainer(containingAssembly: AbstractAssemblyDefinition) {
         return {
             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}assembly': forEachChild((child) => {
                 const assembly = new XmlAssemblyInstance(child, containingAssembly);
@@ -99,11 +99,11 @@ export default class XmlModelContainerSupport {
         };
     }
 
-    private parseChoice(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
-        processElement(xmlContent, {}, this.processChoiceChildren(containingAssembly));
+    private parseChoice(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
+        processElement(xmlContent, {}, this.parseModelContainer(containingAssembly));
     }
 
-    private parseModel(xmlContent: HTMLElement, containingAssembly: AbstractAssemblyDefinition) {
+    private parseModel(xmlContent: Element, containingAssembly: AbstractAssemblyDefinition) {
         processElement(
             xmlContent,
             {},
@@ -114,7 +114,7 @@ export default class XmlModelContainerSupport {
                         {},
                         {
                             // Model parsing shares most items with Choice parsing
-                            ...this.processChoiceChildren(containingAssembly),
+                            ...this.parseModelContainer(containingAssembly),
                             '{http://csrc.nist.gov/ns/oscal/metaschema/1.0}choice': forEachChild((child) =>
                                 this._choiceInstances.push(new XmlChoiceInstance(child, containingAssembly)),
                             ),
